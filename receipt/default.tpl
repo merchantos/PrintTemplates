@@ -221,8 +221,8 @@
 			{% endif %}
 		{% endfor %}
 		<tr><td colspan="2"></td></tr>
-		{% if Sale.getCurrentCashPayments() != 0 %}
-		<tr><td>Cash</td><td>{{Sale.getCurrentCashPayments()|money}}</td></tr>
+		{% if Sale.MetaData.getCurrentCashPayments != 0 %}
+		<tr><td>Cash</td><td>{{Sale.MetaData.getCurrentCashPayments|money}}</td></tr>
 		<tr><td>Change</td><td>{{Sale.change|money}}</td></tr>
 		{% endif %}
 	</table>
@@ -230,24 +230,24 @@
 
 	{% if Sale.Customer and not parameters.gift_receipt %}
 	<table>
-		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.creditBalanceOwed() > 0 or Sale.Customer.CreditAccount.extraDeposit() > 0 %}
+		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.MetaData.extraDeposit > 0 %}
 		<tr><th colspan="2">Store Account</th></tr>
-			{% if Sale.Customer.CreditAccount.creditBalanceOwed() > 0 %}
+			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
 			<tr>
 				<td>Balance Owed</td>
-				<td>{{ Sale.Customer.CreditAccount.creditBalanceOwed()|money }}</td>
+				<td>{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
 			</tr>
-			{% elseif Sale.Customer.CreditAccount.extraDeposit() > 0 %}
+			{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 			<tr>
 				<td>On Deposit</td>
-				<td>{{ Sale.CreditAccount.extraDeposit()|money }}</td>
+				<td>{{ Sale.CreditAccount.MetaData.extraDeposit|money }}</td>
 			</tr>
 			{% endif %}
 		{% endif %}
-		{% if Sale.Customer.getAmountToCompleteAll() > 0 %}
+		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 		<tr>
 			<td>Needed to complete all open orders:</td>
-			<td>{{ Sale.Customer.getAmountToCompleteAll|money }}</td>
+			<td>{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 		</tr>
 		{% endif %}
 	</table>
@@ -344,21 +344,21 @@
 		<table class="layways totals">
 			<tr>
 				<td>Subtotal</td>
-				<td>{{Customer.getOpenTotal('layaway','subtotal_no_discount')|money}}</td>
+				<td>{{Customer.metaData.layawaysSubtotalNoDiscount|money}}</td>
 			</tr>
-			{% if Customer.getOpenTotal('layaway','all_discounts')>0.00 %}
+			{% if Customer.metaData.layawaysAllDiscounts>0.00 %}
 			<tr>
 				<td>Discounts</td>
-				<td>{{Customer.getOpenTotal('layaway','all_discounts')|money}}</td>
+				<td>{{Customer.metaData.layawaysAllDiscounts|money}}</td>
 			</tr>
 			{% endif %}
 			<tr>
 				<td>Tax</td>
-				<td>{{Customer.getOpenTotal('layaway','tax_total')|money}}</td>
+				<td>{{Customer.MetaData.layawaysTaxTotal|money}}</td>
 			</tr>
 			<tr>
 				<td>Total</td>
-				<td>{{Customer.getOpenTotal('layaway')|money}}</td>
+				<td>{{Customer.MetaData.layawaysTotal|money}}</td>
 			</tr>
 		</table>
 	{% endif %}
@@ -373,21 +373,21 @@
 		<table class="specialorders totals">
 			<tr>
 				<td>Subtotal</td>
-				<td>{{Customer.getOpenTotal('special_order','subtotal_no_discount')|mosformat('money')}}</td>
+				<td>{{Customer.MetaData.specialOrdersSubtotalNoDiscount|mosformat('money')}}</td>
 			</tr>
-			{% if Customer.getOpenTotal('special_order','all_discounts') > 0 %}
+			{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 				<tr>
 					<td>Discounts</td>
-					<td>{{Customer.getOpenTotal('special_order','all_discounts')|mosformat('money')}}</td>
+					<td>{{Customer.MetaData.specialOrdersAllDiscounts|mosformat('money')}}</td>
 				</tr>
 			{% endif %}
 			<tr>
 				<td>Tax</td>
-				<td>{{Customer.getOpenTotal('special_order','tax_total')|mosformat('money')}}</td>
+				<td>{{Customer.MetaData.specialOrdersTaxTotal|mosformat('money')}}</td>
 			</tr>
 			<tr>
 				<td>Total</td>
-				<td>{{Customer.getOpenTotal('special_order')|mosformat('money')}}</td>
+				<td>{{Customer.MetaData.specialOrdersTotal|mosformat('money')}}</td>
 			</tr>
 		</table>
 	{% endif %}
@@ -402,7 +402,7 @@
 			{% for Line in Customer.WorkOrders.SaleLine %}
 			<tr>
 				<td>{{Line.name|nl2br}}</td>
-				<td>{{Line.getWorkorderTotal()|money}}</td>
+				<td>{{Line.MetaData.workOrderTotal|money}}</td>
 			</tr>
 			{% endfor %}
 		</table>
@@ -410,7 +410,7 @@
 		<table class="workorders totals">
 			<tr>
 				<td>Total</td>
-				<td>{{Customer.getOpenTotal('workorder')|money}}</td>
+				<td>{{Customer.MetaData.workordersTotal|money}}</td>
 			</tr>
 		</table>
 		{% endif %}
