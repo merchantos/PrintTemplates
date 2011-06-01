@@ -1,6 +1,94 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
-.store { background-color: #ffc; }
+body {
+  margin: 0;
+  padding: 0;
+}
+@page {	margin: 0: }
+.store { page-break-after: always; }
+.receipt {
+	font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
+}
+.receipt .header h3, .receipt .header p {
+	font-size: 10pt;
+	margin: 0;
+}
+.receipt h2 {
+	border-bottom: 1px solid black;
+	text-transform: uppercase;
+	font-size: 10pt;
+	margin: .5em 0 0;
+}
+.receipt .header {
+	text-align: center;
+}
+.receipt .header img { 
+	display: block;
+	margin: 8px auto 4px; 
+}
+.receipt h1 {
+	margin: .5em 0 0;
+	font-size: 12pt;
+	text-align: center;
+}
+.receipt p.date, .receipt p.copy {
+	font-size: 9pt;
+	margin: 0;
+}
+
+.receipt table {
+	margin: 0 0;
+	width: 100%;
+	border-collapse:collapse;
+}
+
+
+.receipt table thead th { text-align: left; }
+.receipt table tbody th { 
+	font-weight: normal; 
+	text-align: left; 
+}
+.receipt table td.amount, .receipt table th.amount {
+  width: 30%;
+  text-align: right;
+}
+
+.receipt table.totals { text-align: right; }
+.receipt table.spacer { margin-top: 1em; }
+.receipt table tr.total td { font-weight: bold; }
+
+.receipt table.sale { border-bottom: 1px solid black; }
+.receipt table.sale thead th { border-bottom: 1px solid black; }
+.receipt table.sale tbody th { font-weight: bold; }
+
+.receipt p.thankyou { 
+	margin: 0; 
+	text-align: center;
+}
+.receipt img.barcode {
+	display: block;
+	margin: 0 auto; 
+}
+
+.receipt dl {
+	overflow: hidden
+}
+.receipt dl dt { 
+	font-weight: bold;
+	width: 80px;
+	float: left
+}
+.receipt dl dd {
+	border-top: 2px solid black;
+	padding-top: 2px;
+	margin: 1em 0 0;
+	float: left;
+	width: 180px
+}
+.receipt dl dd p { margin: 0; }
+
+
+
 {% endblock extrastyles %}
 {% block content %}
 {% for Sale in Sales %}
@@ -11,17 +99,19 @@
 	{% endif %}
 {% endfor %}
 
-{% if Sale.Shop.ReceiptSetup.creditcardAgree|length > 0 and not parameters.gift_receipt %}
-	{% if has_cc_charge or parameter.force_cc_agree or parameter.print_workorder_aggree %}
+{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt %}
+	{% if has_cc_charge or parameters.force_cc_agree or parameters.print_workorder_aggree %}
 <div class="receipt store">
-	{{ _self.title(Sale,parameters) }}
-	<p>Store Copy</p>
-	{{ _self.date(Sale) }}
-
+	<div class="header">
+		{{ _self.title(Sale,parameters) }}
+		<p class="copy">Store Copy</p>
+		{{ _self.date(Sale) }}
+	</div>
+	
 	{{ _self.sale_details(Sale) }}
 	{{ _self.receipt(Sale,parameters) }}
 
-	{% if Sale.quoteID and Sale.Quote.notes|length > 0 %}<p class="note quote">{{Sale.Quote.notes|nl2br}}</p>{% endif %}
+	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|nl2br}}</p>{% endif %}
 
 	{{ _self.cc_agreement(Sale) }}
 	{{ _self.workorder_agreement(Sale) }}
@@ -36,15 +126,14 @@
 <div class="receipt customer">
 	{{ _self.ship_to(Sale) }}
 
-	{% if Sale.Shop.ReceiptSetup.logo|length > 1  %}
-	<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
-	{% endif %}
-
-	<div class="header">
-	{% if Sale.Shop.ReceiptSetup.header|length > 1 %}
+	<div class="header">		
+		{% if Sale.Shop.ReceiptSetup.logo|strlen > 0  %}
+		<img src="/{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
+		{% endif %}
+		<h3>{{ Sale.Shop.name }}</h3>
+	{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
 		{{Sale.Shop.ReceiptSetup.header}}
 	{% else %}
-		<h3>{{ Sale.Shop.name }}</h3>
 		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
 		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
 		<p>{{ContactPhone.number}}</p>
@@ -57,11 +146,12 @@
 	{{ _self.sale_details(Sale) }}
 	{{ _self.receipt(Sale,parameters) }}
 
-	{% if Sale.Shop.ReceiptSetup.generalMsg|length > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|nl2br }}</p>{% endif %}
-	{% if Sale.quoteID and Sale.Quote.notes|length > 0 %}<p class="note quote">{{Sale.Quote.notes|nl2br}}</p>{% endif %}
+	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|nl2br}}</p>{% endif %}
+
+	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|nl2br }}</p>{% endif %}
 
 	{% if not parameters.gift_receipt %}
-	<p>Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
+	<p class="thankyou">Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
 	{% endif %}
 
 	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
@@ -72,9 +162,9 @@
 {% macro title(Sale,parameters) %}
 <h1>
 	{% if not Sale.parentSaleID > 0 and Sale.calcTotal >= 0 %}
-		{% if Sale.completed == 1 %}
+		{% if Sale.completed == true %}
 			{% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
-		{% elseif Sale.voided == 1 %}
+		{% elseif Sale.voided == true %}
 			Receipt 
 			<large>VOIDED</large>
 		{% else %}
@@ -123,18 +213,19 @@
 {% macro line(Line,parameters) %}
 <tr>
 	<th>{{Line.Item.description|nl2br}}</th>
-	<td>{{Line.unitQuantity}}</td>
-	<td>{% if not parameters.gift_receipt %}{{Line.calcTotal|money}}{% endif %}</td>
+	<td class="quantity">{{Line.unitQuantity}}</td>
+	<td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
 </tr>
 {% endmacro %}
 
 {% macro receipt(Sale,parameters) %}
-<table class="lines">
+{% if Sale.SaleLines %}
+<table class="sale lines">
 	<thead>
 		<tr>
 			<th>Item</th>
 			<th></th>
-			<th>Price</th>
+			<th class="amount">Price</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -143,29 +234,31 @@
 		{% endfor %}
 	</tbody>
 </table>
+
 {% if not parameters.gift_receipt %}
 <table class="totals">
 	<tbody>
-  		<tr><td>Subtotal</td><td>{{Sale.calcSubtotal|money}}</td></tr>
-  		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td>{{Sale.calcDiscount|money}}</td></tr>{% endif %}
+  		<tr><td>Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
+  		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|money}}</td></tr>{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
-		<tr><td>{{Tax.name}} Tax ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td>{{Tax.amount|money}}</td></tr>
+		<tr><td>{{Tax.name}} Tax ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 		{% endfor %}
-		<tr><td>Total Tax</td><td>{{Sale.calcTax1|money}}</td></tr>
-		<tr><td>Total</td><td>{{Sale.calcTotal|money}}</td></tr>
+		<tr><td>Total Tax</td><td class="amount">{{Sale.calcTax1|money}}</td></tr>
+		<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
 	</tbody>
 </table>
 {% endif %}
+{% endif %}
 
-{% if Sale.completed == 1 and not parameters.gift_receipt %}
+{% if Sale.completed == true and not parameters.gift_receipt %}
 	{% if Sale.SalePayments %}
+	<h2>Payments</h2>
 	<table class="payments">
-		<tr><th colspan="2">Payments</th></tr>
 		{% for Payment in Sale.SalePayments.SalePayment %}
 			<!-- NOT Cash Payment -->
-			{% if not Payment.isCurrentCash == 1 %}
+			{% if not Payment.isCurrentCash == true %}
 				<!--  Gift Card -->
-				{% if Payment.CreditAccount.giftCard == 1 %}
+				{% if Payment.CreditAccount.giftCard == true %}
 					{% if Payment.amount > 0 %}
 					<tr >
 						<td>
@@ -187,19 +280,19 @@
 							{% if Payment.ccChargeID > 0 %}
 								{% if Payment.CCCharge %}
 									<br>Card Num: {{Payment.CCCharge.xnum}}
-									{% if Payment.CCCharge.cardType|length > 0 %}
+									{% if Payment.CCCharge.cardType|strlen > 0 %}
 										<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
 									{% endif %}
-									{% if Payment.CCCharge.cardholderName|length > 0 %}
+									{% if Payment.CCCharge.cardholderName|strlen > 0 %}
 										<br>Cardholder: {{Payment.CCCharge.cardholderName}}
 									{% endif %}
-									{% if Payment.CCCharge.entryMethod|length > 0 %}
+									{% if Payment.CCCharge.entryMethod|strlen > 0 %}
 										<br>Entry: {{Payment.CCCharge.entryMethod}}
 									{% endif %}
-									{% if Payment.CCCharge.authCode|length > 0 %}
+									{% if Payment.CCCharge.authCode|strlen > 0 %}
 										<br>Approval: {{Payment.CCCharge.authCode}}
 									{% endif %}
-									{% if Payment.CCCharge.gatewayTransID|length > 0 %}
+									{% if Payment.CCCharge.gatewayTransID|strlen > 0 %}
 										<br>ID: {{Payment.CCCharge.gatewayTransID}}
 									{% endif %}
 								{% endif %}
@@ -221,34 +314,9 @@
 			{% endif %}
 		{% endfor %}
 		<tr><td colspan="2"></td></tr>
-		{% if Sale.getCurrentCashPayments() != 0 %}
-		<tr><td>Cash</td><td>{{Sale.getCurrentCashPayments()|money}}</td></tr>
+		{% if Sale.MetaData.getCurrentCashPayments != 0 %}
+		<tr><td>Cash</td><td>{{Sale.MetaData.getCurrentCashPayments|money}}</td></tr>
 		<tr><td>Change</td><td>{{Sale.change|money}}</td></tr>
-		{% endif %}
-	</table>
-	{% endif %}
-
-	{% if Sale.Customer and not parameters.gift_receipt %}
-	<table>
-		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.creditBalanceOwed() > 0 or Sale.Customer.CreditAccount.extraDeposit() > 0 %}
-		<tr><th colspan="2">Store Account</th></tr>
-			{% if Sale.Customer.CreditAccount.creditBalanceOwed() > 0 %}
-			<tr>
-				<td>Balance Owed</td>
-				<td>{{ Sale.Customer.CreditAccount.creditBalanceOwed()|money }}</td>
-			</tr>
-			{% elseif Sale.Customer.CreditAccount.extraDeposit() > 0 %}
-			<tr>
-				<td>On Deposit</td>
-				<td>{{ Sale.CreditAccount.extraDeposit()|money }}</td>
-			</tr>
-			{% endif %}
-		{% endif %}
-		{% if Sale.Customer.getAmountToCompleteAll() > 0 %}
-		<tr>
-			<td>Needed to complete all open orders:</td>
-			<td>{{ Sale.Customer.getAmountToCompleteAll|money }}</td>
-		</tr>
 		{% endif %}
 	</table>
 	{% endif %}
@@ -258,17 +326,45 @@
 		{{ _self.specialorders(Sale.Customer,parameters.gift_receipt)}}
 		{{ _self.workorders(Sale.Customer,parameters.gift_receipt)}}
 	{% endif %}
+	
+	{% if Sale.Customer and not parameters.gift_receipt %}
+		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.MetaData.extraDeposit > 0 %}
+		<h2>Store Account</h2>
+		<table class="totals">
+			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
+			<tr>
+				<td>Balance Owed</td>
+				<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
+			</tr>
+			{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
+			<tr>
+				<td>On Deposit</td>
+				<td class="amount">{{ Sale.CreditAccount.MetaData.extraDeposit|money }}</td>
+			</tr>
+			{% endif %}
+		</table>
+		{% endif %}
+		{% if Sale.Customer.MetaData.total > 0 %}
+		<table class="spacer totals">
+		<tr class="total">
+			<td>Needed to complete all</td>
+			<td class="amount">{{ Sale.Customer.MetaData.total|money }}</td>
+		</tr>
+		</table>
+		{% endif %}
+	</table>
+	{% endif %}
+
 {% endif %}
 {% endmacro %}
 
 {% macro cc_agreement(Sale) %}
-	{% if Sale.Shop.ReceiptSetup.creditcardAgree|length > 0 %}
+	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
 	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|nl2br}}</p>
 	{% endif %}
-	<dl>
-		<dt>Signature</dt>
+	<dl class="signature">
+		<dt>Signature:</dt>
 		<dd>
-			<div class="signature_line"></div><br />
 			{{Sale.Customer.firstName}} {{Sale.Customer.lastName}} ({{Sale.Customer.customerID}})<br />
 			{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
 			{{Phone.useType}}: {{Phone.number}}<br />
@@ -279,7 +375,7 @@
 {% endmacro %}
 
 {% macro workorder_agreement(Sale) %}
-	{% if Sale.Shop.ReceiptSetup.workorderAgree|length > 0 %}
+	{% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
 	<!-- 
 		@FIXME
 		Should only print this work_order agreement if it's never been signed before.
@@ -287,9 +383,9 @@
 	
 <div class="signature">
 	<p>{{Sale.Shop.ReceiptSetup.workorderAgree|nl2br}}</p>
-	<dl>
-		<dt>Signature</dt>
-		<dd><div class="signature_line"></div><br /> {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</dd>
+	<dl class="signature">
+		<dt>Signature:</dt>
+		<dd>{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</dd>
 	</dl>
 </div>
 	{% endif %}
@@ -305,7 +401,7 @@
 		<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
 		{% endif %}{% endfor %}
 		
-		{% if Sale.ShipTo.shipNote|length == 0 %}
+		{% if Sale.ShipTo.shipNote|strlen == 0 %}
 		<h5>Instructions</h5>
 		<p>{{Sale.ShipTo.shipNote}}</p>
 		{% endif %}
@@ -315,20 +411,20 @@
 
 {% macro shipping_address(Customer,Contact) %}
 <p>
-	{% if Customer.company|length > 0 %}{{Customer.company}}<br>{% endif %}
-	{% if Customer.company|length > 0 %}Attn:{% endif %} {{Customer.firstName}} {{Customer.lastName}}<br>
+	{% if Customer.company|strlen > 0 %}{{Customer.company}}<br>{% endif %}
+	{% if Customer.company|strlen > 0 %}Attn:{% endif %} {{Customer.firstName}} {{Customer.lastName}}<br>
 	{{ _self.address(Contact) }}
 </p>
 {% endmacro %}
 
 {% macro address(Contact,delimiter) %}
-	{% if delimiter|length == 0 %}{% set delimiter = '<br>' %}{% endif %}
+	{% if delimiter|strlen == 0 %}{% set delimiter = '<br>' %}{% endif %}
 
 	{% autoescape false %}
 	{% for Address in Contact.Addresses.ContactAddress %}
 		{% if loop.first and Address.address1 %}
 			{{Address.address1}}{{delimiter}}
-			{% if Address.address2|length > 0 %} {{Address.address2}}{{delimiter}}{% endif %}
+			{% if Address.address2|strlen > 0 %} {{Address.address2}}{{delimiter}}{% endif %}
 			{{Address.city}}, {{Address.state}} {{Address.zip}} {{Address.country}}
 		{% endif %}
 	{% endfor %}
@@ -337,82 +433,80 @@
 
 {% macro layaways(Customer,parameters) %}
 	{% if Customer.Layaways and Customer.Layaways|length > 0 %}
-		<table class="lines layaways">
-			<tr><th colspan="2">Layaways</th></tr>
-			{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
-		</table>
-		<table class="layways totals">
-			<tr>
-				<td>Subtotal</td>
-				<td>{{Customer.getOpenTotal('layaway','subtotal_no_discount')|money}}</td>
-			</tr>
-			{% if Customer.getOpenTotal('layaway','all_discounts')>0.00 %}
-			<tr>
-				<td>Discounts</td>
-				<td>{{Customer.getOpenTotal('layaway','all_discounts')|money}}</td>
-			</tr>
-			{% endif %}
-			<tr>
-				<td>Tax</td>
-				<td>{{Customer.getOpenTotal('layaway','tax_total')|money}}</td>
-			</tr>
-			<tr>
-				<td>Total</td>
-				<td>{{Customer.getOpenTotal('layaway')|money}}</td>
-			</tr>
-		</table>
+	<h2>Layaways</h2>
+	<table class="lines layaways">
+		{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
+	</table>
+	<table class="layways totals">
+		<tr>
+			<td>Subtotal</td>
+			<td class="amount">{{Customer.metaData.layawaysSubtotalNoDiscount|money}}</td>
+		</tr>
+		{% if Customer.metaData.layawaysAllDiscounts>0.00 %}
+		<tr>
+			<td>Discounts</td>
+			<td class="amount">{{Customer.metaData.layawaysAllDiscounts|money}}</td>
+		</tr>
+		{% endif %}
+		<tr>
+			<td>Tax</td>
+			<td class="amount">{{Customer.MetaData.layawaysTaxTotal|money}}</td>
+		</tr>
+		<tr class="total">
+			<td>Total</td>
+			<td class="amount">{{Customer.MetaData.layawaysTotal|money}}</td>
+		</tr>
+	</table>
 	{% endif %}
 {% endmacro %}
 
 {% macro specialorders(Customer,parameters) %}
 	{% if Customer.SpecialOrders|length > 0 %}
-		<table class="lines specialorders">
-			<tr><th colspan="2">Special Orders</th></tr>
-			{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
-		</table>
-		<table class="specialorders totals">
+	<h2>Special Orders</h2>
+	<table class="lines specialorders">
+		{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
+	</table>
+	<table class="specialorders totals">
+		<tr>
+			<td>Subtotal</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|mosformat('money')}}</td>
+		</tr>
+		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 			<tr>
-				<td>Subtotal</td>
-				<td>{{Customer.getOpenTotal('special_order','subtotal_no_discount')|mosformat('money')}}</td>
+				<td>Discounts</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|mosformat('money')}}</td>
 			</tr>
-			{% if Customer.getOpenTotal('special_order','all_discounts') > 0 %}
-				<tr>
-					<td>Discounts</td>
-					<td>{{Customer.getOpenTotal('special_order','all_discounts')|mosformat('money')}}</td>
-				</tr>
-			{% endif %}
-			<tr>
-				<td>Tax</td>
-				<td>{{Customer.getOpenTotal('special_order','tax_total')|mosformat('money')}}</td>
-			</tr>
-			<tr>
-				<td>Total</td>
-				<td>{{Customer.getOpenTotal('special_order')|mosformat('money')}}</td>
-			</tr>
-		</table>
+		{% endif %}
+		<tr>
+			<td>Tax</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|mosformat('money')}}</td>
+		</tr>
+		<tr class="total">
+			<td>Total</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersTotal|mosformat('money')}}</td>
+		</tr>
+	</table>
 	{% endif %}
 {% endmacro %}
 
 {% macro workorders(Customer,parameters) %}
 	{% if Customer.Workorders|length > 0 %}
-		<table class="lines workorders">
-			<tr>
-				<th colspan="2">Open Workorders</th>
-			</tr>
-			{% for Line in Customer.WorkOrders.SaleLine %}
-			<tr>
-				<td>{{Line.name|nl2br}}</td>
-				<td>{{Line.getWorkorderTotal()|money}}</td>
-			</tr>
-			{% endfor %}
-		</table>
+	<h2>Open Workorders</h2>
+	<table class="lines workorders">
+		{% for Line in Customer.Workorders.SaleLine %}
+		<tr>
+			{% autoescape false %}<th>{{Line.Note.note|nl2br}}</th>{% endautoescape %}
+			<td class="amount">{{Line.calcTotal|money}}</td>
+		</tr>
+		{% endfor %}
+	</table>
 		{% if Customer.Workorders|length > 1 %}
-		<table class="workorders totals">
-			<tr>
-				<td>Total</td>
-				<td>{{Customer.getOpenTotal('workorder')|money}}</td>
-			</tr>
-		</table>
+	<table class="workorders totals">
+		<tr>
+			<td>Total</td>
+			<td>{{Customer.MetaData.workordersTotal|money}}</td>
+		</tr>
+	</table>
 		{% endif %}
 	{% endif %}
 {% endmacro %}
