@@ -54,6 +54,7 @@ body {
 }
 
 .receipt table.totals { text-align: right; }
+.receipt table.payments { text-align: right; }
 .receipt table.spacer { margin-top: 1em; }
 .receipt table tr.total td { font-weight: bold; }
 
@@ -162,9 +163,9 @@ body {
 {% macro title(Sale,parameters) %}
 <h1>
 	{% if not Sale.parentSaleID > 0 and Sale.calcTotal >= 0 %}
-		{% if Sale.completed == true %}
+		{% if Sale.completed == 'true' %}
 			{% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
-		{% elseif Sale.voided == true %}
+		{% elseif Sale.voided == 'true' %}
 			Receipt 
 			<large>VOIDED</large>
 		{% else %}
@@ -230,7 +231,7 @@ body {
 	</thead>
 	<tbody>
 		{% for Line in Sale.SaleLines.SaleLine %}
-		{{ _self.line(Line,parameters) }}
+			{{ _self.line(Line,parameters) }}
 		{% endfor %}
 	</tbody>
 </table>
@@ -250,75 +251,76 @@ body {
 {% endif %}
 {% endif %}
 
-{% if Sale.completed == true and not parameters.gift_receipt %}
+{% if Sale.completed == 'true' and not parameters.gift_receipt %}
 	{% if Sale.SalePayments %}
-	<h2>Payments</h2>
-	<table class="payments">
-		{% for Payment in Sale.SalePayments.SalePayment %}
-			<!-- NOT Cash Payment -->
-			{% if not Payment.isCurrentCash == true %}
-				<!--  Gift Card -->
-				{% if Payment.CreditAccount.giftCard == true %}
-					{% if Payment.amount > 0 %}
-					<tr >
-						<td>
-							Gift Card Charge<br />
-							New Balance: <!-- Card balance here --> 
-						</td>
-						<td>{{Payment.amount|money}}</td>
-					</tr>
-					{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
-					<tr><td>Refund To Gift Card</td><td>{{Payment.amount|money}}</td></tr>
-					{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
-					<tr><td>Gift Card Purchase</td><td>{{Payment.amount|money}}</td></tr>
-					{% endif %}
-				{% elseif Payment.creditAccountID == 0 %}
-					<tr>
-						<td>
-							{{ Payment.PaymentType.name }}
-
-							{% if Payment.ccChargeID > 0 %}
-								{% if Payment.CCCharge %}
-									<br>Card Num: {{Payment.CCCharge.xnum}}
-									{% if Payment.CCCharge.cardType|strlen > 0 %}
-										<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
-									{% endif %}
-									{% if Payment.CCCharge.cardholderName|strlen > 0 %}
-										<br>Cardholder: {{Payment.CCCharge.cardholderName}}
-									{% endif %}
-									{% if Payment.CCCharge.entryMethod|strlen > 0 %}
-										<br>Entry: {{Payment.CCCharge.entryMethod}}
-									{% endif %}
-									{% if Payment.CCCharge.authCode|strlen > 0 %}
-										<br>Approval: {{Payment.CCCharge.authCode}}
-									{% endif %}
-									{% if Payment.CCCharge.gatewayTransID|strlen > 0 %}
-										<br>ID: {{Payment.CCCharge.gatewayTransID}}
+		<h2>Payments</h2>
+		<table class="payments">
+			{% for Payment in Sale.SalePayments.SalePayment %}
+				{% if Payment.isCurrentCash != 'true' %}
+					<!-- NOT Cash Payment -->
+					{% if Payment.CreditAccount.giftCard == 'true' %}
+						<!--  Gift Card -->
+						{% if Payment.amount > 0 %}
+						<tr >
+							<td>
+								Gift Card Charge<br />
+								New Balance: <!-- Card balance here --> 
+							</td>
+							<td>{{Payment.amount|money}}</td>
+						</tr>
+						{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
+						<tr><td>Refund To Gift Card</td><td>{{Payment.amount|money}}</td></tr>
+						{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
+						<tr><td>Gift Card Purchase</td><td>{{Payment.amount|money}}</td></tr>
+						{% endif %}
+					{% elseif Payment.creditAccountID == 0 %}
+						<!--  NOT Customer Account -->
+						<tr>
+							<td>
+								{{ Payment.PaymentType.name }}
+	
+								{% if Payment.ccChargeID > 0 %}
+									{% if Payment.CCCharge %}
+										<br>Card Num: {{Payment.CCCharge.xnum}}
+										{% if Payment.CCCharge.cardType|strlen > 0 %}
+											<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
+										{% endif %}
+										{% if Payment.CCCharge.cardholderName|strlen > 0 %}
+											<br>Cardholder: {{Payment.CCCharge.cardholderName}}
+										{% endif %}
+										{% if Payment.CCCharge.entryMethod|strlen > 0 %}
+											<br>Entry: {{Payment.CCCharge.entryMethod}}
+										{% endif %}
+										{% if Payment.CCCharge.authCode|strlen > 0 %}
+											<br>Approval: {{Payment.CCCharge.authCode}}
+										{% endif %}
+										{% if Payment.CCCharge.gatewayTransID|strlen > 0 %}
+											<br>ID: {{Payment.CCCharge.gatewayTransID}}
+										{% endif %}
 									{% endif %}
 								{% endif %}
-							{% endif %}
-						</td>
-						<td>{{Payment.amount|money}}</td>
-					</tr>
-				<!-- Customer Account -->
-				{% elseif Payment.creditAccountID == Sale.Customer.creditAccountID %}
-					<tr>
-						<td>
-							{% if Payment.amount < 0 %}Account Deposit
-							{% else %}Account Charge
-							{% endif %}
-						</td>
-						<td>{{Payment.amount|money}}</td>
-					</tr>
+							</td>
+							<td>{{Payment.amount|money}}</td>
+						</tr>
+					{% elseif Payment.creditAccountID == Sale.Customer.creditAccountID %}
+						<!-- Customer Account -->
+						<tr>
+							<td>
+								{% if Payment.amount < 0 %}Account Deposit
+								{% else %}Account Charge
+								{% endif %}
+							</td>
+							<td>{{Payment.amount|money}}</td>
+						</tr>
+					{% endif %}
 				{% endif %}
+			{% endfor %}
+			<tr><td colspan="2"></td></tr>
+			{% if Sale.MetaData.currentCashPayments != 0 %}
+				<tr><td>Cash</td><td>{{Sale.MetaData.currentCashPayments|money}}</td></tr>
+				<tr><td>Change</td><td>{{Sale.change|money}}</td></tr>
 			{% endif %}
-		{% endfor %}
-		<tr><td colspan="2"></td></tr>
-		{% if Sale.MetaData.getCurrentCashPayments != 0 %}
-		<tr><td>Cash</td><td>{{Sale.MetaData.getCurrentCashPayments|money}}</td></tr>
-		<tr><td>Change</td><td>{{Sale.change|money}}</td></tr>
-		{% endif %}
-	</table>
+		</table>
 	{% endif %}
 	
 	{% if Sale.Customer %}
@@ -328,29 +330,29 @@ body {
 	{% endif %}
 	
 	{% if Sale.Customer and not parameters.gift_receipt %}
-		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.MetaData.extraDeposit > 0 %}
-		<h2>Store Account</h2>
-		<table class="totals">
-			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
-			<tr>
-				<td>Balance Owed</td>
-				<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
-			</tr>
-			{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
-			<tr>
-				<td>On Deposit</td>
-				<td class="amount">{{ Sale.CreditAccount.MetaData.extraDeposit|money }}</td>
-			</tr>
-			{% endif %}
-		</table>
+		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
+			<h2>Store Account</h2>
+			<table class="totals">
+				{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
+				<tr>
+					<td>Balance Owed</td>
+					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
+				</tr>
+				{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
+				<tr>
+					<td>On Deposit</td>
+					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
+				</tr>
+				{% endif %}
+			</table>
 		{% endif %}
 		{% if Sale.Customer.MetaData.total > 0 %}
-		<table class="spacer totals">
-		<tr class="total">
-			<td>Needed to complete all</td>
-			<td class="amount">{{ Sale.Customer.MetaData.total|money }}</td>
-		</tr>
-		</table>
+			<table class="spacer totals">
+			<tr class="total">
+				<td>Needed to complete all</td>
+				<td class="amount">{{ Sale.Customer.MetaData.total|money }}</td>
+			</tr>
+			</table>
 		{% endif %}
 	</table>
 	{% endif %}
@@ -440,12 +442,12 @@ body {
 	<table class="layways totals">
 		<tr>
 			<td>Subtotal</td>
-			<td class="amount">{{Customer.metaData.layawaysSubtotalNoDiscount|money}}</td>
+			<td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
 		</tr>
-		{% if Customer.metaData.layawaysAllDiscounts>0.00 %}
+		{% if Customer.MetaData.layawaysAllDiscounts>0.00 %}
 		<tr>
 			<td>Discounts</td>
-			<td class="amount">{{Customer.metaData.layawaysAllDiscounts|money}}</td>
+			<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|money}}</td>
 		</tr>
 		{% endif %}
 		<tr>
@@ -469,21 +471,21 @@ body {
 	<table class="specialorders totals">
 		<tr>
 			<td>Subtotal</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|mosformat('money')}}</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
 		</tr>
 		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 			<tr>
 				<td>Discounts</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|mosformat('money')}}</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|money}}</td>
 			</tr>
 		{% endif %}
 		<tr>
 			<td>Tax</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|mosformat('money')}}</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
 		</tr>
 		<tr class="total">
 			<td>Total</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersTotal|mosformat('money')}}</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
 		</tr>
 	</table>
 	{% endif %}
@@ -491,22 +493,21 @@ body {
 
 {% macro workorders(Customer,parameters) %}
 	{% if Customer.Workorders|length > 0 %}
-	<h2>Open Workorders</h2>
-	<table class="lines workorders">
-		{% for Line in Customer.Workorders.SaleLine %}
-		<tr>
-			{% autoescape false %}<th>{{Line.Note.note|nl2br}}</th>{% endautoescape %}
-			<td class="amount">{{Line.calcTotal|money}}</td>
-		</tr>
-		{% endfor %}
-	</table>
+		<h2>Open Workorders</h2>
+		<table class="lines workorders">
+			{% for Line in Customer.Workorders.SaleLine %}
+				<tr>
+					{% autoescape false %}<th>{{Line.Note.note|nl2br}}</th>{% endautoescape %}
+				</tr>
+			{% endfor %}
+		</table>
 		{% if Customer.Workorders|length > 1 %}
-	<table class="workorders totals">
-		<tr>
-			<td>Total</td>
-			<td>{{Customer.MetaData.workordersTotal|money}}</td>
-		</tr>
-	</table>
+			<table class="workorders totals">
+				<tr>
+					<td>Total</td>
+					<td>{{Customer.MetaData.workordersTotal|money}}</td>
+				</tr>
+			</table>
 		{% endif %}
 	{% endif %}
 {% endmacro %}
