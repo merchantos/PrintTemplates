@@ -100,7 +100,7 @@ body {
 	{% endif %}
 {% endfor %}
 
-{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt %}
+{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt and not parameters.email %}
 	{% if has_cc_charge or parameters.force_cc_agree or parameters.print_workorder_aggree %}
 <div class="receipt store">
 	<div class="header">
@@ -124,6 +124,7 @@ body {
 	{% endif %}
 {% endif %}
 
+<!-- replace.email_custom_header_msg -->
 <div class="receipt customer">
 	{{ _self.ship_to(Sale) }}
 
@@ -157,6 +158,8 @@ body {
 
 	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
 </div>
+
+<!-- replace.email_custom_footer_msg -->
 {% endfor %}
 {% endblock content %}
 
