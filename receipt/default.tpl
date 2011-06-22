@@ -201,7 +201,7 @@ body {
 	{% if Sale.Employee %}Employee: {{Sale.Employee.firstName}} {{Sale.Employee.lastName}}<br />{% endif %}
 	{% if Sale.Customer %}
 		{% if Sale.Customer.company%}Company: {{Sale.Customer.company}}<br />{% endif %}
-		Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}} ({{Sale.Customer.customerID}})<br />
+		Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
 		<span class="indent">
 		{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
 		{{Phone.useType}}: {{Phone.number}}<br />
