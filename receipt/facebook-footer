@@ -1,6 +1,6 @@
-<!-- Facebook footer --> 
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+<!-- Facebook footer --> 
 body {
   margin: 0;
   padding: 0;
