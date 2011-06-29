@@ -112,7 +112,7 @@ body {
 	{{ _self.sale_details(Sale) }}
 	{{ _self.receipt(Sale,parameters) }}
 
-	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|nl2br}}</p>{% endif %}
+	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
 	{{ _self.cc_agreement(Sale) }}
 	{{ _self.workorder_agreement(Sale) }}
@@ -148,9 +148,9 @@ body {
 	{{ _self.sale_details(Sale) }}
 	{{ _self.receipt(Sale,parameters) }}
 
-	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|nl2br}}</p>{% endif %}
+	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
-	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|nl2br }}</p>{% endif %}
+	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>{% endif %}
 
 	{% if not parameters.gift_receipt %}
 	<p class="thankyou">Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
@@ -365,7 +365,7 @@ body {
 
 {% macro cc_agreement(Sale) %}
 	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
-	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|nl2br}}</p>
+	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
 	{% endif %}
 	<dl class="signature">
 		<dt>Signature:</dt>
@@ -387,7 +387,7 @@ body {
 		transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->
 	
 <div class="signature">
-	<p>{{Sale.Shop.ReceiptSetup.workorderAgree|nl2br}}</p>
+	<p>{{Sale.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
 	<dl class="signature">
 		<dt>Signature:</dt>
 		<dd>{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</dd>
@@ -500,7 +500,7 @@ body {
 		<table class="lines workorders">
 			{% for Line in Customer.Workorders.SaleLine %}
 				<tr>
-					{% autoescape false %}<th>{{Line.Note.note|nl2br}}</th>{% endautoescape %}
+					{% autoescape false %}<th>{{Line.Note.note|noteformat|raw}}</th>{% endautoescape %}
 				</tr>
 			{% endfor %}
 		</table>
