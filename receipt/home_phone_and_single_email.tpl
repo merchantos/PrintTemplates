@@ -165,7 +165,7 @@ body {
 
 {% macro title(Sale,parameters) %}
 <h1>
-	{% if not Sale.parentSaleID > 0 and Sale.calcTotal >= 0 %}
+	{% if Sale.calcTotal >= 0 %}
 		{% if Sale.completed == 'true' %}
 			{% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
 		{% elseif Sale.voided == 'true' %}
