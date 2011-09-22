@@ -88,11 +88,6 @@ body {
 }
 .receipt dl dd p { margin: 0; }
 
-.icon {
-        float: left;
-        margin: 0 10px 0 0;
-}
-
 
 
 {% endblock extrastyles %}
@@ -158,17 +153,11 @@ body {
 	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|nl2br }}</p>{% endif %}
 
 	{% if not parameters.gift_receipt %}
-	<p class="thankyou">Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
+	<p class="thankyou">Thank you, {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
 	{% endif %}
-        <img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
-</div>
 
-<!-- Update your Facebook information here -->
-<p>
-        <img height="40" width="40" class="icon" src="http://www.kern-computers.com/facebook_logo.jpg">  
-<b>Like Us On Facebook</b><br>
-facebook.com/yourshophere     
-</p>
+	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+</div>
 
 <!-- replace.email_custom_footer_msg -->
 {% endfor %}
@@ -176,7 +165,7 @@ facebook.com/yourshophere
 
 {% macro title(Sale,parameters) %}
 <h1>
-	{% if Sale.calcTotal >= 0 %}
+	{% if not Sale.parentSaleID > 0 and Sale.calcTotal >= 0 %}
 		{% if Sale.completed == 'true' %}
 			{% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
 		{% elseif Sale.voided == 'true' %}
