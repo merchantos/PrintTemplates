@@ -275,7 +275,7 @@ body {
   		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
   		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|money}}</td></tr>{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
-		<tr><td width="100%">{{Tax.name}} Tax ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+		<tr><td width="100%">{{Tax.name}} Tax ({{Sale.calcTaxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 		{% endfor %}
 		<tr><td width="100%">Total Tax</td><td class="amount">{{Sale.calcTax1|money}}</td></tr>
 		<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
