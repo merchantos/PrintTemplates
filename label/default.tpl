@@ -63,7 +63,7 @@
 			padding: 5px;
 			position: relative;
 			width: 200px;
-			height: 110px;
+			height: 100px;
 			overflow: hidden;
 		}
 		.label h1
