@@ -131,7 +131,7 @@
 	{% for Label in Labels %}
 		{% set lastlabel = loop.last %}
 		{% for copy in 1..Label.copies %}
-				<div class="label{% if not lastlabel %}{% if not loop.last %} pagebreak{% endif %}{% endif %}">
+				<div class="label{% if lastlabel %}{% if Label.copies==copy %}{% else %} pagebreak{% endif %}{% else %} pagebreak{% endif %}">
 					{% if parameters.labelSize != "1.25x1.00" %}
 						<h1>{{ Shop.name }}</h1>
 					{% endif %}
