@@ -430,13 +430,13 @@ body {
 	{% if Sale.ShipTo %}
 	<div class="shipping">
 		<h4>Ship To</h4>
-		{{ _self.shipping_address(Sale.Customer,Sale.ShipTo.Contact) }}
+		{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
 		
 		{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
 		<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
 		{% endif %}{% endfor %}
 		
-		{% if Sale.ShipTo.shipNote|strlen == 0 %}
+		{% if Sale.ShipTo.shipNote|strlen > 0 %}
 		<h5>Instructions</h5>
 		<p>{{Sale.ShipTo.shipNote}}</p>
 		{% endif %}
