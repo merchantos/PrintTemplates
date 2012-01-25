@@ -104,12 +104,6 @@ body {
 {% block content %}
 {% for Sale in Sales %}
 
-{% for Payment in Sale.SalePayments.SalePayment %}
-    {% if Payment.CCCharge %}
-        {% set has_cc_charge = true %}
-    {% endif %}
-{% endfor %}
-
 {% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt and not parameters.email %}
 	{% if parameters.force_cc_agree or parameters.print_workorder_agree %}
         {{ _self.store_receipt(Sale,parameters) }}
@@ -132,7 +126,7 @@ body {
         {% endif %}
         <h3>{{ Sale.Shop.name }}</h3>
     {% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
-        {{Sale.Shop.ReceiptSetup.header}}
+        {{Sale.Shop.ReceiptSetup.header|raw}}
     {% else %}
         <p>{{ _self.address(Sale.Shop.Contact) }}</p>
         {% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
@@ -257,8 +251,13 @@ body {
 
 {% macro line(Line,parameters) %}
 <tr>
-    <th>{{ _self.lineDescription(Line) }}</th>
-    <td class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
+    <th>
+        {{ _self.lineDescription(Line) }}
+        {% if Line.calcLineDiscount > 0 %}
+        <small>Discount: {{Line.calcLineDiscount|money}}</small>
+        {% endif %}
+    </th>
+    <td class="quantity">{{Line.unitQuantity}}</td>
     <td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
 </tr>
 {% endmacro %}

@@ -1,10 +1,10 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+@page { margin: 0px; }
 body {
   margin: 0;
-  padding: 0;
+  padding: 1px; <!-- You need this to make the printer behave -->
 }
-@page {	margin: 0: }
 .store { page-break-after: always; }
 .receipt {
 	font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
@@ -104,34 +104,16 @@ body {
 {% block content %}
 {% for Sale in Sales %}
 
-{% for Payment in Sale.SalePayments.SalePayment %}
-	{% if Payment.CCCharge %}
-		{% set has_cc_charge = true %}
-	{% endif %}
-{% endfor %}
-
 {% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt and not parameters.email %}
-	{% if has_cc_charge or parameters.force_cc_agree or parameters.print_workorder_aggree %}
-<div class="receipt store">
-	<div class="header">
-		{{ _self.title(Sale,parameters) }}
-		<p class="copy">Store Copy</p>
-		{{ _self.date(Sale) }}
-	</div>
-	
-	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters) }}
-
-	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
-
-	{{ _self.cc_agreement(Sale) }}
-	{{ _self.workorder_agreement(Sale) }}
-
-	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">	
-
-	{{ _self.ship_to(Sale) }}
-</div>
-	{% endif %}
+	{% if parameters.force_cc_agree or parameters.print_workorder_agree %}
+        {{ _self.store_receipt(Sale,parameters) }}
+	{% else %}
+	    {% for SalePayment in Sale.SalePayments.SalePayment %}
+        	{% if SalePayment.CCCharge %}
+                {{ _self.store_receipt(Sale,parameters) }}
+        	{% endif %}
+        {% endfor %}
+    {% endif %}
 {% endif %}
 
 <!-- replace.email_custom_header_msg -->
@@ -172,6 +154,29 @@ body {
 <!-- replace.email_custom_footer_msg -->
 {% endfor %}
 {% endblock content %}
+
+
+{% macro store_receipt(Sale,parameters) %}
+<div class="receipt store">
+	<div class="header">
+		{{ _self.title(Sale,parameters) }}
+		<p class="copy">Store Copy</p>
+		{{ _self.date(Sale) }}
+	</div>
+	
+	{{ _self.sale_details(Sale) }}
+	{{ _self.receipt(Sale,parameters) }}
+
+	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
+
+	{{ _self.cc_agreement(Sale) }}
+	{{ _self.workorder_agreement(Sale) }}
+
+	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">	
+
+	{{ _self.ship_to(Sale) }}
+</div>
+{% endmacro %}
 
 {% macro lineDescription(Line) %}
 	{% if Line.Item %}
