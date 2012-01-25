@@ -266,7 +266,7 @@ body {
 		<h2>Payments</h2>
 		<table class="payments">
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.isCurrentCash != 'true' %}
+				{% if Payment.PaymentType.name != 'Cash' %}
 					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
