@@ -126,7 +126,7 @@ body {
         {% endif %}
         <h3>{{ Sale.Shop.name }}</h3>
     {% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
-        {{Sale.Shop.ReceiptSetup.header|raw}}
+        {{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
     {% else %}
         <p>{{ _self.address(Sale.Shop.Contact) }}</p>
         {% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
