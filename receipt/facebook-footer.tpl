@@ -322,15 +322,16 @@ facebook.com/yourshophere
 							</td>
 							<td>{{Payment.amount|money}}</td>
 						</tr>
-					{% elseif Payment.creditAccountID == Sale.Customer.creditAccountID %}
+					{% elseif Payment.CreditAccount %}
 						<!-- Customer Account -->
 						<tr>
-							<td>
-								{% if Payment.amount < 0 %}Account Deposit
-								{% else %}Account Charge
-								{% endif %}
-							</td>
-							<td>{{Payment.amount|money}}</td>
+						    {% if Payment.amount < 0 %}
+							<td>Account Deposit</td>
+							<td class="amount">{{(Payment.amount * -1)|money}}</td>
+                            {% else %}
+    					    <td>Account Charge</td>
+							<td class="amount">{{Payment.amount|money}}</td>
+                            {% endif %}
 						</tr>
 					{% endif %}
 				{% endif %}

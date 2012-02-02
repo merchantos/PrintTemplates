@@ -340,17 +340,18 @@ body {
 							</td>
 							<td class="amount">{{Payment.amount|money}}</td>
 						</tr>
-					{% elseif Payment.creditAccountID == Sale.Customer.creditAccountID %}
-						<!-- Customer Account -->
-						<tr>
-							<td>
-								{% if Payment.amount < 0 %}Account Deposit
-								{% else %}Account Charge
-								{% endif %}
-							</td>
-							<td class="amount">{{Payment.amount|money}}</td>
-						</tr>
-					{% endif %}
+    					{% elseif Payment.CreditAccount %}
+    						<!-- Customer Account -->
+    						<tr>
+    						    {% if Payment.amount < 0 %}
+    							<td>Account Deposit</td>
+    							<td class="amount">{{(Payment.amount * -1)|money}}</td>
+                                {% else %}
+        					    <td>Account Charge</td>
+    							<td class="amount">{{Payment.amount|money}}</td>
+                                {% endif %}
+    						</tr>
+    					{% endif %}
 				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
