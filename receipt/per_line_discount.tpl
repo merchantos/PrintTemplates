@@ -311,7 +311,7 @@ body {
 							</td>
 							<td class="amount">
 							    {{Payment.amount|money}}<br />
-							    {{Payment.CreditAccount.balance|money}}
+							    {{Payment.CreditAccount.balance|getinverse|money}}
 							</td>
                         </tr>
                         {% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
@@ -353,7 +353,7 @@ body {
     						<tr>
     						    {% if Payment.amount < 0 %}
     							<td>Account Deposit</td>
-    							<td class="amount">{{Payment.amount|money}}</td>
+    							<td class="amount">{{Payment.amount|getinverse|money}}</td>
                                 {% else %}
         					    <td>Account Charge</td>
     							<td class="amount">{{Payment.amount|money}}</td>
