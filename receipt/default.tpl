@@ -395,11 +395,11 @@ td.amount { white-space: nowrap; }
 				{% endif %}
 			</table>
 		{% endif %}
-		{% if Sale.Customer.MetaData.total > 0 %}
+		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 			<table class="spacer totals">
 			<tr class="total">
 				<td>Remaining Balance: </td>
-				<td class="amount">{{ Sale.Customer.MetaData.total|money }}</td>
+				<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
 			</table>
 		{% endif %}

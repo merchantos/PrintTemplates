@@ -306,7 +306,7 @@ body {
 							</td>
 							<td class="amount">
 							    {{Payment.amount|money}}<br />
-							    {{Payment.CreditAccount.balance|money}}
+							    {{Payment.CreditAccount.balance|getinverse|money}}
 							</td>
 						</tr>
 						{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
@@ -348,7 +348,7 @@ body {
     						<tr>
     						    {% if Payment.amount < 0 %}
     							<td>Account Deposit</td>
-    							<td class="amount">{{Payment.amount|money}}</td>
+    							<td class="amount">{{Payment.amount|getinverse|money}}</td>
                                 {% else %}
         					    <td>Account Charge</td>
     							<td class="amount">{{Payment.amount|money}}</td>
@@ -390,11 +390,11 @@ body {
 				{% endif %}
 			</table>
 		{% endif %}
-		{% if Sale.Customer.MetaData.total > 0 %}
+		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 			<table class="spacer totals">
 			<tr class="total">
 				<td>Remaining Balance: </td>
-				<td class="amount">-{{ Sale.Customer.MetaData.total|money }}</td>
+				<td class="amount">-{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
 			</table>
 		{% endif %}
