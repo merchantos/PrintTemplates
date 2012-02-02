@@ -327,10 +327,12 @@ body {
 				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
-			{% if Sale.MetaData.currentCashPayments != 0 %}
-				<tr><td>Cash</td><td>{{Sale.MetaData.currentCashPayments|money}}</td></tr>
-				<tr><td>Change</td><td>{{Sale.change|money}}</td></tr>
-			{% endif %}
+		    {% for Payment in Sale.SalePayments.SalePayment %}
+			    {% if Payment.PaymentType.name == 'Cash' %}
+				    <tr><td width="100%">Cash</td><td class="amount">{{Payment.amount|money}}</td></tr>
+				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
+    			{% endif %}
+			{% endfor %}
 		</table>
 	{% endif %}
 	
