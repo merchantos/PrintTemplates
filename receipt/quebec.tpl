@@ -300,11 +300,14 @@ body {
 						<!--  Gift Card -->
 						{% if Payment.amount > 0 %}
 						<tr >
-							<td>
+						    <td>
 								Gift Card Charge<br />
-								New Balance: <!-- Card balance here --> 
+								New Balance:
 							</td>
-							<td class="amount">{{Payment.amount|money}}</td>
+							<td class="amount">
+							    {{Payment.amount|money}}<br />
+							    {{Payment.CreditAccount.balance|money}}
+							</td>
 						</tr>
 						{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
 						<tr><td>Refund To Gift Card</td><td class="amount">{{Payment.amount|money}}</td></tr>
@@ -345,7 +348,7 @@ body {
     						<tr>
     						    {% if Payment.amount < 0 %}
     							<td>Account Deposit</td>
-    							<td class="amount">{{(Payment.amount * -1)|money}}</td>
+    							<td class="amount">{{Payment.amount|money}}</td>
                                 {% else %}
         					    <td>Account Charge</td>
     							<td class="amount">{{Payment.amount|money}}</td>
