@@ -195,7 +195,7 @@ body {
             {% autoescape true %}{{ Line.Note.note|nl2br }}{% endautoescape %}
         </div>
     {% endif %}
-    {% if Line.Serialized|length > 0 %}
+	{% if Line.Serialized %}
         {% for Serialized in Line.Serialized.Serialized %}
             <div class='line_serial'>
                 Serial#: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
@@ -411,38 +411,38 @@ body {
 {% endmacro %}
 
 {% macro cc_agreement(Sale) %}
-    {% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
-    <p>{{Sale.Shop.ReceiptSetup.creditcardAgree|nl2br}}</p>
-    {% endif %}
-    <dl class="signature">
-        <dt>Signature:</dt>
-        <dd>
-            {{Sale.Customer.firstName}} {{Sale.Customer.lastName}} ({{Sale.Customer.customerID}})<br />
-            {% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-            {{Phone.useType}}: {{Phone.number}}<br />
-            {% endfor %}
-            {{ _self.address(Sale.Customer.Contact) }}
-        </dd>
-    </dl>
+    {% if SalePayment.CCCharge %}
+	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
+	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
+	{% endif %}
+	<dl class="signature">
+		<dt>Signature:</dt>
+		<dd>
+			{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
+			{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
+			{{Phone.useType}}: {{Phone.number}}<br />
+			{% endfor %}
+			{{ _self.address(Sale.Customer.Contact) }}
+		</dd>
+	</dl>
+	{% endif %}
 {% endmacro %}
 
 {% macro workorder_agreement(Sale) %}
-    {% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
-    <!-- 
-        @FIXME
-        Should only print this work_order agreement if it's never been signed before.
-        transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->
-    
-<div class="signature">
-    <p>{{Sale.Shop.ReceiptSetup.workorderAgree|nl2br}}</p>
-    <dl class="signature">
-        <dt>Signature:</dt>
-        <dd>{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</dd>
-    </dl>
-</div>
-    {% endif %}
+	{% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 and Sale.Workorders %}
+	<!-- 
+		@FIXME
+		Should only print this work_order agreement if it's never been signed before.
+		transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->	
+        <div class="signature">
+        	<p>{{Sale.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
+        	<dl class="signature">
+        		<dt>Signature:</dt>
+        		<dd>{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</dd>
+        	</dl>
+        </div>
+	{% endif %}
 {% endmacro %}
-
 {% macro ship_to(Sale) %}
     {% if Sale.ShipTo %}
     <div class="shipping">
