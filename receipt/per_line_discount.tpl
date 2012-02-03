@@ -253,7 +253,7 @@ body {
 <tr>
     <th>
         {{ _self.lineDescription(Line) }}
-        {% if Line.calcLineDiscount > 0 %}
+        {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
         <small>Discount: {{Line.calcLineDiscount|money}}</small>
         {% endif %}
     </th>
