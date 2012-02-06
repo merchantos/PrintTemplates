@@ -366,7 +366,7 @@ body {
 {% endmacro %}
 
 {% macro cc_agreement(Sale) %}
-    {% if SalePayment.CCCharge %}
+    {% if Sale.SalePayments.SalePayment.CCCharge %}
 	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
 	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
 	{% endif %}
