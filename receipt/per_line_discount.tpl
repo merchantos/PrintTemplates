@@ -221,7 +221,7 @@ body {
 {% macro date(Sale) %}
 <p class="date">
     {% if Sale.timeStamp %}
-        {{Sale.timeStamp|date('m/d/Y h:i:s A')}}
+        {{Sale.timeStamp|correctTimezone|date('m/d/Y h:i:s A')}}
     {% else %}
         {{"now"|date('m/d/Y h:i:s A')}}
     {% endif %}
