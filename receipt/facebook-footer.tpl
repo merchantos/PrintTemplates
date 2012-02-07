@@ -497,21 +497,21 @@ facebook.com/yourshophere
 	</table>
 	<table class="specialorders totals">
 		<tr>
-			<td>Subtotal</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
+			<td width="100%">Subtotal</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersSubtotal|money}}</td>
 		</tr>
 		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 			<tr>
-				<td>Discounts</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|money}}</td>
+				<td width="100%">Discounts</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
 			</tr>
 		{% endif %}
 		<tr>
-			<td>Tax</td>
+			<td width="100%">Tax</td>
 			<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
 		</tr>
 		<tr class="total">
-			<td>Total</td>
+			<td width="100%">Total</td>
 			<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
 		</tr>
 	</table>

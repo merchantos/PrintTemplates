@@ -523,12 +523,12 @@ td.amount { white-space: nowrap; }
 	<table class="specialorders totals">
 		<tr>
 			<td width="100%">Subtotal</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersSubtotal|money}}</td>
 		</tr>
 		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 			<tr>
 				<td width="100%">Discounts</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|money}}</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
 			</tr>
 		{% endif %}
 		<tr>

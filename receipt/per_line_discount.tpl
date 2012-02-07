@@ -513,32 +513,32 @@ body {
 {% endmacro %}
 
 {% macro specialorders(Customer,parameters) %}
-    {% if Customer.SpecialOrders|length > 0 %}
-    <h2>Special Orders</h2>
-    <table class="lines specialorders">
-        {% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
-    </table>
-    <table class="specialorders totals">
-        <tr>
-            <td width="100%">Subtotal</td>
-            <td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
-        </tr>
-        {% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
-            <tr>
-                <td width="100%">Discounts</td>
-                <td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|money}}</td>
-            </tr>
-        {% endif %}
-        <tr>
-            <td width="100%">Tax</td>
-            <td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
-        </tr>
-        <tr class="total">
-            <td width="100%">Total</td>
-            <td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
-        </tr>
-    </table>
-    {% endif %}
+	{% if Customer.SpecialOrders|length > 0 %}
+	<h2>Special Orders</h2>
+	<table class="lines specialorders">
+		{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
+	</table>
+	<table class="specialorders totals">
+		<tr>
+			<td width="100%">Subtotal</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersSubtotal|money}}</td>
+		</tr>
+		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
+			<tr>
+				<td width="100%">Discounts</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
+			</tr>
+		{% endif %}
+		<tr>
+			<td width="100%">Tax</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
+		</tr>
+		<tr class="total">
+			<td width="100%">Total</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
+		</tr>
+	</table>
+	{% endif %}
 {% endmacro %}
 
 {% macro workorders(Customer,parameters) %}
