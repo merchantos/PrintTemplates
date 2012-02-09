@@ -5,7 +5,7 @@ body {
   margin: 0;
   padding: 1px; <!-- You need this to make the printer behave -->
 }
-.store { page-break-after: always; }
+.store { page-break-after: always; margin-bottom: 40px; }
 .receipt {
 	font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
@@ -34,6 +34,7 @@ body {
 .receipt p.date, .receipt p.copy {
 	font-size: 9pt;
 	margin: 0;
+	text-align: center;
 }
 
 .receipt table {
@@ -53,14 +54,27 @@ body {
   text-align: right;
 }
 
+td.amount { white-space: nowrap; }
+
 .receipt table.totals { text-align: right; }
 .receipt table.payments { text-align: right; }
 .receipt table.spacer { margin-top: 1em; }
 .receipt table tr.total td { font-weight: bold; }
 
+.receipt table td.amount { padding-left: 10px; }
+
 .receipt table.sale { border-bottom: 1px solid black; }
 .receipt table.sale thead th { border-bottom: 1px solid black; }
-.receipt table.sale tbody th { font-weight: bold; }
+.receipt table div.line_description { font-weight: bold; }
+
+.receipt table div.line_note { padding-left: 10px; }
+.receipt table div.line_serial { padding-left: 10px; }
+
+
+.receipt table.workorders div.line_description { font-weight: normal; padding-left: 10px; }
+.receipt table.workorders div.line_note { font-weight: normal; padding-left: 10px; }
+.receipt table.workorders div.line_serial { font-weight: normal; padding-left: 20px; }
+.receipt table.workorders td.workorder div.line_note { font-weight: bold; padding-left: 0px; }
 
 .receipt p.thankyou { 
 	margin: 0; 
@@ -165,6 +179,26 @@ body {
 
 	{{ _self.ship_to(Sale) }}
 </div>
+{% endmacro %}
+
+{% macro lineDescription(Line) %}
+	{% if Line.Item %}
+	<div class=’line_description’>
+		{% autoescape true %}{{ Line.Item.description|nl2br }}{% endautoescape %}
+	</div>
+{% endif %}
+{%if Line.Note %}
+	<div class=’line_note’>
+		{% autoescape true %}{{ Line.Note.note|noteformat|raw }}{% endautoescape %}
+	</div>
+	{% endif %}
+	{% if Line.Serialized %}
+	{% for Serialized in Line.Serialized.Serialized %}
+	<div class=’line_serial’>
+		Serial#: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
+	</div>
+	{% endfor %}
+	{% endif %}
 {% endmacro %}
 
 {% macro title(Sale,parameters) %}
@@ -507,11 +541,25 @@ body {
 				</tr>
 			{% endfor %}
 		</table>
-		{% if Customer.Workorders|length > 1 %}
+		{% if Customer.MetaData.workordersTota > 0 %}
 			<table class="workorders totals">
 				<tr>
-					<td>Total</td>
-					<td>{{Customer.MetaData.workordersTotal|money}}</td>
+					<td width=”100%”>Subtotal</td>
+					<td class=”amount”>{{Customer.MetaData.workordersSubtotalNoDiscount|money}}</td>
+				</tr>
+		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
+			<tr>
+				<td width=”100%”>Discounts</td>
+				<td class=”amount”>{{Customer.MetaData.workordersAllDiscounts|money}}</td>
+			</tr>
+		{% endif %}
+			<tr>
+				<td width=”100%”>Tax</td>
+				<td class=”amount”>{{Customer.MetaData.workordersTaxTotal|money}}</td>
+				</tr>
+					<tr class=”total”>
+					<td width=”100%”>Total</td>
+					<td class=”amount”>{{Customer.MetaData.workordersTotal|money}}</td>
 				</tr>
 			</table>
 		{% endif %}
