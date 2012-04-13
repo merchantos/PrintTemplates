@@ -141,7 +141,7 @@ td.amount { white-space: nowrap; }
 	{{ _self.title(Sale,parameters) }}
 	{{ _self.date(Sale) }}
 	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters) }}
+	{{ _self.receipt(Sale,parameters,true) }}
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
@@ -167,7 +167,7 @@ td.amount { white-space: nowrap; }
 	</div>
 	
 	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters) }}
+	{{ _self.receipt(Sale,parameters,false) }}
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
@@ -260,8 +260,9 @@ td.amount { white-space: nowrap; }
 </tr>
 {% endmacro %}
 
-{% macro receipt(Sale,parameters) %}
+{% macro receipt(Sale,parameters,show_lines) %}
 {% if Sale.SaleLines %}
+{% if show_lines %}
 <table class="sale lines">
 	<thead>
 		<tr>
@@ -276,7 +277,7 @@ td.amount { white-space: nowrap; }
 		{% endfor %}
 	</tbody>
 </table>
-
+{% endif %}
 {% if not parameters.gift_receipt %}
 <table class="totals">
 	<tbody>
