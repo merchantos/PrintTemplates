@@ -184,12 +184,13 @@ td.amount { white-space: nowrap; }
 	{% if Line.Item %}
 		<div class='line_description'>
 			{% autoescape true %}{{ Line.Item.description|nl2br }}{% endautoescape %}
-			{% for item_price in Line.Item.Prices.ItemPrice %}
-			  {% if item_price.useType == 'MSRP' %}
-			    <br />MSRP: {{ item_price.amount|money }}
-			  {% endif %}
-			{% endfor %}
 		</div>
+		{% for item_price in Line.Item.Prices.ItemPrice %}
+		  {% if item_price.useType == 'MSRP' and item_price.amount|intval > Line.unitPrice|intval %}
+		    MSRP: {{ item_price.amount|money }}
+		    <br />You saved {{((item_price.amount - Line.unitPrice) * Line.unitQuantity)|intval|money }}!
+		  {% endif %}
+		{% endfor %}
 	{% endif %}
 	{%if Line.Note %}
 		<div class='line_note'>
