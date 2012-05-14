@@ -340,7 +340,7 @@ td.amount { white-space: nowrap; }
 										{% if Payment.CCCharge.authCode|strlen > 0 %}
 											<br>Approval: {{Payment.CCCharge.authCode}}
 										{% endif %}
-										{% if Payment.CCCharge.gatewayTransID|strlen > 0 %}
+										{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
 											<br>ID: {{Payment.CCCharge.gatewayTransID}}
 										{% endif %}
 									{% endif %}
