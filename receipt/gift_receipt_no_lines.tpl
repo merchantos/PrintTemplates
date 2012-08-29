@@ -348,7 +348,7 @@ td.amount { white-space: nowrap; }
 									{% endif %}
 								{% endif %}
 							</td>
-							<td class="amount">{{Payment.amountmoney}}</td>
+							<td class="amount">{{Payment.amount|money}}</td>
 						</tr>
 					{% elseif Payment.CreditAccount %}
 						<!-- Customer Account -->
