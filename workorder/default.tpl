@@ -113,9 +113,13 @@
 				<td class="notes">{{ WorkorderLine.note }}</td>
 				{% else %}
 				<td class="notes" colspan="2">{{ WorkorderLine.note }}</td>
-				{% if parameters.type == 'invoice' %}
-				<td class="charge">{{ WorkorderLine.unitPriceOverride | money }}<td>
 				{% endif %}
+				{% if parameters.type == 'invoice' %}
+				    {% if WorkorderLine.unitPriceOverride !='0' %} 
+				    <td class="charge">{{WorkorderLine.unitPriceOverride | money}}</td>
+				    {% else %}
+				    <td class="charge">{{ WorkorderLine.SaleLine.unitPrice | money }}</td>
+				    {% endif %}
 				{% endif %}
 			</tr>
 			{% endfor %}
