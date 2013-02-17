@@ -63,10 +63,10 @@
 	}
 	.notes h1 { margin: 1em 0 0; }
 
-	.receipt img.barcode 
+	img.barcode 
 	{
 		display: block;
-		margin: 0 auto; 
+		margin: 2em auto; 
 	}
 {% endblock extrastyles %}
 
@@ -93,7 +93,16 @@
 				{% if WorkorderLine.itemID != 0 %}
 				<td class="description"></td>
 				{% else %}
-				<td class="description">{{ WorkorderItem.Item.description }}</td>
+				<td class="description">
+				    {% if WorkorderLine.unitQuantity > 0 %}
+				    {{ WorkorderLine.unitQuantity }} &times; 
+				    {% endif %}
+				    {{ WorkorderItem.Item.description }}
+				    
+				    {% if WorkorderItem.Discount %}
+				    <br>{{WorkorderItem.Discount.name}} ({{WorkorderItem.SaleLine.calcLineDiscount|money}})
+				    {% endif %}
+				</td>
 				{% endif %}
 				<td class="notes">{{ WorkorderItem.note }}</td>
 				{% if parameters.type == 'invoice' %}
@@ -101,35 +110,48 @@
 				<td class="charge"> $0.00
 				{% endif %}
 				{% if WorkorderItem.warranty == 'false' %}
-				<td class="charge">	{{ WorkorderItem.unitPrice | money}}<td>
+				<td class="charge">	
+				    {{ (WorkorderItem.SaleLine.calcSubtotal - WorkorderItem.SaleLine.calcLineDiscount) | money}}
+				<td>
 				{% endif %}
 				{% endif %}
 			</tr>
 			{% endfor %}
 			{% for WorkorderLine in Workorder.WorkorderLines.WorkorderLine %} <!--this loop is necessary for showing labor charges -->
 			<tr>
-				{% if WorkorderLine.itemID !=0 %}
-				<td class="description">{{ WorkorderLine.Item.description }}</td>
+				{% if WorkorderLine.itemID != 0 %}
+				<td class="description">
+				    {{ WorkorderLine.Item.description }}
+				    
+				    {% if WorkorderLine.Discount %}
+				    <br>{{WorkorderLine.Discount.name}} ({{WorkorderLine.SaleLine.calcLineDiscount|money}})
+				    {% endif %}
+				</td>
 				<td class="notes">{{ WorkorderLine.note }}</td>
 				{% else %}
-				<td class="notes" colspan="2">{{ WorkorderLine.note }}</td>
+				<td class="notes" colspan="2">
+				    {{ WorkorderLine.note }}
+				    
+				    {% if WorkorderLine.Discount %}
+				    <br>{{WorkorderLine.Discount.name}} ({{WorkorderLine.SaleLine.calcLineDiscount|money}})
+				    {% endif %}
+				</td>
 				{% endif %}
 				{% if parameters.type == 'invoice' %}
-				    {% if WorkorderLine.unitPriceOverride !='0' %} 
-				    <td class="charge">{{WorkorderLine.unitPriceOverride | money}}</td>
-				    {% else %}
-				    <td class="charge">{{ WorkorderLine.SaleLine.unitPrice | money }}</td>
-				    {% endif %}
+				<td class="charge">{{WorkorderLine.SaleLine.calcTotal | money}}</td>
 				{% endif %}
 			</tr>
 			{% endfor %}
 
 		</table>
 		
+		{% if Workorder.note|length > 1 %}
 		<div class="notes">
-			<h1>Notes:</h1>
+			<h3>Notes:</h3>
 			{{ Workorder.note }}
 		</div>
+		{% endif %}
+		
 		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
 	</div>
 	{% endfor %}
