@@ -158,7 +158,7 @@
 						{% else %}
 							<div class="price"><div class="saleprice">{{ price }}</div></div>
 						{% endif %}
-						<div class="description">{{ Label.Item.description }}</div>
+						<div class="description">{{ Label.Item.customSku }}</div>
 					</div>
 					<div class="barcode">
 						{% if parameters.labelSize == "1.25x1.00" %}
