@@ -22,40 +22,40 @@
 		padding: 10px
     }
 
-	.header_item h2
-	{
+	.detail h2 {
 		margin: 0px;
 		padding: 0px;
 		font-size: 11pt;
 	}
+	.detail { margin-bottom: 1em; }
 
-	table.lines
-	{
-		width: 100%;
+	table.lines, table.totals { 
+	    width: 100%; 
+	    border-spacing:0;
+        border-collapse:collapse;
 	}
-
-	table.lines th
-	{
+    table.lines td, table.totals td {
+        padding: 4px 0;
+    }
+	table.lines th {
 		font-size: 10pt;
 		border-bottom: 1px solid #000;
 		margin-bottom: 3px;
 		text-align: left;
 	}
-	table.lines td.quantity
-	{
-		text-align: right;
+	table.lines td.notes { margin-left: 15px; }
+	
+	table td.amount { 
+	    width: 10%; 
+	    text-align: left;
 	}
-	table.lines td.notes
-	{ 
-		margin-left: 15px;
+	
+	table.totals { 
+	    text-align: right; 
+	    border-top: 1px solid #000;
 	}
-
-	table.lines td.barcode
-	{
-		text-align: right;
-		padding: 3px;
-		border: 1px solid #000;
-	}
+	table.totals tr td:first-child { padding-right: 10px; }
+	table tr.total td { font-weight: bold; }
 
 	.notes {
 		overflow: hidden;
@@ -76,7 +76,7 @@
 		<div class="header">
 				<h1>Work Order <strong>#{{Workorder.workorderID}}</strong></h1>
 		</div>
-		<div class="header_item">
+		<div class="detail">
 			<h2>Customer: {{ Workorder.Customer.lastName}}, {{ Workorder.Customer.firstName}}</h2>
 			<h2>Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}</h2>
 			<h2>Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
@@ -107,11 +107,11 @@
 				<td class="notes">{{ WorkorderItem.note }}</td>
 				{% if parameters.type == 'invoice' %}
 				{% if WorkorderItem.warranty == 'true' %}
-				<td class="charge"> $0.00
+				<td class="amount"> $0.00
 				{% endif %}
 				{% if WorkorderItem.warranty == 'false' %}
-				<td class="charge">	
-				    {{ (WorkorderItem.SaleLine.calcSubtotal - WorkorderItem.SaleLine.calcLineDiscount) | money}}
+				<td class="amount">	
+				    {{ WorkorderItem.SaleLine.calcSubtotal | money}}
 				<td>
 				{% endif %}
 				{% endif %}
@@ -124,7 +124,7 @@
 				    {{ WorkorderLine.Item.description }}
 				    
 				    {% if WorkorderLine.Discount %}
-				    <br>{{WorkorderLine.Discount.name}} ({{WorkorderLine.SaleLine.calcLineDiscount|money}})
+				    <br>Discount: {{WorkorderLine.Discount.name}} ({{ WorkorderLine.SaleLine.calcLineDiscount | money}})
 				    {% endif %}
 				</td>
 				<td class="notes">{{ WorkorderLine.note }}</td>
@@ -138,12 +138,21 @@
 				</td>
 				{% endif %}
 				{% if parameters.type == 'invoice' %}
-				<td class="charge">{{WorkorderLine.SaleLine.calcTotal | money}}</td>
+				<td class="amount">{{WorkorderLine.SaleLine.calcSubtotal | money}}</td>
 				{% endif %}
 			</tr>
 			{% endfor %}
-
 		</table>
+
+        <table class="totals">
+        	<tbody>
+                <tr><td>Labor</td><td class="amount">{{Workorder.MetaData.labor|money}}</td></tr>
+                <tr><td>Parts</td><td class="amount">{{Workorder.MetaData.parts|money}}</td></tr>
+          		{% if Workorder.MetaData.discount > 0 %}<tr><td>Discounts</td><td class="amount">-{{Workorder.MetaData.discount|money}}</td></tr>{% endif %}
+                <tr><td>Tax</td><td class="amount">{{Workorder.MetaData.tax|money}}</td></tr>
+        		<tr class="total"><td>Total</td><td class="amount">{{Workorder.MetaData.total|money}}</td></tr>
+        	</tbody>
+        </table>
 		
 		{% if Workorder.note|length > 1 %}
 		<div class="notes">
