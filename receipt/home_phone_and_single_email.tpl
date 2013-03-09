@@ -266,8 +266,6 @@ body {
 		<h2>Payments</h2>
 		<table class="payments">
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.PaymentType.name != 'Cash' %}
-					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
 						{% if Payment.amount > 0 %}
@@ -327,12 +325,10 @@ body {
                                 {% endif %}
     						</tr>
     					{% endif %}
-				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
 		    {% for Payment in Sale.SalePayments.SalePayment %}
 			    {% if Payment.PaymentType.name == 'Cash' %}
-				    <tr><td width="100%">Cash</td><td class="amount">{{Payment.amount|money}}</td></tr>
 				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
     			{% endif %}
 			{% endfor %}

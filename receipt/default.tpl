@@ -283,9 +283,8 @@ td.amount { white-space: nowrap; }
   		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
   		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
-		<tr><td width="100%">{{Tax.name}} Tax ({{Sale.calcTaxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+		<tr><td width="100%">{{Tax.name}} Tax ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 		{% endfor %}
-		
 		
         <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.calcTax1|money}}</td></tr>
 		<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
@@ -299,73 +298,70 @@ td.amount { white-space: nowrap; }
 		<h2>Payments</h2>
 		<table class="payments">
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.PaymentType.name != 'Cash' %}
-					<!-- NOT Cash Payment -->
-					{% if Payment.CreditAccount.giftCard == 'true' %}
-						<!--  Gift Card -->
-						{% if Payment.amount > 0 %}
-						<tr >
-							<td>
-								Gift Card Charge<br />
-								New Balance:
-							</td>
-							<td class="amount">
-							    {{Payment.amount|money}}<br />
-							    {{Payment.CreditAccount.balance|getinverse|money}}
-							</td>
-						</tr>
-						{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
-						<tr><td>Refund To Gift Card</td><td class="amount">{{Payment.amount|money}}</td></tr>
-						{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
-						<tr><td>Gift Card Purchase</td><td class="amount">{{Payment.amount|money}}</td></tr>
-						{% endif %}
-					{% elseif Payment.creditAccountID == 0 %}
-						<!--  NOT Customer Account -->
-						<tr>
-							<td width="100%">
-								{{ Payment.PaymentType.name }}
-	
-								{% if Payment.ccChargeID > 0 %}
-									{% if Payment.CCCharge %}
-										<br>Card Num: {{Payment.CCCharge.xnum}}
-										{% if Payment.CCCharge.cardType|strlen > 0 %}
-											<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
-										{% endif %}
-										{% if Payment.CCCharge.cardholderName|strlen > 0 %}
-											<br>Cardholder: {{Payment.CCCharge.cardholderName}}
-										{% endif %}
-										{% if Payment.CCCharge.entryMethod|strlen > 0 %}
-											<br>Entry: {{Payment.CCCharge.entryMethod}}
-										{% endif %}
-										{% if Payment.CCCharge.authCode|strlen > 0 %}
-											<br>Approval: {{Payment.CCCharge.authCode}}
-										{% endif %}
-										{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
-											<br>ID: {{Payment.CCCharge.gatewayTransID}}
-										{% endif %}
+				<!-- NOT Cash Payment -->
+				{% if Payment.CreditAccount.giftCard == 'true' %}
+					<!--  Gift Card -->
+					{% if Payment.amount > 0 %}
+					<tr >
+						<td>
+							Gift Card Charge<br />
+							New Balance:
+						</td>
+						<td class="amount">
+						    {{Payment.amount|money}}<br />
+						    {{Payment.CreditAccount.balance|getinverse|money}}
+						</td>
+					</tr>
+					{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
+					<tr><td>Refund To Gift Card</td><td class="amount">{{Payment.amount|money}}</td></tr>
+					{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
+					<tr><td>Gift Card Purchase</td><td class="amount">{{Payment.amount|money}}</td></tr>
+					{% endif %}
+				{% elseif Payment.creditAccountID == 0 %}
+					<!--  NOT Customer Account -->
+					<tr>
+						<td width="100%">
+							{{ Payment.PaymentType.name }}
+
+							{% if Payment.ccChargeID > 0 %}
+								{% if Payment.CCCharge %}
+									<br>Card Num: {{Payment.CCCharge.xnum}}
+									{% if Payment.CCCharge.cardType|strlen > 0 %}
+										<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
+									{% endif %}
+									{% if Payment.CCCharge.cardholderName|strlen > 0 %}
+										<br>Cardholder: {{Payment.CCCharge.cardholderName}}
+									{% endif %}
+									{% if Payment.CCCharge.entryMethod|strlen > 0 %}
+										<br>Entry: {{Payment.CCCharge.entryMethod}}
+									{% endif %}
+									{% if Payment.CCCharge.authCode|strlen > 0 %}
+										<br>Approval: {{Payment.CCCharge.authCode}}
+									{% endif %}
+									{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
+										<br>ID: {{Payment.CCCharge.gatewayTransID}}
 									{% endif %}
 								{% endif %}
-							</td>
-							<td class="amount">{{Payment.amount|money}}</td>
-						</tr>
-					{% elseif Payment.CreditAccount %}
-						<!-- Customer Account -->
-						<tr>
-						    {% if Payment.amount < 0 %}
-							<td>Account Deposit</td>
-							<td class="amount">{{Payment.amount|getinverse|money}}</td>
-                            {% else %}
-    					    <td>Account Charge</td>
-							<td class="amount">{{Payment.amount|money}}</td>
-                            {% endif %}
-						</tr>
-					{% endif %}
+							{% endif %}
+						</td>
+						<td class="amount">{{Payment.amount|money}}</td>
+					</tr>
+				{% elseif Payment.CreditAccount %}
+					<!-- Customer Account -->
+					<tr>
+					    {% if Payment.amount < 0 %}
+						<td>Account Deposit</td>
+						<td class="amount">{{Payment.amount|getinverse|money}}</td>
+                        {% else %}
+					    <td>Account Charge</td>
+						<td class="amount">{{Payment.amount|money}}</td>
+                        {% endif %}
+					</tr>
 				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
 		    {% for Payment in Sale.SalePayments.SalePayment %}
 			    {% if Payment.PaymentType.name == 'Cash' %}
-				    <tr><td width="100%">Cash</td><td class="amount">{{Payment.amount|money}}</td></tr>
 				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
     			{% endif %}
 			{% endfor %}

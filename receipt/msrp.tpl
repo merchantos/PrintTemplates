@@ -288,7 +288,7 @@ td.amount { white-space: nowrap; }
   		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
   		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
-		<tr><td width="100%">{{Tax.name}} Tax ({{Sale.calcTaxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+		<tr><td width="100%">{{Tax.name}} Tax ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 		{% endfor %}
 		
 		
@@ -304,8 +304,6 @@ td.amount { white-space: nowrap; }
 		<h2>Payments</h2>
 		<table class="payments">
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.PaymentType.name != 'Cash' %}
-					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
 						{% if Payment.amount > 0 %}
@@ -365,12 +363,10 @@ td.amount { white-space: nowrap; }
                             {% endif %}
 						</tr>
 					{% endif %}
-				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
 		    {% for Payment in Sale.SalePayments.SalePayment %}
 			    {% if Payment.PaymentType.name == 'Cash' %}
-				    <tr><td width="100%">Cash</td><td class="amount">{{Payment.amount|money}}</td></tr>
 				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
     			{% endif %}
 			{% endfor %}
