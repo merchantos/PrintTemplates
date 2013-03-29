@@ -133,7 +133,15 @@
 		{% for copy in 1..Label.copies %}
 				<div class="label{% if lastlabel %}{% if Label.copies==copy %}{% else %} pagebreak{% endif %}{% else %} pagebreak{% endif %}">
 					{% if parameters.labelSize != "1.25x1.00" %}
-						<h1>{{ Shop.name }}</h1>
+					    {% if Shop.labelTitle == 'name' %}
+						    <h1>{{ Shop.name }}</h1>
+						{% elseif Shop.labelTitle == 'contact_id.website' %}
+					        <h1>{{ Shop.Contact.website }}</h1>
+						{% elseif Shop.labelTitle == 'contact_id.phone_work' %}
+					        <h1>{{ Shop.Contact.phone_work }}</h1>
+						{% elseif Shop.labelTitle == 'contact_id.custom' %}
+					        <h1>{{ Shop.Contact.custom }}</h1>
+						{% endif %}
 					{% endif %}
 					<div class="content">
 						{% spaceless %}
