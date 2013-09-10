@@ -1,181 +1,30 @@
 {% extends parameters.print ? "printbase" : "base" %}
-{% block extrastyles %}
-	{% if parameters.labelSize == "1.25x1.00" %}
-		.pagebreak
-		{
-			page-break-after: always;
-		}
-		.label
-		{
-			margin: 0 0 0 5px;
-			padding: 0px;
-			position: relative;
-			height: 90px;
-			width: 110px;
-			overflow: hidden;
-		}
-		.label .content
-		{
-			position: relative;
-			width: 110px;
-			height: 43px;
-			overflow: hidden;
-		}
-		.label .price
-		{
-			font-size: 14px;
-			font-weight: bold;
-			float: left;
-			margin-right: 4px;
-			margin-bottom: -4px;
-		}
-		.label .description
-		{
-			position: relative;
-			font-size: 12px;
-			line-height: 14px;
-			top: 3px;
-		}
-		.label .barcode
-		{
-			text-align: center;
-			clear: both;
-			position: relative;
-			height: 47px;
-			width: 110px;
-			margin-top: 2px;
-			padding: 0px;
-			overflow: hidden;
-		}
-		.label .barcode img
-		{
-			position: relative;
-			right: 16px;
-		}
-	{% else %}
-		.pagebreak
-		{
-			page-break-after: always;
-		}
-		.label
-		{
-			margin: 0px;
-			padding: 5px;
-			position: relative;
-			width: 200px;
-			height: 100px;
-			overflow: hidden;
-		}
-		.label h1
-		{
-			margin: 0;
-			padding: 0;
-			text-align: center;
-			font-size: 12px;
-			text-decoration: underline;
-			position: relative;
-			width: 200px;
-			height: 18px;
-		}
-		.label .content
-		{
-			position: relative;
-			margin-top: 2px;
-			bottom: 3px;
-			width: 200px;
-			height: 45px;
-			overflow: hidden;
-		}
-		.label .price
-		{
-			float: left;
-			text-align: center;
-			margin-right: 3px;
-			position: relative;
-			height: 18px;
-			
-		}
-		.label .price .saleprice
-		{
-			font-size: 26px;
-			font-weight: bold;
-			margin-top: -5px;
-			margin-bottom: -5px;
-		}
-		.label .price .msrp
-		{
-			clear: both;
-			font-size: 10px;
-		}
-		.label .description
-		{
-			font-size: 12px;
-			font-weight: bold;
-			position: relative;
-			z-index: 2;
-			height: 52px;
-			margin-top: 2px;
-		}
-		.label .barcode
-		{
-			text-align: center;
-			clear: both;
-			position: relative;
-			width: 200px;
-			height: 40px;
-			overflow: hidden;
-		}
-	{% endif %}
-{% endblock extrastyles %}
+{% block style %}
+<link href="/assets/css/labels.css" media="all" rel="stylesheet" type="text/css" />
+{% endblock %}
 {% block content %}
+	<div class="labels">
 	{% for Label in Labels %}
-		{% set lastlabel = loop.last %}
 		{% for copy in 1..Label.copies %}
-				<div class="label{% if lastlabel %}{% if Label.copies==copy %}{% else %} pagebreak{% endif %}{% else %} pagebreak{% endif %}">
-					{% if parameters.labelSize != "1.25x1.00" %}
-					    {% if Shop.labelTitle == 'name' %}
-						    <h1>{{ Shop.name }}</h1>
-						{% elseif Shop.labelTitle == 'contact_id.website' %}
-					        <h1>{{ Shop.Contact.website }}</h1>
-						{% elseif Shop.labelTitle == 'contact_id.phone_work' %}
-					        <h1>{{ Shop.Contact.phone_work }}</h1>
-						{% elseif Shop.labelTitle == 'contact_id.custom' %}
-					        <h1>{{ Shop.Contact.custom }}</h1>
+			<div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+				<article>
+					<h1>{{ Label.MetaData.title }}</h1>
+					{% if Label.MetaData.price > 0 %}
+					<div class="price">
+						<p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
+						{% if Label.MetaData.msrp %}
+						<p class="msrp">MSRP {{ Label.MetaData.msrp|money }}</p>
 						{% endif %}
+					</div>
 					{% endif %}
-					<div class="content">
-						{% spaceless %}
-							{% set msrp = false %}
-							{% set price = false %}
-							{% for ItemPrice in Label.Item.Prices.ItemPrice %}
-								{% if ItemPrice.useType == "Default" %}
-									{% set price = ItemPrice.amount|mosformat('money') %}
-								{% endif %}
-								{% if ItemPrice.useType == "MSRP" %}
-									{% set msrp = ItemPrice.amount|mosformat('money') %}
-								{% endif %}
-							{% endfor %}
-						{% endspaceless %}
-						{% if Shop.labelMsrp=="true" and msrp and msrp > price %}
-							<div class="price" style="height: 30px;">
-								<div class="saleprice">{{ price }}</div>
-								{% if parameters.labelSize != "1.25x1.00" %}
-									<div class="msrp">MSRP {{ msrp }}</div>
-								{% endif %}
-							</div>
-						{% else %}
-							<div class="price"><div class="saleprice">{{ price }}</div></div>
-						{% endif %}
-						<div class="description">{{ Label.Item.description }}</div>
-					</div>
-					<div class="barcode">
-						{% if parameters.labelSize == "1.25x1.00" %}
-							<img height="47" width="140" src="/barcode.php?type=label&number={{ Label.Item.systemSku }}&ean8=1&noframe=1">
-						{% else %}
-							<img height="40" width="200" src="/barcode.php?type=label&number={{ Label.Item.systemSku }}&noframe=1">
-						{% endif %}
-					</div>
-				</div>
+					<p class="description">{{ Label.Item.description|strreplace('_',' ') }}</p>
+				</article>
+				<footer class="barcode">
+					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
+					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
+				</footer>
+			</div>
 		{% endfor %}
 	{% endfor %}
+	</div>
 {% endblock content %}
