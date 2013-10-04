@@ -221,7 +221,7 @@ body {
 {% macro date(Sale) %}
 <p class="date">
 	{% if Sale.timeStamp %}
-		{{Sale.timeStamp|correcttimezone|date('m/d/Y h:i:s A')}}
+		{{Sale.timeStamp|correcttimezone|date('d/m/Y h:i:s ')}}
 	{% else %}
 		{{"now"|date('m/d/Y h:i:s A')}}
 	{% endif %}
@@ -357,7 +357,7 @@ body {
 			<tr><td colspan="2"></td></tr>
 		    {% for Payment in Sale.SalePayments.SalePayment %}
 			    {% if Payment.PaymentType.name == 'Cash' %}
-				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
+				    <tr><td width="100%">Monnaie</td><td class="amount">{{Sale.change|money}}</td></tr>
     			{% endif %}
 			{% endfor %}
 		</table>
