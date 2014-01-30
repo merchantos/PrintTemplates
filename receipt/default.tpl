@@ -233,12 +233,12 @@ td.amount { white-space: nowrap; }
 
 {% macro sale_details(Sale) %}
 <p>
-  {% if Sale.quoteID %}Quote #: {{Sale.quoteID}}{% endif %}<br />
+  {% if Sale.quoteID > 0 %}Quote #: {{Sale.quoteID}}{% endif %}<br />
   Ticket: {{Sale.ticketNumber}}<br />
   {% if Sale.Register %}Register: {{Sale.Register.name}}<br />{% endif %}
   {% if Sale.Employee %}Employee: {{Sale.Employee.firstName}} {{Sale.Employee.lastName}}<br />{% endif %}
   {% if Sale.Customer %}
-    {% if Sale.Customer.company%}Company: {{Sale.Customer.company}}<br />{% endif %}
+    {% if Sale.Customer.company|strlen > 0%}Company: {{Sale.Customer.company}}<br />{% endif %}
     Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
     <span class="indent">
     {% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
@@ -276,7 +276,6 @@ td.amount { white-space: nowrap; }
     {% endfor %}
   </tbody>
 </table>
-
 {% if not parameters.gift_receipt %}
 <table class="totals">
   <tbody>
