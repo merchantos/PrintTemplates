@@ -203,8 +203,8 @@ img.barcode {
 						</td>
 					{% else %}
 						<td class="description">
-							{% if WorkorderLine.unitQuantity > 0 %}
-								{{ WorkorderLine.unitQuantity }} &times;
+							{% if WorkorderItem.unitQuantity > 0 %}
+								{{ WorkorderItem.unitQuantity }} &times;
 							{% endif %}
 							{{ WorkorderItem.Item.description }}
 							{% if parameters.type == 'invoice' %}
