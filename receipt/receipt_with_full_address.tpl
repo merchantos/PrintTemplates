@@ -7,7 +7,7 @@ body {
 }
 .store { page-break-after: always; margin-bottom: 40px; }
 .receipt {
-  font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
+	font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
 .receipt .header h3, .receipt .header p {
 	font-size: 10pt;
@@ -124,7 +124,7 @@ td.amount { white-space: nowrap; }
 	{{ _self.ship_to(Sale) }}
 
 	<div class="header">		
-		{% if Sale.Shop.ReceiptSetup.logo|strlen > 0  %}
+		{% if Sale.Shop.ReceiptSetup.hasLogo == True  %}
 		<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
 		{% endif %}
 		<h3>{{ Sale.Shop.name }}</h3>
@@ -233,19 +233,19 @@ td.amount { white-space: nowrap; }
 
 {% macro sale_details(Sale) %}
 <p>
-	{% if Sale.quoteID %}Quote #: {{Sale.quoteID}}{% endif %}<br />
+	{% if Sale.quoteID > 0 %}Quote #: {{Sale.quoteID}}{% endif %}<br />
 	Ticket: {{Sale.ticketNumber}}<br />
 	{% if Sale.Register %}Register: {{Sale.Register.name}}<br />{% endif %}
 	{% if Sale.Employee %}Employee: {{Sale.Employee.firstName}} {{Sale.Employee.lastName}}<br />{% endif %}
 	{% if Sale.Customer %}
-		{% if Sale.Customer.company%}Company: {{Sale.Customer.company}}<br />{% endif %}
+		{% if Sale.Customer.company|strlen > 0 %}Company: {{Sale.Customer.company}}<br />{% endif %}
 		Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
 		<span class="indent">
 		{% for ContactAddress in Sale.Customer.Contact.Addresses.ContactAddress %}
-		{{ ContactAddress.address1 }},  
-		{{ ContactAddress.city }}, 
-		{{ ContactAddress.state }}, 
-		{{ ContactAddress.zip }}<br />
+			Address: {{ ContactAddress.address1 }},  
+			{{ ContactAddress.city }}, 
+			{{ ContactAddress.state }}, 
+			{{ ContactAddress.zip }}<br />
 		{% endfor %}
 		{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
 		{{Phone.useType}}: {{Phone.number}}<br />
@@ -289,11 +289,16 @@ td.amount { white-space: nowrap; }
   		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
   		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
-		<tr><td width="100%">{{Tax.name}} Tax ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+		{% if Tax.taxname %}
+		<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+		{% endif %}
+		{% if Tax.taxname2 %}
+		<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
+		{% endif %}
 		{% endfor %}
 		
 		
-        <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.calcTax1|money}}</td></tr>
+        <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.taxTotal|money}}</td></tr>
 		<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
 	</tbody>
 </table>
@@ -305,69 +310,73 @@ td.amount { white-space: nowrap; }
 		<h2>Payments</h2>
 		<table class="payments">
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.CreditAccount.giftCard == 'true' %}
-					<!--  Gift Card -->
-					{% if Payment.amount > 0 %}
-					<tr >
-						<td>
-							Gift Card Charge<br />
-							New Balance:
-						</td>
-						<td class="amount">
-						    {{Payment.amount|money}}<br />
-						    {{Payment.CreditAccount.balance|getinverse|money}}
-						</td>
-					</tr>
-					{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
-					<tr><td>Refund To Gift Card</td><td class="amount">{{Payment.amount|money}}</td></tr>
-					{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
-					<tr><td>Gift Card Purchase</td><td class="amount">{{Payment.amount|money}}</td></tr>
-					{% endif %}
-				{% elseif Payment.creditAccountID == 0 %}
-					<!--  NOT Customer Account -->
-					<tr>
-						<td width="100%">
-							{{ Payment.PaymentType.name }}
-
-							{% if Payment.ccChargeID > 0 %}
-								{% if Payment.CCCharge %}
-									<br>Card Num: {{Payment.CCCharge.xnum}}
-									{% if Payment.CCCharge.cardType|strlen > 0 %}
-										<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
-									{% endif %}
-									{% if Payment.CCCharge.cardholderName|strlen > 0 %}
-										<br>Cardholder: {{Payment.CCCharge.cardholderName}}
-									{% endif %}
-									{% if Payment.CCCharge.entryMethod|strlen > 0 %}
-										<br>Entry: {{Payment.CCCharge.entryMethod}}
-									{% endif %}
-									{% if Payment.CCCharge.authCode|strlen > 0 %}
-										<br>Approval: {{Payment.CCCharge.authCode}}
-									{% endif %}
-									{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
-										<br>ID: {{Payment.CCCharge.gatewayTransID}}
+				{% if Payment.PaymentType.name != 'Cash' %}
+					<!-- NOT Cash Payment -->
+					{% if Payment.CreditAccount.giftCard == 'true' %}
+						<!--  Gift Card -->
+						{% if Payment.amount > 0 %}
+						<tr >
+							<td>
+								Gift Card Charge<br />
+								New Balance:
+							</td>
+							<td class="amount">
+							    {{Payment.amount|money}}<br />
+							    {{Payment.CreditAccount.balance|getinverse|money}}
+							</td>
+						</tr>
+						{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
+						<tr><td>Refund To Gift Card</td><td class="amount">{{Payment.amount|money}}</td></tr>
+						{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
+						<tr><td>Gift Card Purchase</td><td class="amount">{{Payment.amount|money}}</td></tr>
+						{% endif %}
+					{% elseif Payment.creditAccountID == 0 %}
+						<!--  NOT Customer Account -->
+						<tr>
+							<td width="100%">
+								{{ Payment.PaymentType.name }}
+	
+								{% if Payment.ccChargeID > 0 %}
+									{% if Payment.CCCharge %}
+										<br>Card Num: {{Payment.CCCharge.xnum}}
+										{% if Payment.CCCharge.cardType|strlen > 0 %}
+											<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
+										{% endif %}
+										{% if Payment.CCCharge.cardholderName|strlen > 0 %}
+											<br>Cardholder: {{Payment.CCCharge.cardholderName}}
+										{% endif %}
+										{% if Payment.CCCharge.entryMethod|strlen > 0 %}
+											<br>Entry: {{Payment.CCCharge.entryMethod}}
+										{% endif %}
+										{% if Payment.CCCharge.authCode|strlen > 0 %}
+											<br>Approval: {{Payment.CCCharge.authCode}}
+										{% endif %}
+										{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
+											<br>ID: {{Payment.CCCharge.gatewayTransID}}
+										{% endif %}
 									{% endif %}
 								{% endif %}
-							{% endif %}
-						</td>
-						<td class="amount">{{Payment.amount|money}}</td>
-					</tr>
-				{% elseif Payment.CreditAccount %}
-					<!-- Customer Account -->
-					<tr>
-					    {% if Payment.amount < 0 %}
-						<td>Account Deposit</td>
-						<td class="amount">{{Payment.amount|getinverse|money}}</td>
-                        {% else %}
-					    <td>Account Charge</td>
-						<td class="amount">{{Payment.amount|money}}</td>
-                        {% endif %}
-					</tr>
+							</td>
+							<td class="amount">{{Payment.amount|money}}</td>
+						</tr>
+					{% elseif Payment.CreditAccount %}
+						<!-- Customer Account -->
+						<tr>
+						    {% if Payment.amount < 0 %}
+							<td>Account Deposit</td>
+							<td class="amount">{{Payment.amount|getinverse|money}}</td>
+                            {% else %}
+    					    <td>Account Charge</td>
+							<td class="amount">{{Payment.amount|money}}</td>
+                            {% endif %}
+						</tr>
+					{% endif %}
 				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
 		    {% for Payment in Sale.SalePayments.SalePayment %}
 			    {% if Payment.PaymentType.name == 'Cash' %}
+				    <tr><td width="100%">Cash</td><td class="amount">{{Payment.amount|money}}</td></tr>
 				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
     			{% endif %}
 			{% endfor %}
@@ -412,21 +421,23 @@ td.amount { white-space: nowrap; }
 {% endmacro %}
 
 {% macro cc_agreement(Sale) %}
-    {% if Sale.SalePayments.SalePayment.CCCharge %}
-	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
-	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
-	{% endif %}
-	<dl class="signature">
-		<dt>Signature:</dt>
-		<dd>
-			{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
-			{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-			{{Phone.useType}}: {{Phone.number}}<br />
-			{% endfor %}
-			{{ _self.address(Sale.Customer.Contact) }}
-		</dd>
-	</dl>
-	{% endif %}
+	{% for Payment in Sale.SalePayments.SalePayment %}
+	    {% if Payment.CCCharge %}
+			{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
+				<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
+			{% endif %}
+			<dl class="signature">
+				<dt>Signature:</dt>
+				<dd>
+					{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
+					{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
+					{{Phone.useType}}: {{Phone.number}}<br />
+					{% endfor %}
+					{{ _self.address(Sale.Customer.Contact) }}
+				</dd>
+			</dl>
+		{% endif %}
+	{% endfor %}
 {% endmacro %}
 
 {% macro workorder_agreement(Sale) %}

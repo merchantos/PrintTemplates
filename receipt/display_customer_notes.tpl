@@ -247,6 +247,9 @@ td.amount { white-space: nowrap; }
 		{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
 		Email: {{Email.address}} ({{Email.useType}})<br />
 		{% endfor %}
+		{% if Sale.Customer.Note.note|strlen > 0 %}
+		    Note: {{ Sale.Customer.Note.note }}<br />
+		{% endif %}
 		</span>
 	{% endif %}
 </p>
