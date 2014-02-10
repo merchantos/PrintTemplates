@@ -164,8 +164,12 @@ img.barcode {
 				<p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address1 }}</p>
 				<p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
 				<p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}</p>
-				<p>{{ Workorder.Customer.Contact.Phones.ContactPhone.number }}</p>
-				<p>{{ Workorder.Customer.Contact.Emails.ContactEmail.address }}</p>
+				{% for ContactPhone in Workorder.Customer.Contact.Phones.ContactPhone %}
+					<p>{{ ContactPhone.number }} ({{ ContactPhone.useType }})</p>
+				{% endfor %}
+				{% for ContactEmail in Workorder.Customer.Contact.Emails.ContactEmail %}
+					<p>{{ ContactEmail.address }}</p>
+				{% endfor %}
 				<br />
 				{% for serializedID in Workorder.Serialized %}
 					<h3>Work Order Item:</h3>
