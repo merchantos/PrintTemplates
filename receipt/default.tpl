@@ -124,8 +124,8 @@ td.amount { white-space: nowrap; }
 	{{ _self.ship_to(Sale) }}
 
 	<div class="header">		
-		{% if Sale.Shop.ReceiptSetup.hasLogo == True  %}
-		<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
+		{% if Sale.Shop.ReceiptSetup.hasLogo == true %}
+			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
 		{% endif %}
 		<h3>{{ Sale.Shop.name }}</h3>
 	{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
@@ -286,7 +286,7 @@ td.amount { white-space: nowrap; }
 		{% if Tax.taxname %}
 		<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 		{% endif %}
-		{% if Tax.taxname2 %}
+		{% if Tax.taxname2 and Tax.rate2 > 0 %}
 		<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
 		{% endif %}
 		{% endfor %}
