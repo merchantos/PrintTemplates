@@ -260,7 +260,7 @@ td.amount { white-space: nowrap; }
 </tr>
 {% endmacro %}
 
-{% macro receipt(Sale,parameters,show_lines %}
+{% macro receipt(Sale,parameters,show_lines) %}
 {% if Sale.SaleLines %}
 {% if show_lines %}
 <table class="sale lines">
