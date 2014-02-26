@@ -5,7 +5,7 @@ body {
   margin: 0;
   padding: 1px; <!-- You need this to make the printer behave -->
 }
-.store { page-break-after: always; }
+.store { page-break-after: always; margin-bottom: 40px; }
 .receipt {
 	font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
 }
@@ -34,7 +34,10 @@ body {
 .receipt p.date, .receipt p.copy {
 	font-size: 9pt;
 	margin: 0;
+	text-align: center;
 }
+
+td.amount { white-space: nowrap; }
 
 .receipt table {
 	margin: 0 0;
@@ -121,7 +124,7 @@ body {
 	{{ _self.ship_to(Sale) }}
 
 	<div class="header">		
-		{% if Sale.Shop.ReceiptSetup.logo|strlen > 0  %}
+		{% if Sale.Shop.ReceiptSetup.haslogo == 'true' %}
 		<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
 		{% endif %}
 		<h3>{{ Sale.Shop.name }}</h3>
@@ -244,7 +247,7 @@ body {
 			Téléphone:
 		{% endif %}
 		{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-			{{Phone.number}}<br />
+			{{Phone.useType}}: {{Phone.number}}<br />
 		{% endfor %}
 		{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
 		Email: {{Email.address}} ({{Email.useType}})<br />
@@ -299,6 +302,8 @@ body {
 		<h2>Paiements</h2>
 		<table class="payments">
 			{% for Payment in Sale.SalePayments.SalePayment %}
+				{% if Payment.PaymentType.name != 'Cash' %}
+					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
 						{% if Payment.amount > 0 %}
@@ -321,7 +326,11 @@ body {
 						<!--  NOT Customer Account -->
 						<tr>
 							<td width="100%">
+							{% if Payment.PaymentType.name == 'Cash' %}
+								Comptant
+							{% else %}
 								{{ Payment.PaymentType.name }}
+							{% endif %}
 	
 								{% if Payment.ccChargeID > 0 %}
 									{% if Payment.CCCharge %}
@@ -338,7 +347,7 @@ body {
 										{% if Payment.CCCharge.authCode|strlen > 0 %}
 											<br>Approval: {{Payment.CCCharge.authCode}}
 										{% endif %}
-										{% if Payment.CCCharge.gatewayTransID|strlen > 0 %}
+										{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
 											<br>ID: {{Payment.CCCharge.gatewayTransID}}
 										{% endif %}
 									{% endif %}
@@ -358,11 +367,13 @@ body {
                                 {% endif %}
     						</tr>
     					{% endif %}
+    				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
 		    {% for Payment in Sale.SalePayments.SalePayment %}
-			    {% if Payment.PaymentType.name == 'Comptant' %}
-				    <tr><td width="100%">Monnaie</td><td class="amount">{{Sale.change|number_format(2, '.')}}$</td></tr>
+			    {% if Payment.PaymentType.name == 'Cash' %}
+			    	<tr><td width="100%">Comptant</td><td class="amount">{{Payment.amount|number_format(2, '.')}}$</td></tr>
+			    	<tr><td width="100%">Monnaie</td><td class="amount">{{Sale.change|number_format(2, '.')}}$</td></tr>
     			{% endif %}
 			{% endfor %}
 		</table>
@@ -406,21 +417,23 @@ body {
 {% endmacro %}
 
 {% macro cc_agreement(Sale) %}
-    {% if Sale.SalePayments.SalePayment.CCCharge %}
-	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
-	<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
-	{% endif %}
-	<dl class="signature">
-		<dt>Signature:</dt>
-		<dd>
-			{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
-			{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-			{{Phone.useType}}: {{Phone.number}}<br />
-			{% endfor %}
-			{{ _self.address(Sale.Customer.Contact) }}
-		</dd>
-	</dl>
-	{% endif %}
+    {% for Payment in Sale.SalePayments.SalePayment %}
+	    {% if Payment.CCCharge %}
+			{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
+				<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
+			{% endif %}
+			<dl class="signature">
+				<dt>Signature:</dt>
+				<dd>
+					{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
+					{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
+					{{Phone.useType}}: {{Phone.number}}<br />
+					{% endfor %}
+					{{ _self.address(Sale.Customer.Contact) }}
+				</dd>
+			</dl>
+		{% endif %}
+	{% endfor %}
 {% endmacro %}
 
 {% macro workorder_agreement(Sale) %}
