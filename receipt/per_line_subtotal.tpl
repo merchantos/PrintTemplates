@@ -1,3 +1,4 @@
+<!-- per_line_subtotal -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 @page { margin: 0px; }

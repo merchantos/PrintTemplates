@@ -1,3 +1,4 @@
+<!-- CC_Signature_Copy_Without_Lines -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 @page { margin: 0px; }

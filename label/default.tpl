@@ -1,3 +1,4 @@
+<!-- default -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block style %}
 <link href="/assets/css/labels.css" media="all" rel="stylesheet" type="text/css" />

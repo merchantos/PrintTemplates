@@ -1,3 +1,4 @@
+<!-- display_customer_notes -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 @page { margin: 0px; }
@@ -124,7 +125,7 @@ td.amount { white-space: nowrap; }
 	{{ _self.ship_to(Sale) }}
 
 	<div class="header">		
-		{% if Sale.Shop.ReceiptSetup.hasLogo == True  %}
+		{% if Sale.Shop.ReceiptSetup.hasLogo == 'true'  %}
 		<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
 		{% endif %}
 		<h3>{{ Sale.Shop.name }}</h3>
