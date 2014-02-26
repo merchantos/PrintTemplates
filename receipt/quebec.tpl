@@ -195,7 +195,7 @@ td.amount { white-space: nowrap; }
 	{% if Line.Serialized %}
 		{% for Serialized in Line.Serialized.Serialized %}
 			<div class='line_serial'>
-				Numero de séries: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
+				Numero de s&eacute;ries: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
 			</div>
 		{% endfor %}
 	{% endif %}
@@ -207,16 +207,16 @@ td.amount { white-space: nowrap; }
 		{% if Sale.completed == 'true' %}
 			{% if parameters.gift_receipt %}Cadeau{%else%}Re&#231u{%endif%} De Vente
 		{% elseif Sale.voided == 'true' %}
-			Recu 
-			<large>ANNULÉ</large>
+			Re&#231u 
+			<large>ANNUL&Eacute;</large>
 		{% else %}
 			Quovaisieas
 			{% if not Sale.quoteID %}
-				<large>(PAS UN REÇU)</large>
+				<large>(PAS UN RE&Ccedil;U)</large>
 			{% endif %}
 		{% endif %}
 	{% else %}
-		Recu de Rembourser
+		Re&#231u de Rembourser
 	{% endif %}
 </h1>
 {% endmacro %}
@@ -236,7 +236,7 @@ td.amount { white-space: nowrap; }
 	{% if Sale.quoteID > 0 %}# Devis: {{Sale.quoteID}}{% endif %}<br />
 	# Facture: {{Sale.ticketNumber}}<br />
 	{% if Sale.Register %}Caisse: {{Sale.Register.name}}<br />{% endif %}
-	{% if Sale.Employee %}Employé: {{Sale.Employee.firstName}} {{Sale.Employee.lastName}}<br />{% endif %}
+	{% if Sale.Employee %}Employ&eacute;: {{Sale.Employee.firstName}} {{Sale.Employee.lastName}}<br />{% endif %}
 	{% if Sale.Customer %}
 		{% if Sale.Customer.company|strlen > 0 %}
 			Entreprise: {{Sale.Customer.company}}<br />
@@ -244,7 +244,7 @@ td.amount { white-space: nowrap; }
 		Client: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
 		<span class="indent">
 		{% if Sale.Customer.Contact.Phones.ContactPhone.number|strlen > 0 %}
-			Téléphone:
+			T&eacute;l&eacute;phone:
 		{% endif %}
 		{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
 			{{Phone.useType}}: {{Phone.number}}<br />
@@ -286,7 +286,7 @@ td.amount { white-space: nowrap; }
 <table class="totals">
 	<tbody>
   		<tr><td width="100%">Sous-total</td><td class="amount">{{Sale.calcSubtotal|number_format(2, '.')}}$</td></tr>
-  		{% if Sale.calcDiscount > 0 %}<tr><td>Réductions</td><td class="amount">{{Sale.calcDiscount|number_format(2, '.')}}$</td></tr>{% endif %}
+  		{% if Sale.calcDiscount > 0 %}<tr><td>R&eacute;ductions</td><td class="amount">{{Sale.calcDiscount|number_format(2, '.')}}$</td></tr>{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
 		{% endfor %}
 		<tr><td width="100%">T.P.S: [enter your T.P.S. number here]</td><td class="amount">{{Sale.calcTax1|number_format(2, '.')}}$</td></tr>
@@ -396,7 +396,7 @@ td.amount { white-space: nowrap; }
 				</tr>
 				{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 				<tr>
-					<td width="100%">Au Depôt</td>
+					<td width="100%">Au Dep&ocirc;t</td>
 					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|number_format(2, '.')}}$</td>
 				</tr>
 				{% endif %}
@@ -455,11 +455,11 @@ td.amount { white-space: nowrap; }
 {% macro ship_to(Sale) %}
 	{% if Sale.ShipTo %}
 	<div class="shipping">
-		<h4>Address D'expédition</h4>
+		<h4>Address D'exp&eacute;dition</h4>
 		{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
 		
 		{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
-		<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
+		<p>T&eacute;l&eacute;phone: {{Phone.number}} ({{Phone.useType}})</p>
 		{% endif %}{% endfor %}
 		
 		{% if Sale.ShipTo.shipNote|strlen > 0 %}
@@ -494,7 +494,7 @@ td.amount { white-space: nowrap; }
 
 {% macro layaways(Customer,parameters) %}
 	{% if Customer.Layaways and Customer.Layaways|length > 0 %}
-	<h2>Mises de Côté</h2>
+	<h2>Mises de C&ocirc;t&eacute;</h2>
 	<table class="lines layaways">
 		{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
 	</table>
@@ -505,7 +505,7 @@ td.amount { white-space: nowrap; }
 		</tr>
 		{% if Customer.MetaData.layawaysAllDiscounts>0.00 %}
 		<tr>
-			<td width="100%">Réductions</td>
+			<td width="100%">R&eacute;ductions</td>
 			<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|number_format(2, '.')}}$</td>
 		</tr>
 		{% endif %}
@@ -523,7 +523,7 @@ td.amount { white-space: nowrap; }
 
 {% macro specialorders(Customer,parameters) %}
 	{% if Customer.SpecialOrders|length > 0 %}
-	<h2>Commandes Spéciales</h2>
+	<h2>Commandes Sp&eacute;ciales</h2>
 	<table class="lines specialorders">
 		{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
 	</table>
@@ -534,7 +534,7 @@ td.amount { white-space: nowrap; }
 		</tr>
 		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 			<tr>
-				<td width="100%">Réductions</td>
+				<td width="100%">R&eacute;ductions</td>
 				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|number_format(2, '.')}}$</td>
 			</tr>
 		{% endif %}
@@ -553,7 +553,7 @@ td.amount { white-space: nowrap; }
 {% macro workorders(Customer,parameters) %}
 	{% if Customer.Workorders|length > 0 %}
 		<h2>Fiches Reparations Ouvertes
-Réparations</h2>
+R&eacute;parations</h2>
 		<table class="lines workorders">
 			{% for Line in Customer.Workorders.SaleLine %}
 				<tr>
@@ -574,7 +574,7 @@ Réparations</h2>
 				</tr>
 				{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 					<tr>
-						<td width="100%">Réductions</td>
+						<td width="100%">R&eacute;ductions</td>
 						<td class="amount">{{Customer.MetaData.workordersAllDiscounts|number_format(2, '.')}}$</td>
 					</tr>
 				{% endif %}
