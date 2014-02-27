@@ -1,6 +1,8 @@
-<!-- default -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- default -->
+
   .pagebreak
 	{
 		page-break-after: always;

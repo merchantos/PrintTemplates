@@ -1,6 +1,8 @@
-<!-- receipt_with_full_address -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- receipt_with_full_address -->
+
 @page { margin: 0px; }
 body {
   margin: 0;

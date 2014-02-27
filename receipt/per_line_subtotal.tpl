@@ -1,6 +1,8 @@
-<!-- per_line_subtotal -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- per_line_subtotal -->
+
 @page { margin: 0px; }
 body {
   margin: 0;
@@ -588,3 +590,4 @@ td.amount { white-space: nowrap; }
 		{% endif %}
 	{% endif %}
 {% endmacro %}
+<!-- TEST -->

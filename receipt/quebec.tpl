@@ -1,6 +1,8 @@
-<!-- quebec -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- quebec -->
+
 @page { margin: 0px; }
 body {
   margin: 0;

@@ -1,6 +1,8 @@
-<!-- tag_notes_only -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- tag_notes_only -->
+
 @page { margin: 0px; }
 body{
 	margin: 0px;

@@ -1,6 +1,8 @@
-<!-- display_customer_notes -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- display_customer_notes -->
+
 @page { margin: 0px; }
 body {
   margin: 0;

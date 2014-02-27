@@ -1,6 +1,8 @@
-<!-- ipad_cc_with_footer -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- ipad_cc_with_footer -->
+
 @page { margin: 0px; }
 body {
   margin: 0;

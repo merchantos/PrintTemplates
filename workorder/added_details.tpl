@@ -1,6 +1,8 @@
-<!-- added_details -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- added_details -->
+
 @page { margin: 0px; }
 body{
 	margin: 0px;

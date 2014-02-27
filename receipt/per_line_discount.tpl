@@ -1,6 +1,8 @@
-<!-- per_line_discount -->
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
+
+<!-- per_line_discount -->
+
 @page { margin: 0px; }
 body {
   margin: 0;
