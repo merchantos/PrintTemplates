@@ -333,7 +333,7 @@ img.barcode {
 			{% if Workorder.note|strlen > 0 %}
 				<div class="notes">
 					<h3>Notes:</h3>
-					{{ Workorder.note }}
+					{{ Workorder.note|raw|nl2br }}
 				</div>
 			{% endif %}
                 
