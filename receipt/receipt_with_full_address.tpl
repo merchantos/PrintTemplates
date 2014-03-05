@@ -115,7 +115,7 @@ td.amount { white-space: nowrap; }
         {{ _self.store_receipt(Sale,parameters) }}
 	{% else %}
 	    {% for SalePayment in Sale.SalePayments.SalePayment %}
-        	{% if SalePayment.CCCharge %}
+        	{% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
                 {{ _self.store_receipt(Sale,parameters) }}
         	{% endif %}
         {% endfor %}
@@ -295,7 +295,7 @@ td.amount { white-space: nowrap; }
 		{% if Tax.taxname %}
 		<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 		{% endif %}
-		{% if Tax.taxname2 %}
+		{% if Tax.taxname2 and Tax.rate2 > 0 %}
 		<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
 		{% endif %}
 		{% endfor %}

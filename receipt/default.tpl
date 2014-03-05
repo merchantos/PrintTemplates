@@ -115,7 +115,7 @@ td.amount { white-space: nowrap; }
         {{ _self.store_receipt(Sale,parameters) }}
 	{% else %}
 	    {% for SalePayment in Sale.SalePayments.SalePayment %}
-        	{% if SalePayment.CCCharge %}
+        	{% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
                 {{ _self.store_receipt(Sale,parameters) }}
         	{% endif %}
         {% endfor %}

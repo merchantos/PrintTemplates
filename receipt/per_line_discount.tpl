@@ -1,7 +1,7 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 
-<!-- default -->
+<!-- per_line_discount -->
 
 @page { margin: 0px; }
 body {
@@ -115,7 +115,7 @@ td.amount { white-space: nowrap; }
         {{ _self.store_receipt(Sale,parameters) }}
 	{% else %}
 	    {% for SalePayment in Sale.SalePayments.SalePayment %}
-        	{% if SalePayment.CCCharge %}
+        	{% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
                 {{ _self.store_receipt(Sale,parameters) }}
         	{% endif %}
         {% endfor %}
