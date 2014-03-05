@@ -590,4 +590,3 @@ td.amount { white-space: nowrap; }
 		{% endif %}
 	{% endif %}
 {% endmacro %}
-<!-- TEST -->
