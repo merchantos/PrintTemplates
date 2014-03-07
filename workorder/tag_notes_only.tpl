@@ -177,16 +177,16 @@ img.barcode {
 				{% for serializedID in Workorder.Serialized %}
 					<h3>Work Order Item:</h3>
 						<p>{% if Workorder.Serialized.description|strlen > 0 %}
-							{{ Workorder.Serialized.description }} /
+							{{ Workorder.Serialized.description }}
 						{% endif %}
 						{% if Workorder.Serialized.colorName|strlen > 0 %}
-							{{ Workorder.Serialized.colorName }} /
+							/ {{ Workorder.Serialized.colorName }}
 						{% endif %}
 						{% if Workorder.Serialized.sizeName|strlen > 0 %}
-							{{ Workorder.Serialized.sizeName }} /
+							/ {{ Workorder.Serialized.sizeName }}
 						{% endif %}
 						{% if Workorder.Serialized.serial|strlen > 0 %}
-							{{ Workorder.Serialized.serial }}
+							/ {{ Workorder.Serialized.serial }}
 						{% endif %}</p>
 					<br />
 				{% endfor %}
@@ -344,7 +344,7 @@ img.barcode {
 			{% if parameters.type == 'invoice' %}
 				{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
 					<div style="padding: 10px 0px">
-						<p style="margin-bottom:40px;">{{ Workorder.Shop.ReceiptSetup.workorderAgree }}</p>
+						<p style="margin-bottom:40px;">{{ Workorder.Shop.ReceiptSetup.workorderAgree|raw|nl2br }}</p>
 						X_______________________________
 						<br/>
 						{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
