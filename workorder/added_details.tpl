@@ -159,6 +159,12 @@ img.barcode {
 				{% endif %}
 				<h1>Work Order</h1>
 				<h1><strong>#{{ Workorder.workorderID }}</strong></h1>
+				{% if parameters.type == 'shop-tag' %}
+					{% if Workorder.hookIn|strlen > 0 or Workorder.hookOut|strlen > 0 %}
+						<h1 style="margin-top:20px;">Hook In: {{Workorder.hookIn}} <br />
+						Hook Out: {{Workorder.hookOut}}</h1>
+					{% endif %}
+				{% endif %}
 			</div>
 			
 			<div class="detail">
@@ -190,10 +196,10 @@ img.barcode {
 						{% endif %}</p>
 					<br />
 				{% endfor %}
-				<h2>Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}</h2>
-				<h2>Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
+				<h2>Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
+				Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
 			</div>
-				
+
 			<table class="lines">
 				<tr>
 					<th>Item/Labor</th>
@@ -328,13 +334,6 @@ img.barcode {
 						</tr>
 					</tbody>
 				</table>
-			{% endif %}
-			
-			{% if Workorder.note|strlen > 0 %}
-				<div class="notes">
-					<h3>Notes:</h3>
-					{{ Workorder.note|raw|nl2br }}
-				</div>
 			{% endif %}
                 
 			<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
