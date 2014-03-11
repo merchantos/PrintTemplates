@@ -144,7 +144,7 @@ td.amount { white-space: nowrap; }
 	{{ _self.title(Sale,parameters) }}
 	{{ _self.date(Sale) }}
 	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters) }}
+	{{ _self.receipt(Sale,parameters,false) }}
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
@@ -170,7 +170,7 @@ td.amount { white-space: nowrap; }
 	</div>
 	
 	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters) }}
+	{{ _self.receipt(Sale,parameters,true) }}
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
@@ -260,13 +260,15 @@ td.amount { white-space: nowrap; }
 <th>{{ _self.lineDescription(Line) }}
     {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
         <small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
+    {% elseif Line.calcLineDiscount < 0 and not parameters.gift_receipt %}
+    	<small>Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|money|replace({'-': ''})}}</small>
     {% endif %}</th>
     <td class="quantity">{{Line.unitQuantity}}</td>
     <td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
 </tr>
 {% endmacro %}
 
-{% macro receipt(Sale,parameters) %}
+{% macro receipt(Sale,parameters,store_copy) %}
 {% if Sale.SaleLines %}
 <table class="sale lines">
 	<thead>
@@ -287,7 +289,11 @@ td.amount { white-space: nowrap; }
 <table class="totals">
 	<tbody>
   		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
-  		{% if Sale.calcDiscount > 0 %}<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>{% endif %}
+  		  		{% if Sale.calcDiscount > 0 %}
+  			<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>
+  		{% elseif Sale.calcDiscount < 0 %}
+			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|money|replace({'-': ''})}}</td></tr>
+  		{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
 		{% if Tax.taxname %}
 		<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
@@ -383,13 +389,13 @@ td.amount { white-space: nowrap; }
 		</table>
 	{% endif %}
 	
-	{% if Sale.Customer %}
+	{% if Sale.Customer and store_copy == false %}
 		{{ _self.layaways(Sale.Customer,parameters.gift_receipt)}}
 		{{ _self.specialorders(Sale.Customer,parameters.gift_receipt)}}
 		{{ _self.workorders(Sale.Customer,parameters.gift_receipt)}}
 	{% endif %}
 	
-	{% if Sale.Customer and not parameters.gift_receipt %}
+	{% if Sale.Customer and not parameters.gift_receipt and store_copy == false %}
 		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 			<h2>Store Account</h2>
 			<table class="totals">
