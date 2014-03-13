@@ -7,30 +7,18 @@
 	.workorder
 	{
 		margin: 10px;
-		font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
-
 	}
-	.header h1	{
+	.header h1
+	{
 		text-align: center;
 		font-size: 12pt;
 	}
-	.header h3, .header p	{
-		font-size: 10pt;
-		margin:0;
-		text-align: center;
-	}
-    .header h1 strong {
+	.header h1 strong {
 		border: 3px solid black;
-		display: block;
-		margin: 0 auto;
 		font-size: 24pt;
-		width: 2em;
-		padding: 10px
-    }
-	.header img {
-		display: block;
-		margin: 8px auto 4px;
+		padding: 10px;
 	}
+
 	.detail h2 {
 		margin: 0px;
 		padding: 0px;
@@ -64,7 +52,7 @@
 	    border-top: 1px solid #000;
 	}
 	table.totals tr td:first-child { padding-right: 10px; }
-	table tr.total td { font-weight: bold; font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif; }
+	table tr.total td { font-weight: bold; }
 
 	.notes {
 		overflow: hidden;
@@ -77,26 +65,35 @@
 		display: block;
 		margin: 2em auto; 
 	}
+
+	.signature {
+		font-size: 1em;
+		font-weight: 500;
+	}
+
+	.signature dl.signature {
+		position: relative;
+		width: 50%;
+	}
+
+	.signature dl.signature dd {
+		position: absolute;
+		border-top: 1px solid;
+		width: 75%;
+		left: 3em;
+		text-align: right;
+	}
 {% endblock extrastyles %}
 
 {% block content %}
 	{% for Workorder in Workorders %}
 	<div class="workorder {% if not loop.last %} pagebreak{% endif %}">
 		<div class="header">
-			{% if Workorder.Shop.ReceiptSetup.logo|strlen > 0 %}
-			<img src="{{Workorder.Shop.ReceiptSetup.logo}}" width="{{Workorder.Shop.ReceiptSetup.logoWidth}}" height="{{Workorder.Shop.ReceiptSetup.logoHeight}}" class="logo">
+			{% if Workorder.Shop.ReceiptSetup.hasLogo == "true" %}
+				<img class="header" src="{{ Workorder.Shop.ReceiptSetup.logo }}" height="{{ Workorder.Shop.ReceiptSetup.logoHeight }}" width="{{ Workorder.Shop.ReceiptSetup.logoWidth }}">
 			{% endif %}
-			<h3>{{ Workorder.Shop.name }}</h3>
-			{% if Workorder.Shop.ReceiptSetup.header|strlen > 0 %}
-				{{Workorder.Shop.ReceiptSetup.header|nl2br|raw}}
-			{% else %}
-				<p>{{ _self.address(Workorder.Shop.Contact) }}</p>
-				{% for ContactPhone in Workorder.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
-				<p>{{ContactPhone.number}}</p>
-				{% endif %}{% endfor %}
-			{% endif %}
-
-			<h1>WORK ORDER<strong>#{{Workorder.workorderID}}</strong></h1>
+			<h1>Work Order</h1>
+			<h1><strong>#{{Workorder.workorderID}}</strong></h1>
 		</div>
 		<div class="detail">
 			<h2>Customer: {{ Workorder.Customer.lastName}}, {{ Workorder.Customer.firstName}}</h2>
@@ -176,29 +173,24 @@
         	</tbody>
         </table>
 		
-		{% if Workorder.note|length > 1 %}
+		{% if Workorder.note|escape|length > 0 %}
 		<div class="notes">
 			<h3>Notes:</h3>
 			{{ Workorder.note }}
 		</div>
 		{% endif %}
-		
+
+		{% if Workorder.Shop.ReceiptSetup.workorderAgree|length > 0 %}
+			<div class="signature">
+				<p>{{Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
+				<dl class="signature">
+					<dt>Signature:</dt>
+					<dd>{{Workorder.Customer.firstName}} {{Workder.Customer.lastName}}</dd>
+				</dl>
+			</div>
+		{% endif %}
+
 		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
 	</div>
 	{% endfor %}
-
-{% macro address(Contact,delimiter) %}
-	{% if delimiter|strlen == 0 %}{% set delimiter = '<br>' %}{% endif %}
-
-	{% autoescape false %}
-	{% for Address in Contact.Addresses.ContactAddress %}
-		{% if loop.first and Address.address1 %}
-			{{Address.address1}}{{delimiter}}
-			{% if Address.address2|strlen > 0 %} {{Address.address2}}{{delimiter}}{% endif %}
-			{{Address.city}}, {{Address.state}} {{Address.zip}} {{Address.country}}
-		{% endif %}
-	{% endfor %}
-	{% endautoescape %}
-{% endmacro %}
-
 {% endblock content %}

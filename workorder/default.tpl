@@ -1,8 +1,5 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
-
-<!-- default -->
-
   .pagebreak
 	{
 		page-break-after: always;
@@ -16,14 +13,11 @@
 		text-align: center;
 		font-size: 12pt;
 	}
-    .header h1 strong {
+	.header h1 strong {
 		border: 3px solid black;
-		display: block;
-		margin: 0 auto;
 		font-size: 24pt;
-		width: 2em;
-		padding: 10px
-    }
+		padding: 10px;
+	}
 
 	.detail h2 {
 		margin: 0px;
@@ -71,13 +65,32 @@
 		display: block;
 		margin: 2em auto; 
 	}
+
+	.signature {
+		font-size: 1em;
+		font-weight: 500;
+	}
+
+	.signature dl.signature {
+		position: relative;
+		width: 50%;
+	}
+
+	.signature dl.signature dd {
+		position: absolute;
+		border-top: 1px solid;
+		width: 75%;
+		left: 3em;
+		text-align: right;
+	}
 {% endblock extrastyles %}
 
 {% block content %}
 	{% for Workorder in Workorders %}
 	<div class="workorder {% if not loop.last %} pagebreak{% endif %}">
 		<div class="header">
-				<h1>Work Order <strong>#{{Workorder.workorderID}}</strong></h1>
+				<h1>Work Order</h1>
+				<h1><strong>#{{Workorder.workorderID}}</strong></h1>
 		</div>
 		<div class="detail">
 			<h2>Customer: {{ Workorder.Customer.lastName}}, {{ Workorder.Customer.firstName}}</h2>
@@ -157,13 +170,23 @@
         	</tbody>
         </table>
 		
-		{% if Workorder.note|length > 1 %}
+		{% if Workorder.note|escape|length > 0 %}
 		<div class="notes">
 			<h3>Notes:</h3>
 			{{ Workorder.note }}
 		</div>
 		{% endif %}
-		
+
+		{% if Workorder.Shop.ReceiptSetup.workorderAgree|length > 0 %}
+			<div class="signature">
+				<p>{{Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
+				<dl class="signature">
+					<dt>Signature:</dt>
+					<dd>{{Workorder.Customer.firstName}} {{Workder.Customer.lastName}}</dd>
+				</dl>
+			</div>
+		{% endif %}
+
 		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
 	</div>
 	{% endfor %}
