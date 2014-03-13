@@ -129,8 +129,9 @@ td.amount { white-space: nowrap; }
 	<div class="header">		
 		{% if Sale.Shop.ReceiptSetup.hasLogo == 'true' %}
 			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
+		{% else %}
+			<h3>{{ Sale.Shop.name }}</h3>
 		{% endif %}
-		<h3>{{ Sale.Shop.name }}</h3>
 	{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
 		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
 	{% else %}
@@ -290,15 +291,13 @@ td.amount { white-space: nowrap; }
 			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|money|replace({'-': ''})}}</td></tr>
   		{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
-		{% if Tax.taxname %}
-		<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
-		{% endif %}
-		{% if Tax.taxname2 and Tax.rate2 > 0 %}
-		<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
-		{% endif %}
+			{% if Tax.taxname %}
+				<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+			{% endif %}
+			{% if Tax.taxname2 and Tax.rate2 > 0 %}
+				<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
+			{% endif %}
 		{% endfor %}
-		
-		
         <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.taxTotal|money}}</td></tr>
 		<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
 	</tbody>

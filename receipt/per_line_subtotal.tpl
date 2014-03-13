@@ -129,8 +129,9 @@ td.amount { white-space: nowrap; }
 	<div class="header">		
 		{% if Sale.Shop.ReceiptSetup.hasLogo == 'true' %}
 			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
+		{% else %}
+			<h3>{{ Sale.Shop.name }}</h3>
 		{% endif %}
-		<h3>{{ Sale.Shop.name }}</h3>
 	{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
 		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
 	{% else %}
