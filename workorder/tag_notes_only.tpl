@@ -1,7 +1,7 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 
-<!-- tag_notes_only -->
+<!-- added_details -->
 
 @page { margin: 0px; }
 body{
@@ -199,16 +199,13 @@ img.barcode {
 				<h2>Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
 				Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
 			</div>
-				
+
 			<table class="lines">
 				<tr>
 					<th>Item/Labor</th>
 					<th>Notes</th>
-					{% if parameters.type == 'invoice' %}
 						<th>Charge</th>
-					{% endif %}
 				</tr>
-				
 				{% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
 				<tr>
 					{% if WorkorderLine.itemID != 0 %}
@@ -220,10 +217,8 @@ img.barcode {
 								{{ WorkorderItem.unitQuantity }} &times;
 							{% endif %}
 							{{ WorkorderItem.Item.description }}
-							{% if parameters.type == 'invoice' %}
-								{% if WorkorderItem.Discount %}
-									<p>Discount: {{ WorkorderItem.Discount.name }} (-{{ WorkorderItem.SaleLine.calcLineDiscount|money }})</p>
-								{% endif %}
+							{% if WorkorderItem.Discount %}
+								<p>Discount: {{ WorkorderItem.Discount.name }} (-{{ WorkorderItem.SaleLine.calcLineDiscount|money }})</p>
 							{% endif %}
 						 </td>
 					{% endif %}
@@ -231,17 +226,15 @@ img.barcode {
 						<td class="notes">
 							{{ WorkorderItem.note }}
 						</td>
-				
-						{% if parameters.type == 'invoice' %}
-							{% if WorkorderItem.warranty == 'true' %}
-								<td class="amount"> $0.00
-							{% endif %}
+
+						{% if WorkorderItem.warranty == 'true' %}
+							<td class="amount"> $0.00
+						{% endif %}
 					
-							{% if WorkorderItem.warranty == 'false' %}
-								<td class="amount">        
-									{{ WorkorderItem.SaleLine.calcSubtotal|money }}
-								</td>
-							{% endif %}
+						{% if WorkorderItem.warranty == 'false' %}
+							<td class="amount">        
+								{{ WorkorderItem.SaleLine.calcSubtotal|money }}
+							</td>
 						{% endif %}
 					</tr>
 				{% endfor %}
@@ -251,11 +244,9 @@ img.barcode {
 						{% if WorkorderLine.itemID != 0 %}
 							<td class="description">
 								{{ WorkorderLine.Item.description }}
-								{% if parameters.type == 'invoice' %}
-									{% if WorkorderLine.Discount %}
-										<br />
-										<p>Discount: {{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})</p>
-									{% endif %}
+								{% if WorkorderLine.Discount %}
+									<br />
+									<p>Discount: {{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})</p>
 								{% endif %}
 							 </td>
 							 <td class="notes">
@@ -263,94 +254,77 @@ img.barcode {
 							 </td>
 						{% else %}
 							<td class="notes" colspan="2">
-								{{ WorkorderLine.note }}
-								{% if parameters.type == 'invoice' %}
-									{% if WorkorderLine.Discount %}
-										<br />
-										Discount: {{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})
-									{% endif %}
+							{{ WorkorderLine.note }}
+								{% if WorkorderLine.Discount %}
+									<br />
+									Discount: {{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})
 								{% endif %}
 							</td>
 						{% endif %}
 						
-						{% if parameters.type == 'invoice' %}
-							<td class="amount">
-								{{ WorkorderLine.SaleLine.calcSubtotal|money }}
-							</td>
-						{% endif %}
+						<td class="amount">
+							{{ WorkorderLine.SaleLine.calcSubtotal|money }}
+						</td>
 					</tr>
 				{% endfor %}
 			</table>
 			
-			{% if parameters.type == 'invoice' %}
-				<table class="totals">
-					<tbody>
-						<tr>
-							<td>Labor</td>
-							<td class="amount">
-								{{Workorder.MetaData.labor|money}}
-							</td>
-						</tr>
+			<table class="totals">
+				<tbody>
+					<tr>
+						<td>Labor</td>
+						<td class="amount">
+							{{Workorder.MetaData.labor|money}}
+						</td>
+					</tr>
 					
-						<tr>
-							<td>Parts</td>
-							<td class="amount">
-								{{Workorder.MetaData.parts|money}}
-							</td>
-						</tr>
-					
-						{% if Workorder.MetaData.discount > 0 %}
-							<tr>
-								<td>Discounts</td>
-								<td class="amount">
-									-{{Workorder.MetaData.discount|money}}
-								</td>
-							</tr>
-						{% endif %}
+					<tr>
+						<td>Parts</td>
+						<td class="amount">
+							{{Workorder.MetaData.parts|money}}
+						</td>
+					</tr>
 				
+					{% if Workorder.MetaData.discount > 0 %}
 						<tr>
-							<td>Tax</td>
+							<td>Discounts</td>
 							<td class="amount">
-								{{Workorder.MetaData.tax|money}}
+								-{{Workorder.MetaData.discount|money}}
 							</td>
 						</tr>
+					{% endif %}
 				
-						<tr class="total">
-							<td>Total</td>
-							<td class="amount">
-								{{Workorder.MetaData.total|money}}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			{% else %}
-				<table class="totals">
-					<tbody>
-						<tr class="total">
-							<td>Total</td>
-							<td class="amount">
-								{{Workorder.MetaData.total|money}}
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			{% endif %}
-			
+					<tr>
+						<td>Tax</td>
+						<td class="amount">
+							{{Workorder.MetaData.tax|money}}
+						</td>
+					</tr>
+				
+					<tr class="total">
+						<td>Total</td>
+						<td class="amount">
+							{{Workorder.MetaData.total|money}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
 			{% if parameters.type == 'shop-tag' %}
 				{% if Workorder.note|strlen > 0 %}
 					<div class="notes">
 						<h3>Notes:</h3>
-						{{ Workorder.note|raw|nl2br }}
+						{{ Workorder.note|noteformat|raw }}
 					</div>
 				{% endif %}
 			{% endif %}
-                
+
 			<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
 			
 			{% if parameters.type == 'invoice' %}
 				{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
 					<div style="padding: 10px 0px">
-						<p style="margin-bottom:40px;">{{ Workorder.Shop.ReceiptSetup.workorderAgree|raw|nl2br }}</p>
+						<p style="margin-bottom:40px;">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
 						X_______________________________
 						<br/>
 						{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
