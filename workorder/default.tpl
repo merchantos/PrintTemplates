@@ -182,7 +182,7 @@
 				<p>{{Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
 				<dl class="signature">
 					<dt>Signature:</dt>
-					<dd>{{Workorder.Customer.firstName}} {{Workder.Customer.lastName}}</dd>
+					<dd>{{Workorder.Customer.firstName}} {{Workorder.Customer.lastName}}</dd>
 				</dl>
 			</div>
 		{% endif %}
