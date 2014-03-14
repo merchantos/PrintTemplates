@@ -389,31 +389,29 @@ td.amount { white-space: nowrap; }
 		{{ _self.workorders(Sale.Customer,parameters.gift_receipt)}}
 	{% endif %}
 	
-	{% if Sale.Customer and not parameters.gift_receipt and store_copy == false %}
+	{% if Sale.Customer and store_copy == false %}
 		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 			<h2>Store Account</h2>
 			<table class="totals">
 				{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
-				<tr>
-					<td width="100%">Balance Owed</td>
-					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
-				</tr>
+					<tr>
+						<td width="100%">Balance Owed</td>
+						<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
+					</tr>
 				{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
-				<tr>
-					<td width="100%">On Deposit</td>
-					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
-				</tr>
+					<tr>
+						<td width="100%">On Deposit</td>
+						<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
+					</tr>
 				{% endif %}
-			</table>
 		{% endif %}
 		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
-			<table class="spacer totals">
 			<tr class="total">
-				<td>Remaining Balance: </td>
+				<td class="amount">Remaining Balance: </td>
 				<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
-			</table>
 		{% endif %}
+		</table>
 	</table>
 	{% endif %}
 

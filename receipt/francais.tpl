@@ -403,26 +403,24 @@ td.amount { white-space: nowrap; }
 			<h2>Dossier</h2>
 			<table class="totals">
 				{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
-				<tr>
-					<td width="100%">Montants Du</td>
-					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|number_format(2, '.')}}$</td>
-				</tr>
+					<tr>
+						<td width="100%">Montants Du</td>
+						<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
+					</tr>
 				{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
-				<tr>
-					<td width="100%">Au Dep&ocirc;t</td>
-					<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|number_format(2, '.')}}$</td>
-				</tr>
+					<tr>
+						<td width="100%">Au Dep&ocirc;t</td>
+						<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
+					</tr>
 				{% endif %}
-			</table>
 		{% endif %}
 		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
-			<table class="totals">
-			<tr class="spacer total">
-				<td width = "100%">Balance Manquant:</td>
-				<td class="amount">-{{ Sale.Customer.MetaData.getAmountToCompleteAll|number_format(2, '.')}}$</td>
+			<tr class="total">
+				<td class="amount">Balance Monquant </td>
+				<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
-			</table>
 		{% endif %}
+		</table>
 	</table>
 	{% endif %}
 
