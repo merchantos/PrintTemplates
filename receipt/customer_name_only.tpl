@@ -240,7 +240,7 @@ td.amount { white-space: nowrap; }
 	{% if Sale.quoteID > 0 %}Quote #: {{Sale.quoteID}}{% endif %}<br />
 	Ticket: {{Sale.ticketNumber}}<br />
 	{% if Sale.Register %}Register: {{Sale.Register.name}}<br />{% endif %}
-	{% if Sale.Employee %}Employee: {{Sale.Employee.firstName}} {{Sale.Employee.lastName}}<br />{% endif %}
+	{% if Sale.Employee %}Employee: {{Sale.Employee.firstName}}<br />{% endif %}
 	{% if Sale.Customer %}
 		Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
 	{% endif %}
@@ -308,20 +308,32 @@ td.amount { white-space: nowrap; }
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
 						{% if Payment.amount > 0 %}
-						<tr >
-							<td>
-								Gift Card Charge<br />
-								New Balance:
-							</td>
-							<td class="amount">
-							    {{Payment.amount|money}}<br />
-							    {{Payment.CreditAccount.balance|getinverse|money}}
-							</td>
-						</tr>
-						{% elseif Payment.amount < 0 and Sale.calcTotal <= 0 %}
-						<tr><td>Refund To Gift Card</td><td class="amount">{{Payment.amount|money}}</td></tr>
-						{% elseif Payment.amount < 0 and Sale.calcTotal > 0 %}
-						<tr><td>Gift Card Purchase</td><td class="amount">{{Payment.amount|money}}</td></tr>
+							<tr>
+								<td>Gift Card Charge</td>
+								<td class="amount">{{Payment.amount|money}}</td>
+							</tr>
+							<tr>
+								<td>Balance</td>
+								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
+							</tr>
+						{% elseif Payment.amount < 0 and Sale.calcTotal < 0 %}
+							<tr>
+								<td>Refund To Gift Card</td>
+								<td class="amount">{{Payment.amount|getinverse|money}}</td>
+							</tr>
+							<tr>
+								<td>Balance</td>
+								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
+							</tr>
+						{% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
+							<tr>
+								<td>Gift Card Purchase</td>
+								<td class="amount">{{Payment.amount|getinverse|money}}</td>
+							</tr>
+							<tr>
+								<td>Balance</td>
+								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
+							</tr>
 						{% endif %}
 					{% elseif Payment.creditAccountID == 0 %}
 						<!--  NOT Customer Account -->
