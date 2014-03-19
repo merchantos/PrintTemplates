@@ -185,6 +185,8 @@ img.barcode {
 					<h3>Work Order Item:</h3>
 						<p>{% if Workorder.Serialized.description|strlen > 0 %}
 							{{ Workorder.Serialized.description }}
+						{% elseif Workorder.Serialized.Item.description|strlen > 0 %}
+							{{ Workorder.Serialized.Item.description }}
 						{% endif %}
 						{% if Workorder.Serialized.colorName|strlen > 0 %}
 							/ {{ Workorder.Serialized.colorName }}
