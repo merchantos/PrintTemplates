@@ -147,8 +147,9 @@ img.barcode {
 				{% if parameters.type == 'invoice' %}
 					{% if Workorder.Shop.ReceiptSetup.hasLogo == "true" %}
 						<img class="header" src="{{ Workorder.Shop.ReceiptSetup.logo }}" height="{{ Workorder.Shop.ReceiptSetup.logoHeight }}" width="{{ Workorder.Shop.ReceiptSetup.logoWidth }}">
-					{% endif %}
+					{% else %}
 					<h3>{{ Workorder.Shop.name }}</h3>
+					{% endif %}
 					{% if Workorder.Shop.ReceiptSetup.header|strlen > 0 %}
 						{{ Workorder.Shop.ReceiptSetup.header|nl2br|raw }}
 					{% else %}
