@@ -259,8 +259,13 @@ td.amount { white-space: nowrap; }
 {% macro line(Line,parameters) %}
 <tr>
     <th>{{ _self.lineDescription(Line) }}</th>
-    <td class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
-    <td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
+    {% if not parameters.gift_receipt %}
+	    <td class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
+	    <td class="amount">{{Line.calcSubtotal|money}}</td>
+	{% else %}
+		<td class="quantity">{{Line.unitQuantity}}
+	    <td class="amount"></td>
+	{% endif %}
 </tr>
 {% endmacro %}
 
