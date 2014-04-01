@@ -214,7 +214,7 @@ td.amount { white-space: nowrap; }
 			Re&#231u 
 			<large>ANNUL&Eacute;</large>
 		{% else %}
-			Quovaisieas
+			Devis
 			{% if not Sale.quoteID %}
 				<large>(PAS UN RE&Ccedil;U)</large>
 			{% endif %}
