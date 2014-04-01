@@ -136,9 +136,9 @@ td.amount { white-space: nowrap; }
 		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
 	{% else %}
 		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
-		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
-		<p>{{ContactPhone.number}}</p>
-		{% endif %}{% endfor %}
+		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
+			<p>{{ContactPhone.number}}</p>
+		{% endfor %}
 	{% endif %}
 	</div>
 
@@ -403,7 +403,7 @@ td.amount { white-space: nowrap; }
 		{{ _self.workorders(Sale.Customer,parameters.gift_receipt)}}
 	{% endif %}
 	
-	{% if Sale.Customer and store_copy == false %}
+	{% if Sale.Customer and not parameters.gift_receipt and store_copy == false %}
 		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 			<h2>Store Account</h2>
 			<table class="totals">

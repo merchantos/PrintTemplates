@@ -136,9 +136,9 @@ td.amount { white-space: nowrap; }
 		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
 	{% else %}
 		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
-		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
-		<p>{{ContactPhone.number}}</p>
-		{% endif %}{% endfor %}
+		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
+			<p>{{ContactPhone.number}}</p>
+		{% endfor %}
 	{% endif %}
 	</div>
 
@@ -262,7 +262,7 @@ td.amount { white-space: nowrap; }
     {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
         <small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
     {% elseif Line.calcLineDiscount < 0 and not parameters.gift_receipt %}
-    	<small>Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|money|replace({'-': ''})}}</small>
+    	<small>Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
     {% endif %}</th>
     <td class="quantity">{{Line.unitQuantity}}</td>
     <td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
@@ -293,7 +293,7 @@ td.amount { white-space: nowrap; }
   		  		{% if Sale.calcDiscount > 0 %}
   			<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>
   		{% elseif Sale.calcDiscount < 0 %}
-			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|money|replace({'-': ''})}}</td></tr>
+			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
   		{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
 		{% if Tax.taxname %}

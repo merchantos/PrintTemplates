@@ -136,10 +136,9 @@ td.amount { white-space: nowrap; }
 		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
 	{% else %}
 		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
-		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
-		<p>{{ContactPhone.number}}</p>
-		{% endif %}{% endfor %}
-	{% endif %}
+		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
+			<p>{{ContactPhone.number}}</p>
+		{% endfor %}
 	</div>
 
 	{{ _self.title(Sale,parameters) }}
@@ -293,7 +292,7 @@ td.amount { white-space: nowrap; }
   		{% if Sale.calcDiscount > 0 %}
   			<tr><td>R&eacute;ductions</td><td class="amount">-{{Sale.calcDiscount|number_format(2, '.')}}$</td></tr>
   		{% elseif Sale.calcDiscount < 0 %}
-			<tr><td>R&eacute;ductions</td><td class="amount">{{Sale.calcDiscount|number_format(2, '.')|replace({'-': ''})}}$</td></tr>
+			<tr><td>R&eacute;ductions</td><td class="amount">{{Sale.calcDiscount|number_format(2, '.')|getinverse}}$</td></tr>
   		{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
 			{% if Tax.taxname %}

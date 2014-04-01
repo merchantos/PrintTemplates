@@ -279,7 +279,7 @@ td.amount { white-space: nowrap; }
   		{% if Sale.calcDiscount > 0 %}
   			<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>
   		{% elseif Sale.calcDiscount < 0 %}
-			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|money|replace({'-': ''})}}</td></tr>
+			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
   		{% endif %}
 		{% for Tax in Sale.TaxClassTotals.Tax %}
 		{% if Tax.taxname %}

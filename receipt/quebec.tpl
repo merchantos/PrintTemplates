@@ -136,9 +136,9 @@ td.amount { white-space: nowrap; }
 		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
 	{% else %}
 		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
-		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}{% if loop.first %}
-		<p>{{ContactPhone.number}}</p>
-		{% endif %}{% endfor %}
+		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
+			<p>{{ContactPhone.number}}</p>
+		{% endfor %}
 	{% endif %}
 	</div>
 
