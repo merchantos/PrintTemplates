@@ -108,20 +108,26 @@ td.amount { white-space: nowrap; }
 {% endblock extrastyles %}
 
 {% block content %}
+{% set page_loaded = false %}
 {% for Sale in Sales %}
 
-{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt and not parameters.email %}
-	{% if parameters.force_cc_agree or parameters.print_workorder_agree %}
-        {{ _self.store_receipt(Sale,parameters) }}
-	{% else %}
-	    {% for SalePayment in Sale.SalePayments.SalePayment %}
-        	{% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
-                {{ _self.store_receipt(Sale,parameters) }}
-        	{% endif %}
-        {% endfor %}
-    {% endif %}
+{% if not parameters.page or parameters.page == 1 %}
+	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 and not parameters.gift_receipt and not parameters.email %}
+		{% if parameters.force_cc_agree or parameters.print_workorder_agree %}
+        	{{ _self.store_receipt(Sale,parameters) }}
+        	{% set page_loaded = true %}
+		{% else %}
+	    	{% for SalePayment in Sale.SalePayments.SalePayment %}
+        		{% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
+                	{{ _self.store_receipt(Sale,parameters) }}
+                	{% set page_loaded = true %}
+        		{% endif %}
+        	{% endfor %}
+    	{% endif %}
+	{% endif %}
 {% endif %}
 
+{% if not parameters.page or parameters.page == 2 or not page_loaded %}
 <!-- replace.email_custom_header_msg -->
 <div class="receipt customer">
 	{{ _self.ship_to(Sale) }}
@@ -159,6 +165,7 @@ td.amount { white-space: nowrap; }
 </div>
 
 <!-- replace.email_custom_footer_msg -->
+{% endif %}
 {% endfor %}
 {% endblock content %}
 
