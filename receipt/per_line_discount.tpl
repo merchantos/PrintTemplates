@@ -432,12 +432,13 @@ td.amount { white-space: nowrap; }
 				{% endif %}
 		{% endif %}
 		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
+		<table class="totals">
 			<tr class="total">
-				<td class="amount">Remaining Balance: </td>
+				<td width="100%">Remaining Balance: </td>
 				<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
+			</table>
 		{% endif %}
-		</table>
 	</table>
 	{% endif %}
 
@@ -522,59 +523,59 @@ td.amount { white-space: nowrap; }
 
 {% macro layaways(Customer,parameters) %}
 	{% if Customer.Layaways and Customer.Layaways|length > 0 %}
-	<h2>Layaways</h2>
-	<table class="lines layaways">
-		{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
-	</table>
-	<table class="layways totals">
-		<tr>
-			<td width="100%">Subtotal</td>
-			<td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
-		</tr>
-		{% if Customer.MetaData.layawaysAllDiscounts>0.00 %}
-		<tr>
-			<td width="100%">Discounts</td>
-			<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|money}}</td>
-		</tr>
-		{% endif %}
-		<tr>
-			<td width="100%">Tax</td>
-			<td class="amount">{{Customer.MetaData.layawaysTaxTotal|money}}</td>
-		</tr>
-		<tr class="total">
-			<td width="100%">Total</td>
-			<td class="amount">{{Customer.MetaData.layawaysTotal|money}}</td>
-		</tr>
-	</table>
+		<h2>Layaways</h2>
+		<table class="lines layaways">
+			{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
+		</table>
+		<table class="layways totals">
+			<tr>
+				<td width="100%">Subtotal</td>
+				<td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
+			</tr>
+			{% if Customer.MetaData.layawaysAllDiscounts>0.00 %}
+				<tr>
+					<td width="100%">Discounts</td>
+					<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|money}}</td>
+				</tr>
+			{% endif %}
+			<tr>
+				<td width="100%">Tax</td>
+				<td class="amount">{{Customer.MetaData.layawaysTaxTotal|money}}</td>
+			</tr>
+			<tr class="total">
+				<td width="100%">Total</td>
+				<td class="amount">{{Customer.MetaData.layawaysTotal|money}}</td>
+			</tr>
+		</table>
 	{% endif %}
 {% endmacro %}
 
 {% macro specialorders(Customer,parameters) %}
 	{% if Customer.SpecialOrders|length > 0 %}
-	<h2>Special Orders</h2>
-	<table class="lines specialorders">
-		{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
-	</table>
-	<table class="specialorders totals">
-		<tr>
-			<td width="100%">Subtotal</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersSubtotal|money}}</td>
-		</tr>
-		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
+		<h2>Special Orders</h2>
+		<table class="lines specialorders">
+			{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
+		</table>
+		<table class="specialorders totals">
 			<tr>
-				<td width="100%">Discounts</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
+				<td width="100%">Subtotal</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
 			</tr>
-		{% endif %}
-		<tr>
-			<td width="100%">Tax</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
-		</tr>
-		<tr class="total">
-			<td width="100%">Total</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
-		</tr>
-	</table>
+			{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
+				<tr>
+					<td width="100%">Discounts</td>
+					<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|money}}</td>
+				</tr>
+			{% endif %}
+			<tr>
+				<td width="100%">Tax</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
+			</tr>
+			<tr class="total">
+				<td width="100%">Total</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
+			</tr>
+		</table>
 	{% endif %}
 {% endmacro %}
 

@@ -429,12 +429,13 @@ td.amount { white-space: nowrap; }
 				{% endif %}
 		{% endif %}
 		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
+		<table class="totals">
 			<tr class="total">
-				<td class="amount">Balance Monquant </td>
+				<td width="100%">Balance Monquant </td>
 				<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
+			</table>
 		{% endif %}
-		</table>
 	</table>
 	{% endif %}
 
@@ -555,12 +556,12 @@ td.amount { white-space: nowrap; }
 	<table class="specialorders totals">
 		<tr>
 			<td width="100%">Sous-Total</td>
-			<td class="amount">{{Customer.MetaData.specialOrdersSubtotal|number_format(2, '.')}}$</td>
+			<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|number_format(2, '.')}}$</td>
 		</tr>
 		{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 			<tr>
 				<td width="100%">R&eacute;ductions</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|number_format(2, '.')}}$</td>
+				<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|number_format(2, '.')}}$</td>
 			</tr>
 		{% endif %}
 		<tr>
