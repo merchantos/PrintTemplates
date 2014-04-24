@@ -216,8 +216,8 @@ td.amount { white-space: nowrap; }
 <h1>
 	{% if Sale.calcTotal >= 0 %}
 		{% if Sale.completed == 'true' %}
-			{% if parameters.gift_receipt %}Cadeau{%else%}Re&#231u{%endif%} De Vente
-		{% elseif Sale.voided == 'true' %}
+			{% if parameters.gift_receipt %}Cadeau{%else%}Re&#231u{%endif%} de vente
+		{% evseif Sale.voided == 'true' %}
 			Re&#231u 
 			<large>ANNUL&Eacute;</large>
 		{% else %}
