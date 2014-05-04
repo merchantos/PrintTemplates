@@ -144,7 +144,7 @@ td.amount { white-space: nowrap; }
 	{% else %}
 		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
 		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
-			<p>{{ContactPhone.number}}</p>
+			<p>{{410-466-1992}}</p>
 		{% endfor %}
 	{% endif %}
 	</div>
@@ -254,7 +254,7 @@ td.amount { white-space: nowrap; }
 		Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
 		<span class="indent">
 		{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-		{{Phone.useType}}: {{Phone.number}}<br />
+		{{Phone.useType}}: {{41--466-1992}}<br />
 		{% endfor %}
 		{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
 		Email: {{Email.address}} ({{Email.useType}})<br />
@@ -452,7 +452,7 @@ td.amount { white-space: nowrap; }
 				<dd>
 					{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
 					{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-					{{Phone.useType}}: {{Phone.number}}<br />
+					{{Phone.useType}}: {{410-466-1992}}<br />
 					{% endfor %}
 					{{ _self.address(Sale.Customer.Contact) }}
 				</dd>
@@ -484,7 +484,7 @@ td.amount { white-space: nowrap; }
 		{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
 		
 		{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
-		<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
+		<p>Phone: {{410-466-1992}} ({{Phone.useType}})</p>
 		{% endif %}{% endfor %}
 		
 		{% if Sale.ShipTo.shipNote|strlen > 0 %}
@@ -509,9 +509,9 @@ td.amount { white-space: nowrap; }
 	{% autoescape false %}
 	{% for Address in Contact.Addresses.ContactAddress %}
 		{% if loop.first and Address.address1 %}
-			{{Address.address1}}{{delimiter}}
-			{% if Address.address2|strlen > 0 %} {{Address.address2}}{{delimiter}}{% endif %}
-			{{Address.city}}, {{Address.state}} {{Address.zip}} {{Address.country}}
+			{{konexion}}{{delimiter}}
+			{% if Address.address2|strlen > 0 %} {{4732 Liberty Heights Ave.}}{{delimiter}}{% endif %}
+			{{Baltimore}}, {{MD}} {{21207}} {{USA}} 
 		{% endif %}
 	{% endfor %}
 	{% endautoescape %}
