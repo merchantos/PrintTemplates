@@ -4,106 +4,160 @@
 <!-- default -->
 
 @page { margin: 0px; }
+
 body {
-  margin: 0;
-  padding: 1px; <!-- You need this to make the printer behave -->
-}
-.store { page-break-after: always; margin-bottom: 40px; }
-.receipt {
-	font: normal 10pt 'Helvetica Neue',Helvetica,Arial,sans-serif;
-}
-.receipt .header h3, .receipt .header p {
-	font-size: 10pt;
+	font: normal 10pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	margin: 0;
-}
-.receipt h2 {
-	border-bottom: 1px solid black;
-	text-transform: uppercase;
-	font-size: 10pt;
-	margin: .5em 0 0;
-}
-.receipt .header {
-	text-align: center;
-}
-.receipt .header img { 
-	display: block;
-	margin: 8px auto 4px; 
+ 	padding: 1px; <!-- You need this to make the printer behave -->
 }
 
-.receipt h1 {
+.store {
+	page-break-after: always;
+	margin-bottom: 40px;
+}
+
+.receipt {
+	font: normal 10pt “Helvetica Neue”, Helvetica, Arial, sans-serif;
+}
+
+h1 {
 	margin: .5em 0 0;
 	font-size: 12pt;
 	text-align: center;
 }
-.receipt p.date, .receipt p.copy {
+
+p.date, p.copy {
 	font-size: 9pt;
 	margin: 0;
 	text-align: center;
 }
 
-.receipt table {
+p.details {
+	font-size: 10pt;
+	text-align: left;
+}
+
+h2 {
+	border-bottom: 1px solid black;
+	text-transform: uppercase;
+	font-size: 10pt;
+	margin: .5em 0 0;
+}
+
+.header {
+	text-align: center;
+}
+
+.header h3 {
+	font-size: 12pt;
+	margin: 0;
+}
+
+.header img { 
+	display: block;
+	margin: 8px auto 4px; 
+	text-align: center;
+}
+
+table {
 	margin: 0 0;
 	width: 100%;
 	border-collapse:collapse;
 }
 
+table thead th { text-align: left; }
 
-.receipt table thead th { text-align: left; }
-.receipt table tbody th { 
+table tbody th { 
 	font-weight: normal; 
 	text-align: left; 
+	width: 55%;
 }
-.receipt table td.amount, .receipt table th.amount {
+
+table td.amount, table th.amount {
   width: 30%;
   text-align: right;
 }
+
 td.amount { white-space: nowrap; }
 
-.receipt table.totals { text-align: right; }
-.receipt table.payments { text-align: right; }
-.receipt table.spacer { margin-top: 1em; }
-.receipt table tr.total td { font-weight: bold; }
+table.totals { text-align: right; }
+table.payments { text-align: right; }
+table.spacer { margin-top: 1em; }
+table tr.total td { font-weight: bold; }
 
-.receipt table td.amount { padding-left: 10px; }
+table td.amount { padding-left: 10px; }
+table td.quantity { padding-left: 10px; }
 
-.receipt table.sale { border-bottom: 1px solid black; }
-.receipt table.sale thead th { border-bottom: 1px solid black; }
+table.sale { border-bottom: 1px solid black; }
+table.sale thead th { border-bottom: 1px solid black; }
 
-.receipt table div.line_description { font-weight: bold; }
-.receipt table div.line_note { padding-left: 10px; }
-.receipt table div.line_serial { padding-left: 10px; }
+table div.line_description {
+	text-align: left;
+	font-weight: bold;
+}
 
-.receipt table.workorders div.line_description { font-weight: normal; padding-left: 10px; }
-.receipt table.workorders div.line_note { font-weight: normal; padding-left: 10px; }
-.receipt table.workorders div.line_serial { font-weight: normal; padding-left: 20px; }
-.receipt table.workorders td.workorder div.line_note { font-weight: bold; padding-left: 0px; }
+table div.line_note {
+	text-align: left;
+	padding-left: 10px;
+}
 
-.receipt p.thankyou { 
+table div.line_serial {
+	text-align: left;
+	font-weight: normal;
+	padding-left: 10px;
+}
+
+table.workorders div.line_description {
+	font-weight: normal;
+	padding-left: 10px;
+}
+
+table.workorders div.line_note {
+	font-weight: normal;
+	padding-left: 10px;
+}
+
+table.workorders div.line_serial {
+	font-weight: normal;
+	padding-left: 20px;
+}
+
+table.workorders td.workorder div.line_note {
+	font-weight: bold;
+	padding-left: 0px;
+}
+
+p.thankyou { 
 	margin: 0; 
 	text-align: center;
 }
-.receipt img.barcode {
+
+.note { text-align: center; }
+
+img.barcode {
 	display: block;
 	margin: 0 auto; 
 }
 
-.receipt dl {
+dl {
 	overflow: hidden
 }
-.receipt dl dt { 
+
+dl dt { 
 	font-weight: bold;
 	width: 80px;
 	float: left
 }
-.receipt dl dd {
+
+dl dd {
 	border-top: 2px solid black;
 	padding-top: 2px;
 	margin: 1em 0 0;
 	float: left;
 	width: 180px
 }
-.receipt dl dd p { margin: 0; }
 
+dl dd p { margin: 0; }
 
 
 {% endblock extrastyles %}
@@ -130,7 +184,7 @@ td.amount { white-space: nowrap; }
 
 {% if not parameters.page or parameters.page == 2 or not page_loaded %}
 <!-- replace.email_custom_header_msg -->
-<div class="receipt customer">
+<div>
 	{{ _self.ship_to(Sale) }}
 
 	<div class="header">		
@@ -140,11 +194,11 @@ td.amount { white-space: nowrap; }
 			<h3>{{ Sale.Shop.name }}</h3>
 		{% endif %}
 	{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
-		{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}
+		<p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
 	{% else %}
-		<p>{{ _self.address(Sale.Shop.Contact) }}</p>
+		{{ _self.address(Sale.Shop.Contact) }}
 		{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
-			<p>{{ContactPhone.number}}</p>
+			<br />{{ContactPhone.number}}
 		{% endfor %}
 	{% endif %}
 	</div>
@@ -171,7 +225,7 @@ td.amount { white-space: nowrap; }
 {% endblock content %}
 
 {% macro store_receipt(Sale,parameters) %}
-<div class="receipt store">
+<div class="store">
 	<div class="header">
 		{{ _self.title(Sale,parameters) }}
 		<p class="copy">Store Copy</p>
@@ -244,7 +298,7 @@ td.amount { white-space: nowrap; }
 {% endmacro %}
 
 {% macro sale_details(Sale) %}
-<p>
+<p class="details">
 	{% if Sale.quoteID > 0 %}Quote #: {{Sale.quoteID}}{% endif %}<br />
 	Ticket: {{Sale.ticketNumber}}<br />
 	{% if Sale.Register %}Register: {{Sale.Register.name}}<br />{% endif %}
@@ -278,7 +332,7 @@ td.amount { white-space: nowrap; }
 	<thead>
 		<tr>
 			<th>Item</th>
-			<th></th>
+			<th class="quantity">Qty.</th>
 			<th class="amount">Price</th>
 		</tr>
 	</thead>
@@ -422,20 +476,20 @@ td.amount { white-space: nowrap; }
 					</tr>
 				{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 					<tr>
-						<td width="100%">On Deposit: </td>
+						<td width="100%">On Deposit </td>
 						<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
 					</tr>
 				{% endif %}
+			</table>
 		{% endif %}
 		{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 		<table class="totals">
 			<tr class="total">
-				<td width="100%">Remaining Balance: </td>
+				<td width="100%">Remaining Balance </td>
 				<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 			</tr>
-			</table>
-		{% endif %}
 		</table>
+		{% endif %}
 	{% endif %}
 
 {% endif %}
@@ -521,7 +575,9 @@ td.amount { white-space: nowrap; }
 	{% if Customer.Layaways and Customer.Layaways|length > 0 %}
 		<h2>Layaways</h2>
 		<table class="lines layaways">
-			{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
+			<tbody>
+				{% for Line in Customer.Layaways.SaleLine %}{{ _self.line(Line,parameters)}}{% endfor %}
+			</tbody>
 		</table>
 		<table class="layways totals">
 			<tr>
@@ -550,7 +606,9 @@ td.amount { white-space: nowrap; }
 	{% if Customer.SpecialOrders|length > 0 %}
 		<h2>Special Orders</h2>
 		<table class="lines specialorders">
-			{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
+			<tbody>
+				{% for Line in Customer.SpecialOrders.SaleLine %}{{ _self.line(Line,parameters) }}{% endfor %}
+			</tbody>
 		</table>
 		<table class="specialorders totals">
 			<tr>
