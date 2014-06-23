@@ -23,7 +23,7 @@
 		}
 		.label .price
 		{
-			font-size: 14px;
+			font-size: 8px;
 			font-weight: bold;
 			float: left;
 			margin-right: 4px;
@@ -38,12 +38,12 @@
 		}
 		.label .barcode
 		{
-			text-align: center;
+			text-align: right;
 			clear: both;
 			position: relative;
-			height: 47px;
-			width: 110px;
-			margin-top: 2px;
+			height: 24px;
+			width: 55px;
+			margin-top: 1px;
 			padding: 0px;
 			overflow: hidden;
 		}
@@ -51,6 +51,18 @@
 		{
 			position: relative;
 			right: 16px;
+		}
+		.label .color
+		{
+			font-size: 8px;
+			text-align: left;
+			position: relative;
+		}
+		.label .size
+		{
+			font-size: 8px;
+			text-align: right;
+			position: relative;
 		}
 	{% else %}
 		.pagebreak
@@ -63,7 +75,7 @@
 			padding: 5px;
 			position: relative;
 			width: 200px;
-			height: 100px;
+			height: 110px;
 			overflow: hidden;
 		}
 		.label h1
@@ -97,7 +109,7 @@
 		}
 		.label .price .saleprice
 		{
-			font-size: 26px;
+			font-size: 8px; 
 			font-weight: bold;
 			margin-top: -5px;
 			margin-bottom: -5px;
@@ -105,7 +117,7 @@
 		.label .price .msrp
 		{
 			clear: both;
-			font-size: 10px;
+			font-size: 8px;
 		}
 		.label .description
 		{
@@ -118,12 +130,24 @@
 		}
 		.label .barcode
 		{
-			text-align: center;
+			text-align: right;
 			clear: both;
 			position: relative;
-			width: 200px;
-			height: 40px;
+			width: 100px;
+			height: 20px;
 			overflow: hidden;
+		}
+		.label .color
+		{
+			font-size: 8px;
+			text-align: left;
+			position: relative;
+		}
+		.label .size
+		{
+			font-size: 8px;
+			text-align: right;
+			position: relative;
 		}
 	{% endif %}
 {% endblock extrastyles %}
@@ -131,7 +155,7 @@
 	{% for Label in Labels %}
 		{% set lastlabel = loop.last %}
 		{% for copy in 1..Label.copies %}
-				<div class="label{% if lastlabel %}{% if Label.copies==copy %}{% else %} pagebreak{% endif %}{% else %} pagebreak{% endif %}">
+				<div class="label{% if not lastlabel %}{% if not loop.last %} pagebreak{% endif %}{% endif %}">
 					{% if parameters.labelSize != "1.25x1.00" %}
 						<h1>{{ Shop.name }}</h1>
 					{% endif %}
