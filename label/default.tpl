@@ -20,11 +20,14 @@
 						{% endif %}
 					</div>
 					{% endif %}
-					<p class="description">{{ Label.Item.description|strreplace('_',' ') }}</p>
+					<div class="barcode">
+						<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
+						<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
+					</div>
 				</article>
-				<footer class="barcode">
-					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
-					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
+				<footer>
+					<p class="color">{{ Label.Item.color }}</p>
+					<p class="size">{{ Label.Item.size }}</p>
 				</footer>
 			</div>
 		{% endfor %}
