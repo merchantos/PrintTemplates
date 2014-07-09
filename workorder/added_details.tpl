@@ -199,7 +199,8 @@ img.barcode {
 						{% endif %}</p>
 					<br />
 				{% endfor %}
-				<h2>Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
+				<h2>Employee: {{ Workorder.Employee.firstName }} {{ Workorder.Employee.lastName }}<br />
+				Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
 				Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
 			</div>
 
