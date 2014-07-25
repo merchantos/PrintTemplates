@@ -174,7 +174,7 @@ dl dd p { margin: 0; }
 		{% else %}
 	    	{% for SalePayment in Sale.SalePayments.SalePayment %}
         		{% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
-                	{{ _self.store_receipt(Sale,parameters) }}
+                	{{ _self.store_receipt(Sale,parameters,SalePayment) }}
                 	{% set page_loaded = true %}
         		{% endif %}
         	{% endfor %}
@@ -206,7 +206,7 @@ dl dd p { margin: 0; }
 	{{ _self.title(Sale,parameters) }}
 	{{ _self.date(Sale) }}
 	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters,false) }}
+	{{ _self.receipt(Sale,parameters,true,false) }}
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
@@ -224,7 +224,7 @@ dl dd p { margin: 0; }
 {% endfor %}
 {% endblock content %}
 
-{% macro store_receipt(Sale,parameters) %}
+{% macro store_receipt(Sale,parameters,Payment) %}
 <div class="store">
 	<div class="header">
 		{{ _self.title(Sale,parameters) }}
@@ -233,11 +233,15 @@ dl dd p { margin: 0; }
 	</div>
 	
 	{{ _self.sale_details(Sale) }}
-	{{ _self.receipt(Sale,parameters,true) }}
+
+	<h2>Payments</h2>
+	<table class="payments">
+		{{ _self.cc_payment_info(Sale,Payment) }}
+	</table>
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
-	{{ _self.cc_agreement(Sale) }}
+	{{ _self.cc_agreement(Sale,Payment) }}
 	{{ _self.workorder_agreement(Sale) }}
 
 	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">	
@@ -326,45 +330,47 @@ dl dd p { margin: 0; }
 </tr>
 {% endmacro %}
 
-{% macro receipt(Sale,parameters,store_copy) %}
+{% macro receipt(Sale,parameters,show_lines,store_copy) %}
 {% if Sale.SaleLines %}
-<table class="sale lines">
-	<thead>
-		<tr>
-			<th>Item</th>
-			<th class="quantity">Qty.</th>
-			<th class="amount">Price</th>
-		</tr>
-	</thead>
-	<tbody>
-		{% for Line in Sale.SaleLines.SaleLine %}
-			{{ _self.line(Line,parameters) }}
-		{% endfor %}
-	</tbody>
-</table>
+	{% if show_lines %}
+		<table class="sale lines">
+			<thead>
+				<tr>
+					<th>Item</th>
+					<th class="quantity">Qty.</th>
+					<th class="amount">Price</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for Line in Sale.SaleLines.SaleLine %}
+					{{ _self.line(Line,parameters) }}
+				{% endfor %}
+			</tbody>
+		</table>
 
-{% if not parameters.gift_receipt %}
-<table class="totals">
-	<tbody>
-  		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
-  		{% if Sale.calcDiscount > 0 %}
-  			<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>
-  		{% elseif Sale.calcDiscount < 0 %}
-			<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
-  		{% endif %}
-		{% for Tax in Sale.TaxClassTotals.Tax %}
-			{% if Tax.taxname %}
-				<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
-			{% endif %}
-			{% if Tax.taxname2 and Tax.rate2 > 0 %}
-				<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
-			{% endif %}
-		{% endfor %}
-        <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.taxTotal|money}}</td></tr>
-		<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
-	</tbody>
-</table>
-{% endif %}
+		{% if not parameters.gift_receipt %}
+			<table class="totals">
+				<tbody>
+			  		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
+			  		{% if Sale.calcDiscount > 0 %}
+			  			<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>
+			  		{% elseif Sale.calcDiscount < 0 %}
+						<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
+			  		{% endif %}
+					{% for Tax in Sale.TaxClassTotals.Tax %}
+						{% if Tax.taxname %}
+							<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+						{% endif %}
+						{% if Tax.taxname2 and Tax.rate2 > 0 %}
+							<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
+						{% endif %}
+					{% endfor %}
+			        <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.taxTotal|money}}</td></tr>
+					<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
+				</tbody>
+			</table>
+		{% endif %}
+	{% endif %}
 {% endif %}
 
 {% if Sale.completed == 'true' and not parameters.gift_receipt %}
@@ -407,54 +413,23 @@ dl dd p { margin: 0; }
 						{% endif %}
 					{% elseif Payment.creditAccountID == 0 %}
 						<!--  NOT Customer Account -->
-						<tr>
-							<td width="100%">
-								{{ Payment.PaymentType.name }}
-	
-								{% if Payment.ccChargeID > 0 %}
-									{% if Payment.CCCharge %}
-										<br>Card Num: {{Payment.CCCharge.xnum}}
-										{% if Payment.CCCharge.cardType|strlen > 0 %}
-											<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
-										{% endif %}
-										{% if Payment.CCCharge.cardholderName|strlen > 0 %}
-											<br>Cardholder: {{Payment.CCCharge.cardholderName}}
-										{% endif %}
-										{% if Payment.CCCharge.entryMethod|strlen > 0 %}
-											<br>Entry: {{Payment.CCCharge.entryMethod}}
-										{% endif %}
-										{% if Payment.CCCharge.authCode|strlen > 0 %}
-											<br>Approval: {{Payment.CCCharge.authCode}}
-										{% endif %}
-										{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
-											<br>ID: {{Payment.CCCharge.gatewayTransID}}
-										{% endif %}
-									{% endif %}
-								{% endif %}
-							</td>
-							<td class="amount">{{Payment.amount|money}}</td>
-						</tr>
+						{{ _self.cc_payment_info(Sale,Payment) }}
 					{% elseif Payment.CreditAccount %}
 						<!-- Customer Account -->
 						<tr>
 						    {% if Payment.amount < 0 %}
 							<td>Account Deposit</td>
 							<td class="amount">{{Payment.amount|getinverse|money}}</td>
-                            {% else %}
-    					    <td>Account Charge</td>
+						    {% else %}
+							<td>Account Charge</td>
 							<td class="amount">{{Payment.amount|money}}</td>
-                            {% endif %}
+						    {% endif %}
 						</tr>
 					{% endif %}
 				{% endif %}
 			{% endfor %}
 			<tr><td colspan="2"></td></tr>
-		    {% for Payment in Sale.SalePayments.SalePayment %}
-			    {% if Payment.PaymentType.name == 'Cash' %}
-				    <tr><td width="100%">Cash</td><td class="amount">{{Payment.amount|money}}</td></tr>
-				    <tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
-    			{% endif %}
-			{% endfor %}
+			{{ _self.sale_cash_payment(Sale) }}
 			</tbody>
 		</table>
 	{% endif %}
@@ -495,24 +470,46 @@ dl dd p { margin: 0; }
 {% endif %}
 {% endmacro %}
 
-{% macro cc_agreement(Sale) %}
-	{% for Payment in Sale.SalePayments.SalePayment %}
-	    {% if Payment.CCCharge %}
-			{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
-				<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
+{% macro cc_payment_info(Sale,Payment) %}
+<tr>
+	<td width="100%">
+	{{ Payment.PaymentType.name }}
+		{% if Payment.ccChargeID > 0 %}
+			<br>Card Num: {{Payment.CCCharge.xnum}}
+			{% if Payment.CCCharge.cardType|strlen > 0 %}
+				<br>Type: {%if Payment.CCCharge.isDebit %}Debit/{% endif %}{{Payment.CCCharge.cardType}}
 			{% endif %}
-			<dl class="signature">
-				<dt>Signature:</dt>
-				<dd>
-					{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
-					{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-					{{Phone.useType}}: {{Phone.number}}<br />
-					{% endfor %}
-					{{ _self.address(Sale.Customer.Contact) }}
-				</dd>
-			</dl>
+			{% if Payment.CCCharge.cardholderName|strlen > 0 %}
+				<br>Cardholder: {{Payment.CCCharge.cardholderName}}
+			{% endif %}
+			{% if Payment.CCCharge.entryMethod|strlen > 0 %}
+				<br>Entry: {{Payment.CCCharge.entryMethod}}
+			{% endif %}
+			{% if Payment.CCCharge.authCode|strlen > 0 %}
+				<br>Approval: {{Payment.CCCharge.authCode}}
+			{% endif %}
+			{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
+				<br>ID: {{Payment.CCCharge.gatewayTransID}}
+			{% endif %}
 		{% endif %}
-	{% endfor %}
+	</td>
+	<td class="amount">{{Payment.amount|money}}</td>
+</tr>
+{% endmacro %}
+
+
+{% macro cc_agreement(Sale,Payment) %}
+{% if Payment.CCCharge %}
+	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
+		<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
+	{% endif %}
+	<dl class="signature">
+		<dt>Signature:</dt>
+		<dd>
+			{{Payment.CCCharge.cardholderName}}<br />
+		</dd>
+	</dl>
+{% endif %}
 {% endmacro %}
 
 {% macro workorder_agreement(Sale) %}
@@ -670,5 +667,20 @@ dl dd p { margin: 0; }
 				</tr>
 			</table>
 		{% endif %}
+	{% endif %}
+{% endmacro %}
+
+{% macro sale_cash_payment(Sale) %}
+	{% set total = Sale.change|floatval %}
+	{% set pay_cash = 'false' %}
+	{% for Payment in Sale.SalePayments.SalePayment %}
+		{% if Payment.PaymentType.name == 'Cash' %}
+			{% set total = total + Payment.amount|floatval %}
+			{% set pay_cash = 'true' %}
+    		{% endif %}
+	{% endfor %}
+	{% if pay_cash == 'true' %}
+		<tr><td width="100%">Cash</td><td class="amount">{{total|money}}</td></tr>
+		<tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
 	{% endif %}
 {% endmacro %}
