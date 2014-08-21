@@ -175,7 +175,7 @@ img.barcode {
                 <p>{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}</p>
                 <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address1 }}</p>
                 <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
-                <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}</p>
+                <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}, {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }} {{ Workorder.Customer.Contact.Addresses.ContactAddress.zip }}</p>
                 {% for ContactPhone in Workorder.Customer.Contact.Phones.ContactPhone %}
                     <p>{{ ContactPhone.number }} ({{ ContactPhone.useType }})</p>
                 {% endfor %}
