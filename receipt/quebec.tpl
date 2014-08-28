@@ -372,7 +372,7 @@ dl dd p { margin: 0; }
 		<table class="payments">
 			<tbody>
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.PaymentType.name != 'Cash' %}
+				{% if Payment.PaymentType.name != 'Cash' and Payment.archived == 'false' %}
 					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
@@ -383,25 +383,25 @@ dl dd p { margin: 0; }
 							</tr>
 							<tr>
 								<td width="100%">Balance</td>
-								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
+								<td class="amount">{{Payment.CreditAccount.balance|getinverse|number_format(2, '.')}}$</td>
 							</tr>
 						{% elseif Payment.amount < 0 and Sale.calcTotal < 0 %}
 							<tr>
 								<td width="100%">Refund To Gift Card</td>
-								<td class="amount">{{Payment.amount|getinverse|money}}</td>
+								<td class="amount">{{Payment.amount|getinverse|number_format(2, '.')}}$</td>
 							</tr>
 							<tr>
 								<td width="100%">Balance</td>
-								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
+								<td class="amount">{{Payment.CreditAccount.balance|getinverse|number_format(2, '.')}}$</td>
 							</tr>
 						{% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
 							<tr>
 								<td width="100%">Gift Card Purchase</td>
-								<td class="amount">{{Payment.amount|getinverse|money}}</td>
+								<td class="amount">{{Payment.amount|getinverse|number_format(2, '.')}}$</td>
 							</tr>
 							<tr>
 								<td width="100%">Balance</td>
-								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
+								<td class="amount">{{Payment.CreditAccount.balance|getinverse|number_format(2, '.')}}$</td>
 							</tr>
 						{% endif %}
 					{% elseif Payment.creditAccountID == 0 %}

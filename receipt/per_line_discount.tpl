@@ -386,7 +386,7 @@ dl dd p { margin: 0; }
 		<table class="payments">
 			<tbody>
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.PaymentType.name != 'Cash' %}
+				{% if Payment.PaymentType.name != 'Cash' and Payment.archived == 'false' %}
 					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
