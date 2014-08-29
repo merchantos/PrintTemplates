@@ -1,7 +1,7 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 
-<!-- default -->
+<!-- item_count -->
 
 @page { margin: 0px; }
 
@@ -209,10 +209,14 @@ dl dd p { margin: 0; }
 	{{ _self.sale_details(Sale) }}
 	{{ _self.receipt(Sale,parameters,true,false) }}
 
+	<!-- Item count loop -->
+
 	{% for Line in Sale.SaleLines.SaleLine %}
 		{% set item_count = item_count + Line.unitQuantity %}
 	{% endfor %}
 	<p>Item Count: {{ item_count }}</p>
+
+	<!-- End Item count loop -->
 
 	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
