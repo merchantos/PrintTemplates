@@ -275,7 +275,11 @@ dl dd p { margin: 0; }
 <h1>
 	{% if Sale.calcTotal >= 0 %}
 		{% if Sale.completed == 'true' %}
-			{% if parameters.gift_receipt %}Cadeau{%else%}Re&#231u{%endif%} de vente
+			{% if parameters.gift_receipt %}
+                Re&#231u Cadeau
+            {% else %}
+                Re&#231u de vente
+        {% endif %}
 		{% elseif Sale.voided == 'true' %}
 			Re&#231u 
 			<large>ANNUL&Eacute;</large>
@@ -286,7 +290,7 @@ dl dd p { margin: 0; }
 			{% endif %}
 		{% endif %}
 	{% else %}
-		Re&#231u de Rembourser
+		Re&#231u de Remboursement
 	{% endif %}
 </h1>
 {% endmacro %}
@@ -294,7 +298,7 @@ dl dd p { margin: 0; }
 {% macro date(Sale) %}
 <p class="date">
 	{% if Sale.timeStamp %}
-		{{Sale.timeStamp|correcttimezone|date('m/d/Y h:i:s A')}}
+		{{Sale.timeStamp|correcttimezone|date('d/m/Y h:i:s A')}}
 	{% else %}
 		{{"now"|date('m/d/Y h:i:s A')}}
 	{% endif %}
@@ -337,8 +341,8 @@ dl dd p { margin: 0; }
 			<thead>
 				<tr>
 					<th>Produits</th>
-					<th class="quantity">Qty.</th>
-					<th class="amount">Prix</th>
+					<th class="quantity">Qt&eacute;.</th>
+					<th class="amount">{% if not parameters.gift_receipt %} Prix {% endif %}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -378,7 +382,7 @@ dl dd p { margin: 0; }
 						<!--  Gift Card -->
 						{% if Payment.amount > 0 %}
 							<tr>
-								<td width="100%">Gift Card Charge</td>
+								<td width="100%">Carte Cadeau</td>
 								<td class="amount">{{Payment.amount|number_format(2, '.')}}$</td>
 							</tr>
 							<tr>
