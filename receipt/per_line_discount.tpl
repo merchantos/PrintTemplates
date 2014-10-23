@@ -1,7 +1,7 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 
-<!-- default -->
+<!-- per_line_discount -->
 
 @page { margin: 0px; }
 
@@ -70,12 +70,10 @@ table thead th { text-align: left; }
 table tbody th { 
 	font-weight: normal; 
 	text-align: left; 
-	width: 55%;
 }
 
-table td.amount, table th.amount {
-  width: 30%;
-  text-align: right;
+table td.amount, table td.quantity, table th.amount, table th.quantity {
+	text-align: right;
 }
 
 td.amount { white-space: nowrap; }
@@ -86,7 +84,6 @@ table.spacer { margin-top: 1em; }
 table tr.total td { font-weight: bold; }
 
 table td.amount { padding-left: 10px; }
-table td.quantity { padding-left: 10px; }
 
 table.sale { border-bottom: 1px solid black; }
 table.sale thead th { border-bottom: 1px solid black; }
@@ -94,6 +91,7 @@ table.sale thead th { border-bottom: 1px solid black; }
 table div.line_description {
 	text-align: left;
 	font-weight: bold;
+	min-width: 55%;
 }
 
 table div.line_note {
@@ -272,7 +270,7 @@ dl dd p { margin: 0; }
 
 
 {% macro title(Sale,parameters) %}
-<h1>
+<h1 id="receiptTypeTitle">
 	{% if Sale.calcTotal >= 0 %}
 		{% if Sale.completed == 'true' %}
 			{% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
@@ -324,16 +322,16 @@ dl dd p { margin: 0; }
 
 {% macro line(Line,parameters) %}
 <tr>
-    <th>
-        {{ _self.lineDescription(Line) }}
+	<th>
+		{{ _self.lineDescription(Line) }}
         {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
             <small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
         {% elseif Line.calcLineDiscount < 0 and not parameters.gift_receipt %}
     	    <small>Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
         {% endif %}
     </th>
-    <td class="quantity">{{Line.unitQuantity}}</td>
-    <td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
+	<td class="quantity">{{Line.unitQuantity}}</td>
+	<td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
 </tr>
 {% endmacro %}
 
@@ -344,7 +342,7 @@ dl dd p { margin: 0; }
 			<thead>
 				<tr>
 					<th>Item</th>
-					<th class="quantity">Qty.</th>
+					<th class="quantity">#</th>
 					<th class="amount">Price</th>
 				</tr>
 			</thead>
@@ -365,11 +363,11 @@ dl dd p { margin: 0; }
 						<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
 			  		{% endif %}
 					{% for Tax in Sale.TaxClassTotals.Tax %}
-						{% if Tax.taxname %}
-							<tr><td width="100%">{{Tax.taxname}} ({{Tax.taxable|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+						{% if Tax.taxname and Tax.rate > 0 %}
+							<tr><td width="100%">{{Tax.taxname}} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
 						{% endif %}
 						{% if Tax.taxname2 and Tax.rate2 > 0 %}
-							<tr><td width="100%">{{Tax.taxname2}} ({{Tax.taxable|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
+							<tr><td width="100%">{{Tax.taxname2}} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
 						{% endif %}
 					{% endfor %}
 			        <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.taxTotal|money}}</td></tr>
@@ -386,7 +384,7 @@ dl dd p { margin: 0; }
 		<table class="payments">
 			<tbody>
 			{% for Payment in Sale.SalePayments.SalePayment %}
-				{% if Payment.PaymentType.name != 'Cash' and Payment.archived == 'false' %}
+				{% if Payment.PaymentType.name != 'Cash' %}
 					<!-- NOT Cash Payment -->
 					{% if Payment.CreditAccount.giftCard == 'true' %}
 						<!--  Gift Card -->
