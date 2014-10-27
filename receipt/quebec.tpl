@@ -70,11 +70,13 @@ table thead th { text-align: left; }
 table tbody th { 
 	font-weight: normal; 
 	text-align: left; 
-	width: 55%;
 }
 
-table td.amount, table th.amount {
-  width: 30%;
+th.description {
+	width: 100%;
+}
+
+table td.amount, table th.amount, table th.quantity {
   text-align: right;
 }
 
@@ -328,7 +330,7 @@ dl dd p { margin: 0; }
 
 {% macro line(Line,parameters) %}
 <tr>
-	<th>{{ _self.lineDescription(Line) }}</th>
+	<th class="description">{{ _self.lineDescription(Line) }}</th>
 	<td class="quantity">{{Line.unitQuantity}}</td>
 	<td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|number_format(2, '.')}}${% endif %}</td>
 </tr>
@@ -340,8 +342,8 @@ dl dd p { margin: 0; }
 		<table class="sale lines">
 			<thead>
 				<tr>
-					<th>Produits</th>
-					<th class="quantity">Qt&eacute;.</th>
+					<th class="description">Produits</th>
+					<th class="quantity">#</th>
 					<th class="amount">{% if not parameters.gift_receipt %} Prix {% endif %}</th>
 				</tr>
 			</thead>
