@@ -76,6 +76,10 @@ table td.amount, table td.quantity, table th.amount, table th.quantity {
 	text-align: right;
 }
 
+th.description {
+	width: 100%;
+}
+
 td.amount { white-space: nowrap; }
 
 table.totals { text-align: right; }
@@ -91,7 +95,6 @@ table.sale thead th { border-bottom: 1px solid black; }
 table div.line_description {
 	text-align: left;
 	font-weight: bold;
-	min-width: 55%;
 }
 
 table div.line_note {
@@ -322,7 +325,7 @@ dl dd p { margin: 0; }
 
 {% macro line(Line,parameters) %}
 <tr>
-	<th>
+	<thc class="description">
 		{{ _self.lineDescription(Line) }}
         {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
             <small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
@@ -341,7 +344,7 @@ dl dd p { margin: 0; }
 		<table class="sale lines">
 			<thead>
 				<tr>
-					<th>Item</th>
+					<th class="description">Item</th>
 					<th class="quantity">#</th>
 					<th class="amount">Price</th>
 				</tr>
