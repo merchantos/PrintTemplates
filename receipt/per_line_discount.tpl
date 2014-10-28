@@ -325,7 +325,7 @@ dl dd p { margin: 0; }
 
 {% macro line(Line,parameters) %}
 <tr>
-	<thc class="description">
+	<th class="description">
 		{{ _self.lineDescription(Line) }}
         {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
             <small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
