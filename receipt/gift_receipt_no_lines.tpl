@@ -1,7 +1,7 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 
-<!-- default -->
+<!-- Gift Receipt No Lines -->
 
 @page { margin: 0px; }
 
