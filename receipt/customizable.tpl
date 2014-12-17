@@ -426,7 +426,8 @@ dl dd p { margin: 0; }
     </th>
     {% if options.show_custom_sku == true %}
         <td class="sku">{{ Line.Item.customSku }}</td>
-    {% elseif options.show_manufacturer_sku == true %}
+    {% endif %}
+    {% if options.show_manufacturer_sku == true %}
         <td class="sku">{{ Line.Item.manufacturerSku }}</td>
     {% endif %}
     {% if not parameters.gift_receipt %}
@@ -450,8 +451,11 @@ dl dd p { margin: 0; }
         <thead>
             <tr>
                 <th class="description">Item</th>
-                {% if options.show_custom_sku == true or options.show_manufacturer_sku == true %}
-                    <th class="sku">SKU</th>
+                {% if options.show_custom_sku == true %}
+                    <th class="sku">Custom SKU</th>
+                {% endif %}
+                {% if options.show_manufacturer_sku == true %}
+                    <th class="sku">Man. SKU </th>
                 {% endif %}
                 <th class="quantity">#</th>
                 {% if not parameters.gift_receipt %}<th class="amount">Price</th>{% endif %}
