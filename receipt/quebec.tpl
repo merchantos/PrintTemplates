@@ -680,7 +680,7 @@ R&eacute;parations</h2>
     		{% endif %}
 	{% endfor %}
 	{% if pay_cash == 'true' %}
-		<tr><td width="100%">Comptant</td><td class="amount">{{Payment.amount|number_format(2, '.')}}$</td></tr>
-		<tr><td width="100%">Monnaie</td><td class="amount">{{Sale.change|number_format(2, '.')}}$</td></tr>
+		<tr><td width="100%">Comptant</td><td id="receiptPaymentsCash" class="amount">{{total|number_format(2, '.')}}$</td></tr>
+        <tr><td width="100%">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|number_format(2, '.')}}$</td></tr>
 	{% endif %}
 {% endmacro %}
