@@ -17,6 +17,9 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set customer_name_only = false %}            {# Hides all Customer information except for their name #}
 {% set show_customer_notes = false %}           {# Displays Notes entered in the Customer's profile #}
 
+{% set credit_account_signature = false %}      {# Prints Store Copy with signature line on accounts that use an Account Credit (not Deposit) #}
+{% set credit_account_agreement = 'I authorize the above charge to my Credit Account.' %}   {# The text that will display with the signature line #}
+
 {% set hide_customer_layaways = false %}        {# Hides Customer Layaway information at the bottom of receipts #}
 {% set hide_customer_specialorders = false %}   {# Hides Customer Special Order information at the bottom of receipts #}
 {% set hide_customer_workorders = false %}      {# Hides Customer Work Order information at the bottom of receipts #}
@@ -218,7 +221,10 @@ dl dd p { margin: 0; }
             {% set page_loaded = true %}
         {% else %}
             {% for SalePayment in Sale.SalePayments.SalePayment %}
-                {% if SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
+                {% if SalePayment.CreditAccount.balance > 0 and credit_account_signature == true %}
+                    {{ _self.store_receipt(Sale,parameters,SalePayment,_context) }}
+                    {% set page_loaded = true %}
+                {% elseif SalePayment.CCCharge and SalePayment.CCCharge.isDebit == 'false' %}
                     {{ _self.store_receipt(Sale,parameters,SalePayment,_context) }}
                     {% set page_loaded = true %}
                 {% endif %}
@@ -266,12 +272,18 @@ dl dd p { margin: 0; }
 
     {# End Item count loop #}
 
-    {% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p id="receiptQuoteNote" class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
+    {% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}
+        <p id="receiptQuoteNote" class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>
+    {% endif %}
 
-    {% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p id="receiptNote" class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>{% endif %}
+    {% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}
+        <p id="receiptNote" class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>
+    {% endif %}
 
     {% if not parameters.gift_receipt %}
-    <p id="receiptThankYouNote" class="thankyou">Thank You{% if Sale.Customer %} {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
+        <p id="receiptThankYouNote" class="thankyou">
+            Thank You{% if Sale.Customer %} {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!
+        </p>
     {% endif %}
 
     <img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
@@ -303,7 +315,7 @@ dl dd p { margin: 0; }
 
     {% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
-    {{ _self.cc_agreement(Sale,Payment) }}
+    {{ _self.cc_agreement(Sale,Payment,options) }}
     {{ _self.workorder_agreement(Sale) }}
 
     <img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">  
@@ -623,9 +635,11 @@ dl dd p { margin: 0; }
 {% endmacro %}
 
 
-{% macro cc_agreement(Sale,Payment) %}
-{% if Payment.CCCharge %}
-    {% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
+{% macro cc_agreement(Sale,Payment,options) %}
+{% if Payment.CCCharge or Payment.CreditAccount.balance > 0 %}
+    {% if options.credit_account_agreement|strlen > 0 and Payment.CreditAccount.balance > 0 %}
+        {{ options.credit_account_agreement }}
+    {% elseif Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
         <p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
     {% endif %}
     <dl id="signatureSection" class="signature">
