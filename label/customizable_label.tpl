@@ -138,7 +138,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 							{% endfor %}
 						{% endif %}
                         {% if show_custom_sku == true %}
-                            {% if Label.Item.manufacturerSku|strlen > 0 %}
+                            {% if Label.Item.customSku|strlen > 0 %}
                                 <i>{{ Label.Item.customSku }}</i>
                             {% endif %}
                         {% endif %}
