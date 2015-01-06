@@ -5,6 +5,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
 {% set per_line_discount = false %}             {# Displays Discounts on each Sale Line #}
 {% set per_line_subtotal = false %}             {# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
+{% set per_line_discounted_subtotal = false %}  {# Strikes out original subtotal and replaces it with discounted total #}
 {% set show_custom_sku = false %}               {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
 {% set show_manufacturer_sku = false %}         {# Adds SKU column for Manufacturer SKU, if available, on each Sale Line #}
 
@@ -26,6 +27,25 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set hide_customer_credit_account = false %}  {# Hides Customer Credit Account information at the bottom of receipts #}
 
 {% set logo_width = '225px' %}                  {# Default width is 225px. A smaller number will scale logo down #}
+{% set multi_shop_logos = false %}              {# Allows multiple logos to be added for separate locations when used with options below #}
+    
+{#
+    Use the following shop_logo_array to enter all of your locations and the link to the logo image that you have uploaded to the internet.
+    Enter your EXACT shop name (Case Sensitive!) in the Quotes after the "name": entry and then enter the URL to your logo after the "logo": entry.
+    Be sure to set the multi_shop_logos setting above to true in order to have these logos take effect!
+#}
+
+{% set shop_logo_array =
+    {
+        0:{"name":"Example Shop", "logo_url":"http://logo.url.goes/here.jpg"},
+        1:{"name":"", "logo_url":""},
+        2:{"name":"", "logo_url":""},
+        3:{"name":"", "logo_url":""},
+        4:{"name":"", "logo_url":""},
+        5:{"name":"", "logo_url":""}
+    }
+%}
+
 
 {#
                             ***End Custom Options***
@@ -238,9 +258,15 @@ dl dd p { margin: 0; }
 <div>
     {{ _self.ship_to(Sale) }}
 
-    <div class="header">        
-        {% if Sale.Shop.ReceiptSetup.hasLogo == 'true' %}
-            <img src="{{Sale.Shop.ReceiptSetup.logo}}" width={{ logo_width }} class="logo">
+    <div class="header">
+        {% if multi_shop_logos == true %}
+            {% for shop in shop_logo_array %}
+                {% if shop.name == Sale.Shop.name %}
+                    <img src="{{ shop.logo_url }}" width ={{ logo_width }} class="logo">
+                {% endif %}
+            {% endfor %}
+        {% elseif Sale.Shop.ReceiptSetup.hasLogo == 'true' %}
+            <img src="{{ Sale.Shop.ReceiptSetup.logo }}" width={{ logo_width }} class="logo">
         {% else %}
             <h3>{{ Sale.Shop.name }}</h3>
         {% endif %}
@@ -444,8 +470,21 @@ dl dd p { margin: 0; }
     {% endif %}
     {% if not parameters.gift_receipt %}
         {% if options.per_line_subtotal == true %}
-            <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
-            <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>
+            {% if options.per_line_discounted_subtotal == true and Line.calcLineDiscount > 0 %}
+                <td data-automation="lineItemQuantity" class="quantity"><strike>{{Line.unitQuantity}} x 
+                    {% if Line.discountAmount > 0 %}
+                        {{Line.unitPrice|money}}</strike><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval -Line.discountAmount|floatval)|money }}</td>
+                    {% elseif Line.discountPercent > 0 %}
+                        {{Line.unitPrice|money}}</strike><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval * (1 - Line.discountPercent|floatval))|money }}</td>
+                    {% endif %}
+                <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ Line.calcTotal|money }}</td>
+            {% else %}
+                <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
+                <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>
+            {% endif %}
+        {% elseif options.per_line_discounted_subtotal == true %}
+            <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
+            <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ Line.calcTotal|money }}</td>
         {% else %}
             <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
             <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>
@@ -769,7 +808,7 @@ dl dd p { margin: 0; }
     {% endif %}
 {% endmacro %}
 
-{% macro workorders(Customer,parameters,per_line_discount,per_line_subtotal,show_custom_sku,show_manufacturer_sku) %}
+{% macro workorders(Customer,parameters,options) %}
     {% if Customer.Workorders|length > 0 %}
         <h2>Open Workorders</h2>
         <table class="lines workorders">
