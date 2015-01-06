@@ -483,14 +483,14 @@ dl dd p { margin: 0; }
                     {% elseif Line.discountPercent > 0 %}
                         {{Line.unitPrice|money}}</strike><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval * (1 - Line.discountPercent|floatval))|money }}</td>
                     {% endif %}
-                <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ Line.calcTotal|money }}</td>
+                <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|money }}</td>
             {% else %}
                 <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
                 <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>
             {% endif %}
         {% elseif options.per_line_discounted_subtotal == true %}
             <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
-            <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ Line.calcTotal|money }}</td>
+            <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|money }}</td>
         {% else %}
             <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
             <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>
