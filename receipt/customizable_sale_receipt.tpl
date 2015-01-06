@@ -259,26 +259,32 @@ dl dd p { margin: 0; }
     {{ _self.ship_to(Sale) }}
 
     <div class="header">
+        {% set logo_printed = false %}
         {% if multi_shop_logos == true %}
             {% for shop in shop_logo_array %}
                 {% if shop.name == Sale.Shop.name %}
-                    <img src="{{ shop.logo_url }}" width ={{ logo_width }} class="logo">
+                    {% if shop.logo_url|strlen > 0 %}
+                        <img src="{{ shop.logo_url }}" width ={{ logo_width }} class="logo">
+                        {% set logo_printed = true %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         {% elseif Sale.Shop.ReceiptSetup.hasLogo == 'true' %}
             <img src="{{ Sale.Shop.ReceiptSetup.logo }}" width={{ logo_width }} class="logo">
-        {% else %}
+            {% set logo_printed = true %}
+        {% endif %}
+        {% if logo_printed == false %}
             <h3>{{ Sale.Shop.name }}</h3>
         {% endif %}
-    {% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
-        <p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
-    {% else %}
-        {{ _self.address(Sale.Shop.Contact) }}
-        {% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
-            <br />{{ContactPhone.number}}
-        {% endfor %}
-    {% endif %}
-    </div>
+        {% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
+            <p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
+        {% else %}
+            {{ _self.address(Sale.Shop.Contact) }}
+            {% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
+                <br />{{ContactPhone.number}}
+            {% endfor %}
+        {% endif %}
+        </div>
 
     {{ _self.title(Sale,parameters,quote_to_invoice) }}
     {{ _self.date(Sale) }}
