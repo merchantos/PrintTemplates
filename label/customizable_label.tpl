@@ -7,6 +7,8 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set show_custom_sku = false %}                   {# Display Custom SKU (if available) above Description #}
 {% set show_manufacturer_sku = false %}             {# Display Manufacturer SKU (if available) above Description #}
 {% set show_date = false %}                         {# Display today's date above description (ddmmyy formatting) #}
+{% set date_format = 'mdy' %}                       {# Format the date is shown in if show_date is enabled.
+                                                        m = 2 digit month, d = 2 digit day, y = 2 digit year, Y = 4 digit year #}
 
 {# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
 
@@ -132,7 +134,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 					{% endif %}
 					<p class="description">
                         {% if show_date == true %}
-                            {{"now"|date('mdy')}}
+                            {{"now"|date(date_format)}}
                         {% endif %}
 						{% if vendor_number == true %}
 							{% for ItemVendorNum in Label.Item.ItemVendorNums.ItemVendorNum %}
