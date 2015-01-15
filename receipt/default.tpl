@@ -214,7 +214,7 @@ dl dd p { margin: 0; }
 	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>{% endif %}
 
 	{% if not parameters.gift_receipt %}
-	<p class="thankyou">Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
+	<p class="thankyou">Thank You{% if Sale.Customer %} ,{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
 	{% endif %}
 
 	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
