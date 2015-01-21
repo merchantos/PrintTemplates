@@ -518,11 +518,15 @@ dl dd p { margin: 0; }
         <thead>
             <tr>
                 <th class="description">Item</th>
-                {% if options.show_custom_sku == true %}
+                {% if options.show_custom_sku == true and options.show_manufacturer_sku == true %}
                     <th class="sku">Custom SKU</th>
+                {% elseif options.show_custom_sku %}
+                    <th class="sku">SKU</th>
                 {% endif %}
-                {% if options.show_manufacturer_sku == true %}
+                {% if options.show_custom_sku == true and options.show_manufacturer_sku == true %}
                     <th class="sku">Man. SKU </th>
+                {% elseif options.show_manufacturer_sku == true %}
+                    <th class="sku">SKU</th>
                 {% endif %}
                 <th class="quantity">#</th>
                 {% if not parameters.gift_receipt %}<th class="amount">Price</th>{% endif %}
