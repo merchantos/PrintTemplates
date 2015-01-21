@@ -3,20 +3,28 @@
 Set any of the options in this section from 'false' to 'true' in order to enable them in the template
 #}
 
+{# Item Lines #}
+
 {% set per_line_discount = false %}             {# Displays Discounts on each Sale Line #}
 {% set per_line_subtotal = false %}             {# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set per_line_discounted_subtotal = false %}  {# Strikes out original subtotal and replaces it with discounted total #}
 {% set show_custom_sku = false %}               {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
 {% set show_manufacturer_sku = false %}         {# Adds SKU column for Manufacturer SKU, if available, on each Sale Line #}
 
+{# Misc. adjustments #}
+
 {% set transaction_item_count = false %}        {# Gives a total quantity of items sold near the bottom of the receipt #}
 {% set store_copy_show_lines = false %}         {# Shows Sale Lines on Credit Card Store Copy receipts #}
 {% set quote_to_invoice = false %}              {# Changes Quote wording to Invoice in Sales and in Sale Quotes (does not apply to Work Order Quotes) #}
 {% set gift_receipt_no_lines = false %}         {# Removes Sale Lines from Gift Receipts #}
 
+{# Customer information #}
+
 {% set display_full_customer_address = false %} {# Displays Customer's full address, if available #}
 {% set customer_name_only = false %}            {# Hides all Customer information except for their name #}
 {% set show_customer_notes = false %}           {# Displays Notes entered in the Customer's profile #}
+
+{# Customer Account  #}
 
 {% set credit_account_signature = false %}      {# Prints Store Copy with signature line on accounts that use an Account Credit (not Deposit) #}
 {% set credit_account_agreement = 'I authorize the above charge to my Credit Account.' %}   {# The text that will display with the signature line #}
@@ -26,9 +34,11 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set hide_customer_workorders = false %}      {# Hides Customer Work Order information at the bottom of receipts #}
 {% set hide_customer_credit_account = false %}  {# Hides Customer Credit Account information at the bottom of receipts #}
 
+{# Logos #}
+
 {% set logo_width = '225px' %}                  {# Default width is 225px. A smaller number will scale logo down #}
 {% set multi_shop_logos = false %}              {# Allows multiple logos to be added for separate locations when used with options below #}
-    
+
 {#
     Use the following shop_logo_array to enter all of your locations and the link to the logo image that you have uploaded to the internet.
     Enter your EXACT shop name (Case Sensitive!) in the Quotes after the "name": entry and then enter the URL to your logo after the "logo": entry.
@@ -106,9 +116,9 @@ h2 {
     margin: 0;
 }
 
-.header img { 
+.header img {
     display: block;
-    margin: 8px auto 4px; 
+    margin: 8px auto 4px;
     text-align: center;
 }
 
@@ -120,9 +130,9 @@ table {
 
 table thead th { text-align: left; }
 
-table tbody th { 
-    font-weight: normal; 
-    text-align: left; 
+table tbody th {
+    font-weight: normal;
+    text-align: left;
 }
 
 table td.amount, table th.amount {
@@ -194,8 +204,8 @@ table.workorders td.workorder div.line_note {
     padding-left: 0px;
 }
 
-p.thankyou { 
-    margin: 0; 
+p.thankyou {
+    margin: 0;
     text-align: center;
 }
 
@@ -203,14 +213,14 @@ p.thankyou {
 
 img.barcode {
     display: block;
-    margin: 0 auto; 
+    margin: 0 auto;
 }
 
 dl {
     overflow: hidden
 }
 
-dl dt { 
+dl dt {
     font-weight: bold;
     width: 80px;
     float: left
@@ -333,7 +343,7 @@ dl dd p { margin: 0; }
         <p class="copy">Store Copy</p>
         {{ _self.date(Sale) }}
     </div>
-    
+
     {{ _self.sale_details(Sale,options) }}
 
     {% if options.store_copy_show_lines == true %}
@@ -350,7 +360,7 @@ dl dd p { margin: 0; }
     {{ _self.cc_agreement(Sale,Payment,options) }}
     {{ _self.workorder_agreement(Sale) }}
 
-    <img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">  
+    <img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
 
     {{ _self.ship_to(Sale) }}
 </div>
@@ -383,7 +393,7 @@ dl dd p { margin: 0; }
         {% if Sale.completed == 'true' %}
             {% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
         {% elseif Sale.voided == 'true' %}
-            Receipt 
+            Receipt
             <large>VOIDED</large>
         {% else %}
             {% if quote_to_invoice == true %}
@@ -432,9 +442,9 @@ dl dd p { margin: 0; }
         <span id="receiptPhonesContainer" class="indent">
         {% if options.display_full_customer_address == true %}
             {% for ContactAddress in Sale.Customer.Contact.Addresses.ContactAddress %}
-                Address: {{ ContactAddress.address1 }}  
-                {{ ContactAddress.city }}, 
-                {{ ContactAddress.state }}, 
+                Address: {{ ContactAddress.address1 }}
+                {{ ContactAddress.city }},
+                {{ ContactAddress.state }},
                 {{ ContactAddress.zip }}<br />
             {% endfor %}
         {% endif %}
@@ -477,7 +487,7 @@ dl dd p { margin: 0; }
     {% if not parameters.gift_receipt %}
         {% if options.per_line_subtotal == true %}
             {% if options.per_line_discounted_subtotal == true and Line.calcLineDiscount > 0 %}
-                <td data-automation="lineItemQuantity" class="quantity"><strike>{{Line.unitQuantity}} x 
+                <td data-automation="lineItemQuantity" class="quantity"><strike>{{Line.unitQuantity}} x
                     {% if Line.discountAmount > 0 %}
                         {{Line.unitPrice|money}}</strike><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval -Line.discountAmount|floatval)|money }}</td>
                     {% elseif Line.discountPercent > 0 %}
@@ -488,7 +498,7 @@ dl dd p { margin: 0; }
                 <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</td>
                 <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>
             {% endif %}
-        {% elseif options.per_line_discounted_subtotal == true %}
+        {% elseif options.per_line_discounted_subtotal == true and Line.calcLineDiscount > 0 %}
             <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
             <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|money}}</strike><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|money }}</td>
         {% else %}
@@ -609,7 +619,7 @@ dl dd p { margin: 0; }
             </tbody>
         </table>
     {% endif %}
-    
+
     {% if Sale.Customer and store_copy == false %}
         {% if options.hide_customer_layaways == false %}
             {{ _self.layaways(Sale.Customer,parameters.gift_receipt,_context)}}
@@ -621,7 +631,7 @@ dl dd p { margin: 0; }
             {{ _self.workorders(Sale.Customer,parameters.gift_receipt,_context)}}
         {% endif %}
     {% endif %}
-    
+
     {% if Sale.Customer and not parameters.gift_receipt and store_copy == false and options.hide_customer_credit_account == false %}
         {% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
             <h2>Store Account</h2>
@@ -698,10 +708,10 @@ dl dd p { margin: 0; }
 
 {% macro workorder_agreement(Sale) %}
     {% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 and Sale.Workorders %}
-    <!-- 
+    <!--
         @FIXME
         Should only print this work_order agreement if it's never been signed before.
-        transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->    
+        transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->
         <div class="signature">
             <p>{{Sale.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
             <dl class="signature">
@@ -717,11 +727,11 @@ dl dd p { margin: 0; }
     <div class="shipping">
         <h4>Ship To</h4>
         {{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
-        
+
         {% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
         <p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
         {% endif %}{% endfor %}
-        
+
         {% if Sale.ShipTo.shipNote|strlen > 0 %}
         <h5>Instructions</h5>
         <p>{{Sale.ShipTo.shipNote}}</p>
