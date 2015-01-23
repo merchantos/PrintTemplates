@@ -17,6 +17,13 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set bottom_margin = '0px' %}
 {% set left_margin = '0px' %}
 
+{# Enter Category IDs (found in Settings > Categories to the left of Category names) into the appropriate section, separated by commas and enclosed in single quotes #}
+
+{% set normal_label_categories =  [''] %}
+{% set alt_label_categories = [''] %}
+{% set small_label_categories = [''] %}
+{% set jewelry_label_categories = [''] %}
+
 {# Normal Label (2.25x1.25) settings #}
 
 {% set normal_description_font_size = '9pt' %}      {# Default is 9pt #}
@@ -60,11 +67,11 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 <link href="/assets/css/labels.css" media="all" rel="stylesheet" type="text/css" />
 
 <style type="text/css">
-    
+
     body {
         margin: {{top_margin}} {{right_margin}} {{bottom_margin}} {{left_margin}};
     }
-    
+
     {# Normal Label (2.25x1.25) CSS settings #}
 
     .label.size225x125 .description {
@@ -121,7 +128,34 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 	<div class="labels">
 	{% for Label in Labels %}
 		{% for copy in 1..Label.copies %}
-			<div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+            {% set size_specified = false %}
+            {% for category in normal_label_categories %}
+                {% if category == Label.Item.categoryID %}
+                    <div class="label size225x125{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                    {% set size_specified = true %}
+                {% endif %}
+            {% endfor %}
+            {% for category in alt_label_categories %}
+                {% if category == Label.Item.categoryID %}
+                    <div class="label size200x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                    {% set size_specified = true %}
+                {% endif %}
+            {% endfor %}
+            {% for category in small_label_categories %}
+                {% if category == Label.Item.categoryID %}
+                    <div class="label size125x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                    {% set size_specified = true %}
+                {% endif %}
+            {% endfor %}
+            {% for category in jewelry_label_categories %}
+                {% if category == Label.Item.categoryID %}
+                    <div class="label size220x50{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                    {% set size_specified = true %}
+                {% endif %}
+            {% endfor %}
+            {% if size_specified == false %}
+                <div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+            {% endif %}
 				<article>
 					<h1>{{ Label.MetaData.title }}</h1>
 					{% if Label.MetaData.price > 0 %}
