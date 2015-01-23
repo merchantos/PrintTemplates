@@ -3,6 +3,8 @@
 Set any of the options in this section from 'false' to 'true' in order to enable them in the template
 #}
 
+{% set chrome_right_margin_fix = false %}       {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
+
 {# Item Lines #}
 
 {% set per_line_discount = false %}             {# Displays Discounts on each Sale Line #}
@@ -71,6 +73,9 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 body {
     font: normal 10pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin: 0;
+    {% if chrome_right_margin_fix == true %}
+        margin-right: .13in;
+    {% endif %}
     padding: 1px; <!-- You need this to make the printer behave -->
 }
 
