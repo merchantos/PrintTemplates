@@ -7,6 +7,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set show_custom_sku = false %}                   {# Display Custom SKU (if available) above Description #}
 {% set show_manufacturer_sku = false %}             {# Display Manufacturer SKU (if available) above Description #}
 {% set show_date = false %}                         {# Display today's date above description (ddmmyy formatting) #}
+{% set price_with_no_cents = false %}               {# Remove cents from being displayed in price #}
 {% set date_format = 'mdy' %}                       {# Format the date is shown in if show_date is enabled.
                                                         m = 2 digit month, d = 2 digit day, y = 2 digit year, Y = 4 digit year #}
 
@@ -160,7 +161,11 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 					<h1>{{ Label.MetaData.title }}</h1>
 					{% if Label.MetaData.price > 0 %}
 					<div class="price">
-						<p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
+                        {% if price_with_no_cents == true %}
+                            <p class="saleprice"><sup class="currency">$</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}</p>
+                        {% else %}
+						  <p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
+                        {% endif %}
 						{% if Label.MetaData.msrp %}
 						<p class="msrp">MSRP {{ Label.MetaData.msrp|money }}</p>
 						{% endif %}
