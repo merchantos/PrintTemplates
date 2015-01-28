@@ -631,13 +631,13 @@ dl dd p { margin: 0; }
 
     {% if Sale.Customer and store_copy == false %}
         {% if options.hide_customer_layaways == false %}
-            {{ _self.layaways(Sale.Customer,parameters.gift_receipt,_context)}}
+            {{ _self.layaways(Sale.Customer,parameters.gift_receipt,options)}}
         {% endif %}
         {% if options.hide_customer_specialorders == false %}
-            {{ _self.specialorders(Sale.Customer,parameters.gift_receipt,_context)}}
+            {{ _self.specialorders(Sale.Customer,parameters.gift_receipt,options)}}
         {% endif %}
         {% if options.hide_customer_workorders == false %}
-            {{ _self.workorders(Sale.Customer,parameters.gift_receipt,_context)}}
+            {{ _self.workorders(Sale.Customer,parameters.gift_receipt,options)}}
         {% endif %}
     {% endif %}
 
