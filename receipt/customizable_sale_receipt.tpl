@@ -4,6 +4,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 #}
 
 {% set chrome_right_margin_fix = false %}       {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
+{% set firefox_margin_fix = false %}            {# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
 
 {# Item Lines #}
 
@@ -68,13 +69,17 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% block extrastyles %}
 
 
-@page { margin: 0px; }
+@page {
+    margin: 0;
+}
 
 body {
     font: normal 10pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    margin: 0;
     {% if chrome_right_margin_fix == true %}
         margin-right: .13in;
+    {% endif %}
+    {% if firefox_margin_fix == true %}
+        margin: 25px;
     {% endif %}
     padding: 1px; <!-- You need this to make the printer behave -->
 }
@@ -782,7 +787,7 @@ dl dd p { margin: 0; }
         <table class="layways totals">
             <tr>
                 <td width="100%">Subtotal</td>
-                <td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
+                <td class="amount">{{Customer.MetaData.layawaysSubtotal|money}}</td>
             </tr>
             {% if Customer.MetaData.layawaysAllDiscounts>0.00 %}
                 <tr>
