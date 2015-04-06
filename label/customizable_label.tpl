@@ -71,6 +71,10 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 <style type="text/css">
 
     body {
+        margin: 0;
+    }
+
+    .custom_margin {
         margin: {{top_margin}} {{right_margin}} {{bottom_margin}} {{left_margin}};
     }
 
@@ -130,82 +134,84 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 	<div class="labels">
 	{% for Label in Labels %}
 		{% for copy in 1..Label.copies %}
-            {% set size_specified = false %}
-            {% for category in normal_label_categories %}
-                {% if category == Label.Item.categoryID %}
-                    <div class="label size225x125{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                    {% set size_specified = true %}
+            <div class="custom_margin">
+                {% set size_specified = false %}
+                {% for category in normal_label_categories %}
+                    {% if category == Label.Item.categoryID %}
+                        <div class="label size225x125{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                        {% set size_specified = true %}
+                    {% endif %}
+                {% endfor %}
+                {% for category in alt_label_categories %}
+                    {% if category == Label.Item.categoryID %}
+                        <div class="label size200x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                        {% set size_specified = true %}
+                    {% endif %}
+                {% endfor %}
+                {% for category in small_label_categories %}
+                    {% if category == Label.Item.categoryID %}
+                        <div class="label size125x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                        {% set size_specified = true %}
+                    {% endif %}
+                {% endfor %}
+                {% for category in jewelry_label_categories %}
+                    {% if category == Label.Item.categoryID %}
+                        <div class="label size220x50{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                        {% set size_specified = true %}
+                    {% endif %}
+                {% endfor %}
+                {% if size_specified == false %}
+                    <div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
                 {% endif %}
-            {% endfor %}
-            {% for category in alt_label_categories %}
-                {% if category == Label.Item.categoryID %}
-                    <div class="label size200x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                    {% set size_specified = true %}
-                {% endif %}
-            {% endfor %}
-            {% for category in small_label_categories %}
-                {% if category == Label.Item.categoryID %}
-                    <div class="label size125x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                    {% set size_specified = true %}
-                {% endif %}
-            {% endfor %}
-            {% for category in jewelry_label_categories %}
-                {% if category == Label.Item.categoryID %}
-                    <div class="label size220x50{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                    {% set size_specified = true %}
-                {% endif %}
-            {% endfor %}
-            {% if size_specified == false %}
-                <div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-            {% endif %}
-				<article>
-					<h1>{{ Label.MetaData.title }}</h1>
-					{% if Label.MetaData.price > 0 %}
-					<div class="price">
-                        {% if price_with_no_cents == true %}
-                            <p class="saleprice"><sup class="currency">$</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}</p>
-                        {% else %}
-						  <p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
-                        {% endif %}
-						{% if Label.MetaData.msrp %}
-						<p class="msrp">MSRP {{ Label.MetaData.msrp|money }}</p>
-						{% endif %}
-					</div>
-					{% endif %}
-					<p class="description">
-                        {% if show_date == true %}
-                            {{"now"|date(date_format)}}
-                        {% endif %}
-						{% if vendor_number == true %}
-							{% for ItemVendorNum in Label.Item.ItemVendorNums.ItemVendorNum %}
-	   							{% if Label.Item.defaultVendorID+0 == ItemVendorNum.vendorID+0 %}
-	   								<span style="font-style: italic;">{{ ItemVendorNum.value }}</span>
-	   							{% endif %}
-							{% endfor %}
-						{% endif %}
-                        {% if show_upc_code == true %}
-                            {% if Label.Item.upc|strlen > 0 %}
-                                <i>{{ Label.Item.upc }}</i>
+    				<article>
+    					<h1>{{ Label.MetaData.title }}</h1>
+    					{% if Label.MetaData.price > 0 %}
+    					<div class="price">
+                            {% if price_with_no_cents == true %}
+                                <p class="saleprice"><sup class="currency">$</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}</p>
+                            {% else %}
+    						  <p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
                             {% endif %}
-                        {% endif %}
-                        {% if show_custom_sku == true %}
-                            {% if Label.Item.customSku|strlen > 0 %}
-                                <i>{{ Label.Item.customSku }}</i>
+    						{% if Label.MetaData.msrp %}
+    						<p class="msrp">MSRP {{ Label.MetaData.msrp|money }}</p>
+    						{% endif %}
+    					</div>
+    					{% endif %}
+    					<p class="description">
+                            {% if show_date == true %}
+                                {{"now"|date(date_format)}}
                             {% endif %}
-                        {% endif %}
-                        {% if show_manufacturer_sku == true %}
-                            {% if Label.Item.manufacturerSku|strlen > 0 %}
-                                <i>{{ Label.Item.manufacturerSku }}</i>
+    						{% if vendor_number == true %}
+    							{% for ItemVendorNum in Label.Item.ItemVendorNums.ItemVendorNum %}
+    	   							{% if Label.Item.defaultVendorID+0 == ItemVendorNum.vendorID+0 %}
+    	   								<span style="font-style: italic;">{{ ItemVendorNum.value }}</span>
+    	   							{% endif %}
+    							{% endfor %}
+    						{% endif %}
+                            {% if show_upc_code == true %}
+                                {% if Label.Item.upc|strlen > 0 %}
+                                    <i>{{ Label.Item.upc }}</i>
+                                {% endif %}
                             {% endif %}
-                        {% endif %}
-						{{ Label.Item.description|strreplace('_',' ') }}
-					</p>
-				</article>
-				<footer class="barcode">
-					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
-					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
-				</footer>
-			</div>
+                            {% if show_custom_sku == true %}
+                                {% if Label.Item.customSku|strlen > 0 %}
+                                    <i>{{ Label.Item.customSku }}</i>
+                                {% endif %}
+                            {% endif %}
+                            {% if show_manufacturer_sku == true %}
+                                {% if Label.Item.manufacturerSku|strlen > 0 %}
+                                    <i>{{ Label.Item.manufacturerSku }}</i>
+                                {% endif %}
+                            {% endif %}
+    						{{ Label.Item.description|strreplace('_',' ') }}
+    					</p>
+    				</article>
+    				<footer class="barcode">
+    					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
+    					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
+    				</footer>
+    			</div>
+            </div>
 		{% endfor %}
 	{% endfor %}
 	</div>
