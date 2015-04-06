@@ -75,6 +75,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
 body {
     font: normal 10pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    margin: 0;
     {% if chrome_right_margin_fix == true %}
         margin-right: .13in;
     {% endif %}
