@@ -11,6 +11,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set price_with_no_cents = false %}               {# Remove cents from being displayed in price #}
 {% set date_format = 'mdy' %}                       {# Format the date is shown in if show_date is enabled.
                                                         m = 2 digit month, d = 2 digit day, y = 2 digit year, Y = 4 digit year #}
+{% set hide_price = false %}                        {# Remove the price from displaying on label #}
 
 {# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
 
@@ -46,7 +47,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set jewelry_description_font_size = '7.5pt' %}   {# Default is 7.5pt #}
 {% set jewelry_price_font_size = '6pt' %}           {# Default is 6pt #}
 
-{# For Vertical:   Negative numbers move up, positive move down 
+{# For Vertical:   Negative numbers move up, positive move down
    For Horizontal: Negative numbers move right, positive move left #}
 
 {% set jewelry_description_vertical = '0px' %}
@@ -165,18 +166,20 @@ Set any of the options in this section from 'false' to 'true' in order to enable
                 {% endif %}
     				<article>
     					<h1>{{ Label.MetaData.title }}</h1>
-    					{% if Label.MetaData.price > 0 %}
-    					<div class="price">
-                            {% if price_with_no_cents == true %}
-                                <p class="saleprice"><sup class="currency">$</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}</p>
-                            {% else %}
-    						  <p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
-                            {% endif %}
-    						{% if Label.MetaData.msrp %}
-    						<p class="msrp">MSRP {{ Label.MetaData.msrp|money }}</p>
-    						{% endif %}
-    					</div>
-    					{% endif %}
+                        {% if hide_price == false %}
+        					{% if Label.MetaData.price > 0 %}
+            					<div class="price">
+                                    {% if price_with_no_cents == true %}
+                                        <p class="saleprice"><sup class="currency">$</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}</p>
+                                    {% else %}
+            						  <p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
+                                    {% endif %}
+            						{% if Label.MetaData.msrp %}
+            						<p class="msrp">MSRP {{ Label.MetaData.msrp|money }}</p>
+            						{% endif %}
+            					</div>
+        					{% endif %}
+                        {% endif %}
     					<p class="description">
                             {% if show_date == true %}
                                 {{"now"|date(date_format)}}
