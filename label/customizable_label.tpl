@@ -12,6 +12,8 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set date_format = 'mdy' %}                       {# Format the date is shown in if show_date is enabled.
                                                         m = 2 digit month, d = 2 digit day, y = 2 digit year, Y = 4 digit year #}
 {% set hide_price = false %}                        {# Remove the price from displaying on label #}
+{% set hide_description = false %}                  {# Remove the description from displaying on label #}
+{% set hide_barcode = false %}                      {# Remove the barcode from displaying on label #}
 
 {# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
 
@@ -27,20 +29,42 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set small_label_categories = [''] %}
 {% set jewelry_label_categories = [''] %}
 
+
 {# Normal Label (2.25x1.25) settings #}
 
 {% set normal_description_font_size = '9pt' %}      {# Default is 9pt #}
 {% set normal_price_font_size = '12pt' %}           {# Default is 12pt #}
+
+{# For Vertical:   Negative numbers move up, positive move down
+   For Horizontal: Negative numbers move right, positive move left #}
+
+{% set normal_barcode_vertical = '0px' %}
+{% set normal_barcode_horizontal = '0px' %}
+
 
 {# Alt. Label (2.00x1.00) settings #}
 
 {% set alt_description_font_size = '9pt' %}         {# Default is 9pt #}
 {% set alt_price_font_size = '12pt' %}              {# Default is 12pt #}
 
+{# For Vertical:   Negative numbers move up, positive move down
+   For Horizontal: Negative numbers move right, positive move left #}
+
+{% set alt_barcode_vertical = '0px' %}
+{% set alt_barcode_horizontal = '0px' %}
+
+
 {# Small Label (1.25x1.00) settings #}
 
 {% set small_description_font_size = '9pt' %}       {# Default is 9pt #}
 {% set small_price_font_size = '7pt' %}             {# Default is 7pt #}
+
+{# For Vertical:   Negative numbers move up, positive move down
+   For Horizontal: Negative numbers move right, positive move left #}
+
+{% set small_barcode_vertical = '0px' %}
+{% set small_barcode_horizontal = '0px' %}
+
 
 {# Jewelry Label (2.20x.50) settings  #}
 
@@ -58,6 +82,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
 {% set jewelry_barcode_vertical = '0px' %}
 {% set jewelry_barcode_horizontal = '0px' %}
+
 
 {#
                             ***End Custom Options***
@@ -89,6 +114,12 @@ Set any of the options in this section from 'false' to 'true' in order to enable
         font-size: {{ normal_price_font_size }};
     }
 
+    .label.size225x125 .barcode {
+        position: absolute;
+        bottom: {{ normal_barcode_vertical * -1 }}px;
+        left: {{ normal_barcode_horizontal * -1 }}px;
+    }
+
     {# Alt. Label (2.00x1.00) CSS settings #}
 
     .label.size200x100 .description {
@@ -99,14 +130,25 @@ Set any of the options in this section from 'false' to 'true' in order to enable
         font-size: {{ alt_price_font_size }};
     }
 
+    .label.size200x100 .barcode {
+        position: absolute;
+        bottom: {{ alt_barcode_vertical * -1 }}px;
+        left: {{ alt_barcode_horizontal * -1 }}px;
+    }
     {# Small Label (1.25x1.00) CSS settings #}
 
-    .label.size125x100 .description{
+    .label.size125x100 .description {
         font-size: {{ small_description_font_size }};
     }
 
     .label.size125x100 .price {
         font-size: {{ small_price_font_size }};
+    }
+
+    .label.size125x100 .barcode {
+        position: absolute;
+        bottom: {{ small_barcode_vertical * -1 }}px;
+        left: {{ small_barcode_horizontal * -1 }}px;
     }
 
     {# Jewelry Label (2.20x.50) CSS settings #}
@@ -206,13 +248,17 @@ Set any of the options in this section from 'false' to 'true' in order to enable
                                     <i>{{ Label.Item.manufacturerSku }}</i>
                                 {% endif %}
                             {% endif %}
-    						{{ Label.Item.description|strreplace('_',' ') }}
+                            {% if hide_description == false %}
+    						  {{ Label.Item.description|strreplace('_',' ') }}
+                            {% endif %}
     					</p>
     				</article>
-    				<footer class="barcode">
-    					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
-    					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
-    				</footer>
+                    {% if hide_barcode == false %}
+        				<footer class="barcode">
+        					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
+        					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
+        				</footer>
+                    {% endif %}
     			</div>
             </div>
 		{% endfor %}
