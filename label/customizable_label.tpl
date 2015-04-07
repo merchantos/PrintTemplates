@@ -15,14 +15,8 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set hide_description = false %}                  {# Remove the description from displaying on label #}
 {% set hide_barcode = false %}                      {# Remove the barcode from displaying on label #}
 
-{# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
-
-{% set top_margin = '0px' %}
-{% set right_margin = '0px' %}
-{% set bottom_margin = '0px' %}
-{% set left_margin = '0px' %}
-
-{# Enter Category IDs (found in Settings > Categories to the left of Category names) into the appropriate section, separated by commas and enclosed in single quotes #}
+{# Enter Category IDs (found in Settings > Categories by clicking on the desired Category and looking at the id=number at in the URL for the Category)
+    into the appropriate section, separated by commas and enclosed in single quotes #}
 
 {% set normal_label_categories =  [''] %}
 {% set alt_label_categories = [''] %}
@@ -34,6 +28,13 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
 {% set normal_description_font_size = '9pt' %}      {# Default is 9pt #}
 {% set normal_price_font_size = '12pt' %}           {# Default is 12pt #}
+
+{# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
+
+{% set normal_top_margin = '0px' %}
+{% set normal_right_margin = '0px' %}
+{% set normal_bottom_margin = '0px' %}
+{% set normal_left_margin = '0px' %}
 
 {# For Vertical:   Negative numbers move up, positive move down
    For Horizontal: Negative numbers move right, positive move left #}
@@ -47,6 +48,13 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set alt_description_font_size = '9pt' %}         {# Default is 9pt #}
 {% set alt_price_font_size = '12pt' %}              {# Default is 12pt #}
 
+{# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
+
+{% set alt_top_margin = '0px' %}
+{% set alt_right_margin = '0px' %}
+{% set alt_bottom_margin = '0px' %}
+{% set alt_left_margin = '0px' %}
+
 {# For Vertical:   Negative numbers move up, positive move down
    For Horizontal: Negative numbers move right, positive move left #}
 
@@ -59,6 +67,13 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set small_description_font_size = '9pt' %}       {# Default is 9pt #}
 {% set small_price_font_size = '7pt' %}             {# Default is 7pt #}
 
+{# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
+
+{% set small_top_margin = '0px' %}
+{% set small_right_margin = '0px' %}
+{% set small_bottom_margin = '0px' %}
+{% set small_left_margin = '0px' %}
+
 {# For Vertical:   Negative numbers move up, positive move down
    For Horizontal: Negative numbers move right, positive move left #}
 
@@ -70,6 +85,13 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
 {% set jewelry_description_font_size = '7.5pt' %}   {# Default is 7.5pt #}
 {% set jewelry_price_font_size = '6pt' %}           {# Default is 6pt #}
+
+{# Use the following if adjustments to the label position are needed. Positive and negative numbers work #}
+
+{% set jewelry_top_margin = '0px' %}
+{% set jewelry_right_margin = '0px' %}
+{% set jewelry_bottom_margin = '0px' %}
+{% set jewelry_left_margin = '0px' %}
 
 {# For Vertical:   Negative numbers move up, positive move down
    For Horizontal: Negative numbers move right, positive move left #}
@@ -100,11 +122,11 @@ Set any of the options in this section from 'false' to 'true' in order to enable
         margin: 0;
     }
 
-    .custom_margin {
-        margin: {{top_margin}} {{right_margin}} {{bottom_margin}} {{left_margin}};
-    }
-
     {# Normal Label (2.25x1.25) CSS settings #}
+
+    .label.size225x125 .custom_margin {
+        margin: {{normal_top_margin}} {{normal_right_margin}} {{normal_bottom_margin}} {{normal_left_margin}};
+    }
 
     .label.size225x125 .description {
         font-size: {{ normal_description_font_size }};
@@ -122,6 +144,10 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
     {# Alt. Label (2.00x1.00) CSS settings #}
 
+    .label.size200x100 .custom_margin {
+        margin: {{alt_top_margin}} {{alt_right_margin}} {{alt_bottom_margin}} {{alt_left_margin}};
+    }
+
     .label.size200x100 .description {
         font-size: {{ alt_description_font_size }};
     }
@@ -136,6 +162,10 @@ Set any of the options in this section from 'false' to 'true' in order to enable
         left: {{ alt_barcode_horizontal * -1 }}px;
     }
     {# Small Label (1.25x1.00) CSS settings #}
+
+    .label.size125x100 .custom_margin {
+        margin: {{small_top_margin}} {{small_right_margin}} {{small_bottom_margin}} {{small_left_margin}};
+    }
 
     .label.size125x100 .description {
         font-size: {{ small_description_font_size }};
@@ -152,6 +182,10 @@ Set any of the options in this section from 'false' to 'true' in order to enable
     }
 
     {# Jewelry Label (2.20x.50) CSS settings #}
+
+    .label.size220x50 .custom_margin {
+        margin: {{jewelry_top_margin}} {{jewelry_right_margin}} {{jewelry_bottom_margin}} {{jewelry_left_margin}};
+    }
 
     .label.size220x50 .description {
         top: {{ jewelry_description_vertical }};
@@ -177,7 +211,6 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 	<div class="labels">
 	{% for Label in Labels %}
 		{% for copy in 1..Label.copies %}
-            <div class="custom_margin">
                 {% set size_specified = false %}
                 {% for category in normal_label_categories %}
                     {% if category == Label.Item.categoryID %}
@@ -206,6 +239,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
                 {% if size_specified == false %}
                     <div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
                 {% endif %}
+                <div class="label size{{Label.MetaData.size}} custom_margin">
     				<article>
     					<h1>{{ Label.MetaData.title }}</h1>
                         {% if hide_price == false %}
