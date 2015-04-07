@@ -11,6 +11,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set per_line_discount = false %}             {# Displays Discounts on each Sale Line #}
 {% set per_line_subtotal = false %}             {# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set per_line_discounted_subtotal = false %}  {# Strikes out original subtotal and replaces it with discounted total #}
+{% set per_line_employee = false %}             {# Display Employee for each Sale line #}
 {% set show_custom_sku = false %}               {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
 {% set show_manufacturer_sku = false %}         {# Adds SKU column for Manufacturer SKU, if available, on each Sale Line #}
 
@@ -389,13 +390,13 @@ dl dd p { margin: 0; }
 </div>
 {% endmacro %}
 
-{% macro lineDescription(Line) %}
+{% macro lineDescription(Line,options) %}
     {% if Line.Item %}
         <div class='line_description'>
             {% autoescape true %}{{ Line.Item.description|nl2br }}{% endautoescape %}
         </div>
     {% endif %}
-    {%if Line.Note %}
+    {% if Line.Note %}
         <div class='line_note'>
             {% autoescape true %}{{ Line.Note.note|noteformat|raw }}{% endautoescape %}
         </div>
@@ -406,6 +407,11 @@ dl dd p { margin: 0; }
                 Serial#: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
             </div>
         {% endfor %}
+    {% endif %}
+    {% if options.per_line_employee == true %}
+        <div class='line_note'>
+            Employee: {{ Line.Employee.firstName }}
+        </div>
     {% endif %}
 {% endmacro %}
 
@@ -492,7 +498,7 @@ dl dd p { margin: 0; }
 {% macro line(Line,parameters,options) %}
 <tr>
     <th data-automation="lineItemDescription" class="description">
-        {{ _self.lineDescription(Line) }}
+        {{ _self.lineDescription(Line,options) }}
         {% if options.per_line_discount == true %}
             {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
                 <small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
