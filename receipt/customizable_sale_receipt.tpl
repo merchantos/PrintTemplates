@@ -21,7 +21,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set store_copy_show_lines = false %}         {# Shows Sale Lines on Credit Card Store Copy receipts #}
 {% set quote_to_invoice = false %}              {# Changes Quote wording to Invoice in Sales and in Sale Quotes (does not apply to Work Order Quotes) #}
 {% set gift_receipt_no_lines = false %}         {# Removes Sale Lines from Gift Receipts #}
-{% set hide_barcode)sale = false %}             {# Removes barcode from bottom of receipts #}
+{% set hide_barcode = false %}             {# Removes barcode from bottom of receipts #}
 
 {# Customer information #}
 
