@@ -8,6 +8,11 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set tps_number = '123456789' %}
 {% set tvq_number = '123456789' %}
 
+{# Misc. Bug fixes #}
+
+{% set chrome_right_margin_fix = false %}       {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
+{% set firefox_margin_fix = false %}            {# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
+
 {# Item Lines #}
 
 {% set per_line_discount = false %}             {# Displays Discounts on each Sale Line #}
@@ -76,6 +81,12 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 body {
     font: normal 10pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
     margin: 0;
+    {% if chrome_right_margin_fix == true %}
+        margin-right: .13in;
+    {% endif %}
+    {% if firefox_margin_fix == true %}
+        margin: 25px;
+    {% endif %}
     padding: 1px; <!-- You need this to make the printer behave -->
 }
 
