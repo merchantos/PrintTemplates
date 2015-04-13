@@ -1,7 +1,6 @@
 {% extends parameters.print ? "printbase" : "base" %}
 {% block extrastyles %}
 
-<!-- default -->
 
 @page { margin: 0px; }
 
@@ -209,15 +208,15 @@ dl dd p { margin: 0; }
 	{{ _self.sale_details(Sale) }}
 	{{ _self.receipt(Sale,parameters,true,false) }}
 
-	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
+	{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p id="receiptQuoteNote" class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
-	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>{% endif %}
+	{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p id="receiptNote" class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>{% endif %}
 
 	{% if not parameters.gift_receipt %}
-	<p class="thankyou">Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
+	<p id="receiptThankYouNote" class="thankyou">Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!</p>
 	{% endif %}
 
-	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+	<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
 </div>
 
 <!-- replace.email_custom_footer_msg -->
@@ -303,20 +302,20 @@ dl dd p { margin: 0; }
 {% endmacro %}
 
 {% macro sale_details(Sale) %}
-<p class="details">
-	{% if Sale.quoteID > 0 %}Quote #: {{Sale.quoteID}}{% endif %}<br />
-	Ticket: {{Sale.ticketNumber}}<br />
-	{% if Sale.Register %}Register: {{Sale.Register.name}}<br />{% endif %}
-	{% if Sale.Employee %}Employee: {{Sale.Employee.firstName}}<br />{% endif %}
+<p id="receiptInfo" class="details">
+	{% if Sale.quoteID > 0 %}<span id="receiptQuoteId">Quote #: {{Sale.quoteID}}</span><br />{% endif %}
+	Ticket: <span id="receiptTicketId">{{Sale.ticketNumber}}</span><br />
+	{% if Sale.Register %}Register: <span id="receiptRegisterName">{{Sale.Register.name}}</span><br />{% endif %}
+	{% if Sale.Employee %}Employee: <span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br />{% endif %}
 	{% if Sale.Customer %}
-		{% if Sale.Customer.company|strlen > 0 %}Company: {{Sale.Customer.company}}<br />{% endif %}
-		Customer: {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
-		<span class="indent">
+		{% if Sale.Customer.company|strlen > 0 %}Company: <span id="receiptCompanyName">{{Sale.Customer.company}}</span><br />{% endif %}
+		Customer: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
+		<span id="receiptPhonesContainer" class="indent">
 		{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-		{{Phone.useType}}: {{Phone.number}}<br />
+		<span data-automation="receiptPhoneNumber">{{Phone.useType}}: {{Phone.number}}</span><br />
 		{% endfor %}
 		{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
-		Email: {{Email.address}} ({{Email.useType}})<br />
+		Email: <span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
 		{% endfor %}
 		</span>
 	{% endif %}
@@ -325,9 +324,9 @@ dl dd p { margin: 0; }
 
 {% macro line(Line,parameters) %}
 <tr>
-	<th class="description">{{ _self.lineDescription(Line) }}</th>
-	<td class="quantity">{{Line.unitQuantity}}</td>
-	<td class="amount">{% if not parameters.gift_receipt %}{{Line.calcSubtotal|money}}{% endif %}</td>
+	<th data-automation="lineItemDescription" class="description">{{ _self.lineDescription(Line) }}</th>
+	<td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
+	{% if not parameters.gift_receipt %}<td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|money}}</td>{% endif %}
 </tr>
 {% endmacro %}
 
@@ -339,7 +338,7 @@ dl dd p { margin: 0; }
 				<tr>
 					<th class="description">Item</th>
 					<th class="quantity">#</th>
-					<th class="amount">Price</th>
+					{% if not parameters.gift_receipt %}<th class="amount">Price</th>{% endif %}
 				</tr>
 			</thead>
 			<tbody>
@@ -351,23 +350,23 @@ dl dd p { margin: 0; }
 
 		{% if not parameters.gift_receipt %}
 			<table class="totals">
-				<tbody>
-			  		<tr><td width="100%">Subtotal</td><td class="amount">{{Sale.calcSubtotal|money}}</td></tr>
+				<tbody id="receiptSaleTotals">
+			  		<tr><td width="100%">Subtotal</td><td id="receiptSaleTotalsSubtotal" class="amount">{{Sale.calcSubtotal|money}}</td></tr>
 			  		{% if Sale.calcDiscount > 0 %}
-			  			<tr><td>Discounts</td><td class="amount">-{{Sale.calcDiscount|money}}</td></tr>
+			  			<tr><td>Discounts</td><td id="receiptSaleTotalsDiscounts" class="amount">-{{Sale.calcDiscount|money}}</td></tr>
 			  		{% elseif Sale.calcDiscount < 0 %}
-						<tr><td>Discounts</td><td class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
+						<tr><td>Discounts</td><td id="receiptSaleTotalsDiscounts" class="amount">{{Sale.calcDiscount|getinverse|money}}</td></tr>
 			  		{% endif %}
 					{% for Tax in Sale.TaxClassTotals.Tax %}
 						{% if Tax.taxname and Tax.rate > 0 %}
-							<tr><td width="100%">{{Tax.taxname}} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td class="amount">{{Tax.amount|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">{{Tax.taxname}} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
 						{% endif %}
 						{% if Tax.taxname2 and Tax.rate2 > 0 %}
-							<tr><td width="100%">{{Tax.taxname2}} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td class="amount">{{Tax.amount2|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">{{Tax.taxname2}} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
 						{% endif %}
 					{% endfor %}
-			        <tr><td width="100%">Total Tax</td><td class="amount">{{Sale.taxTotal|money}}</td></tr>
-					<tr class="total"><td>Total</td><td class="amount">{{Sale.calcTotal|money}}</td></tr>
+			        <tr><td width="100%">Total Tax</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
+					<tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
 				</tbody>
 			</table>
 		{% endif %}
@@ -377,7 +376,7 @@ dl dd p { margin: 0; }
 {% if Sale.completed == 'true' and not parameters.gift_receipt %}
 	{% if Sale.SalePayments %}
 		<h2>Payments</h2>
-		<table class="payments">
+		<table id="receiptPayments" class="payments">
 			<tbody>
 			{% for Payment in Sale.SalePayments.SalePayment %}
 				{% if Payment.PaymentType.name != 'Cash' %}
@@ -387,29 +386,29 @@ dl dd p { margin: 0; }
 						{% if Payment.amount > 0 %}
 							<tr>
 								<td>Gift Card Charge</td>
-								<td class="amount">{{Payment.amount|money}}</td>
+								<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|money}}</td>
 							</tr>
 							<tr>
 								<td>Balance</td>
-								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
+								<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
 							</tr>
 						{% elseif Payment.amount < 0 and Sale.calcTotal < 0 %}
 							<tr>
 								<td>Refund To Gift Card</td>
-								<td class="amount">{{Payment.amount|getinverse|money}}</td>
+								<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 							</tr>
 							<tr>
 								<td>Balance</td>
-								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
+								<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
 							</tr>
 						{% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
 							<tr>
 								<td>Gift Card Purchase</td>
-								<td class="amount">{{Payment.amount|getinverse|money}}</td>
+								<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 							</tr>
 							<tr>
 								<td>Balance</td>
-								<td class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
+								<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
 							</tr>
 						{% endif %}
 					{% elseif Payment.creditAccountID == 0 %}
@@ -420,10 +419,10 @@ dl dd p { margin: 0; }
 						<tr>
 						    {% if Payment.amount < 0 %}
 							<td>Account Deposit</td>
-							<td class="amount">{{Payment.amount|getinverse|money}}</td>
+							<td id="receiptPaymentsCreditAccountDepositValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 						    {% else %}
 							<td>Account Charge</td>
-							<td class="amount">{{Payment.amount|money}}</td>
+							<td id="receiptPaymentsCreditAccountChargeValue" class="amount">{{Payment.amount|money}}</td>
 						    {% endif %}
 						</tr>
 					{% endif %}
@@ -504,7 +503,7 @@ dl dd p { margin: 0; }
 	{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
 		<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
 	{% endif %}
-	<dl class="signature">
+	<dl id="signatureSection" class="signature">
 		<dt>Signature:</dt>
 		<dd>
 			{{Payment.CCCharge.cardholderName}}<br />
@@ -681,7 +680,7 @@ dl dd p { margin: 0; }
     		{% endif %}
 	{% endfor %}
 	{% if pay_cash == 'true' %}
-		<tr><td width="100%">Cash</td><td class="amount">{{total|money}}</td></tr>
-		<tr><td width="100%">Change</td><td class="amount">{{Sale.change|money}}</td></tr>
+		<tr><td width="100%">Cash</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
+		<tr><td width="100%">Change</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
 	{% endif %}
 {% endmacro %}
