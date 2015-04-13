@@ -18,6 +18,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set per_line_discount = false %}             {# Displays Discounts on each Sale Line #}
 {% set per_line_subtotal = false %}             {# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set per_line_discounted_subtotal = false %}  {# Strikes out original subtotal and replaces it with discounted total #}
+{% set per_line_employee = false %}
 {% set show_custom_sku = false %}               {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
 {% set show_manufacturer_sku = false %}         {# Adds SKU column for Manufacturer SKU, if available, on each Sale Line #}
 
@@ -27,6 +28,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set store_copy_show_lines = false %}         {# Shows Sale Lines on Credit Card Store Copy receipts #}
 {% set quote_to_invoice = false %}              {# Changes Quote wording to Invoice in Sales and in Sale Quotes (does not apply to Work Order Quotes) #}
 {% set gift_receipt_no_lines = false %}         {# Removes Sale Lines from Gift Receipts #}
+{% set hide_barcode = false %}
 
 {# Customer information #}
 
@@ -252,6 +254,18 @@ dl dd {
 
 dl dd p { margin: 0; }
 
+.strike {
+  position: relative;
+}
+.strike:before {
+  position: absolute;
+  content: "";
+  left: 0;
+  top: 50%;
+  right: 0;
+  border-top: 1px solid;
+}
+
 
 {% endblock extrastyles %}
 
@@ -344,7 +358,10 @@ dl dd p { margin: 0; }
         </p>
     {% endif %}
 
-    <img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+    {% if hide_barcode == false %}
+        <img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+    {% endif %}
+
 </div>
 
 <!-- replace.email_custom_footer_msg -->
@@ -382,13 +399,13 @@ dl dd p { margin: 0; }
 </div>
 {% endmacro %}
 
-{% macro lineDescription(Line) %}
+{% macro lineDescription(Line,options) %}
     {% if Line.Item %}
         <div class='line_description'>
             {% autoescape true %}{{ Line.Item.description|nl2br }}{% endautoescape %}
         </div>
     {% endif %}
-    {%if Line.Note %}
+    {% if Line.Note %}
         <div class='line_note'>
             {% autoescape true %}{{ Line.Note.note|noteformat|raw }}{% endautoescape %}
         </div>
@@ -399,6 +416,11 @@ dl dd p { margin: 0; }
                 Numero de s&eacute;ries: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
             </div>
         {% endfor %}
+    {% endif %}
+    {% if options.per_line_employee == true %}
+        <div class='line_note'>
+            Employee: {{ Line.Employee.firstName }}
+        </div>
     {% endif %}
 {% endmacro %}
 
@@ -457,7 +479,7 @@ dl dd p { margin: 0; }
             Client: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
         {% endif %}
         {% if Sale.Customer.company|strlen > 0 %}
-            Enterprise: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
+            Entreprise: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
         {% endif %}
         <span id="receiptPhonesContainer" class="indent">
         {% if options.display_full_customer_address == true %}
@@ -489,7 +511,7 @@ dl dd p { margin: 0; }
 {% macro line(Line,parameters,options) %}
 <tr>
     <th data-automation="lineItemDescription" class="description">
-        {{ _self.lineDescription(Line) }}
+        {{ _self.lineDescription(Line,options) }}
         {% if options.per_line_discount == true %}
             {% if Line.calcLineDiscount > 0 and not parameters.gift_receipt %}
                 <small>R&eacute;duction: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|number_format(2, '.')}}$</small>
@@ -507,20 +529,20 @@ dl dd p { margin: 0; }
     {% if not parameters.gift_receipt %}
         {% if options.per_line_subtotal == true %}
             {% if options.per_line_discounted_subtotal == true and Line.calcLineDiscount > 0 %}
-                <td data-automation="lineItemQuantity" class="quantity"><strike>{{Line.unitQuantity}} x
+                <td data-automation="lineItemQuantity" class="quantity"><span class="strike">{{Line.unitQuantity}} x
                     {% if Line.discountAmount > 0 %}
-                        {{Line.unitPrice|number_format(2, '.')}}$</strike><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval -Line.discountAmount|floatval)|number_format(2, '.')}}$</td>
+                        {{Line.unitPrice|number_format(2, '.')}}$</span><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval -Line.discountAmount|floatval)|number_format(2, '.')}}$</td>
                     {% elseif Line.discountPercent > 0 %}
-                        {{Line.unitPrice|number_format(2, '.')}}$</strike><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval * (1 - Line.discountPercent|floatval))|number_format(2, '.')}}$</td>
+                        {{Line.unitPrice|number_format(2, '.')}}$</span><br /> {{Line.unitQuantity}} x {{ (Line.unitPrice|floatval * (1 - Line.discountPercent|floatval))|number_format(2, '.')}}$</td>
                     {% endif %}
-                <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|number_format(2, '.')}}$</strike><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|number_format(2, '.')}}$</td>
+                <td data-automation="lineItemPrice" class="amount"><span class="strike">{{Line.calcSubtotal|number_format(2, '.')}}$</span><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|number_format(2, '.')}}$</td>
             {% else %}
                 <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{Line.unitPrice|number_format(2, '.')}}$</td>
                 <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|number_format(2, '.')}}$</td>
             {% endif %}
         {% elseif options.per_line_discounted_subtotal == true and Line.calcLineDiscount > 0 %}
             <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
-            <td data-automation="lineItemPrice" class="amount"><strike>{{Line.calcSubtotal|number_format(2, '.')}}$</strike><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|number_format(2, '.')}}$</td>
+            <td data-automation="lineItemPrice" class="amount"><span class="strike">{{Line.calcSubtotal|number_format(2, '.')}}$</span><br/> {{ (Line.calcSubtotal|floatval - Line.calcLineDiscount|floatval)|number_format(2, '.')}}$</td>
         {% else %}
             <td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
             <td data-automation="lineItemPrice" class="amount">{{Line.calcSubtotal|number_format(2, '.')}}$</td>
@@ -597,7 +619,7 @@ dl dd p { margin: 0; }
                             </tr>
                         {% elseif Payment.amount < 0 and Sale.calcTotal < 0 %}
                             <tr>
-                                <td>Refund To Gift Card</td>
+                                <td>Remboursement sur Carte Cadeau</td>
                                 <td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|number_format(2, '.')}}$</td>
                             </tr>
                             <tr>
@@ -606,7 +628,7 @@ dl dd p { margin: 0; }
                             </tr>
                         {% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
                             <tr>
-                                <td>Gift Card Purchase</td>
+                                <td>Achat Carte Cadeau</td>
                                 <td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|number_format(2, '.')}}$</td>
                             </tr>
                             <tr>
@@ -621,7 +643,7 @@ dl dd p { margin: 0; }
                         <!-- Customer Account -->
                         <tr>
                             {% if Payment.amount < 0 %}
-                            <td width="100%">Account Deposit</td>
+                            <td width="100%">D&eacute;p&ocirc;t sur Compte</td>
                             <td class="amount">{{Payment.amount|getinverse|number_format(2, '.')}}$</td>
                             {% else %}
                             <td width="100%">Account Charge</td>
@@ -639,13 +661,13 @@ dl dd p { margin: 0; }
 
     {% if Sale.Customer and store_copy == false %}
         {% if options.hide_customer_layaways == false %}
-            {{ _self.layaways(Sale.Customer,parameters.gift_receipt,_context)}}
+            {{ _self.layaways(Sale.Customer,parameters.gift_receipt,options)}}
         {% endif %}
         {% if options.hide_customer_specialorders == false %}
-            {{ _self.specialorders(Sale.Customer,parameters.gift_receipt,_context)}}
+            {{ _self.specialorders(Sale.Customer,parameters.gift_receipt,options)}}
         {% endif %}
         {% if options.hide_customer_workorders == false %}
-            {{ _self.workorders(Sale.Customer,parameters.gift_receipt,_context)}}
+            {{ _self.workorders(Sale.Customer,parameters.gift_receipt,options)}}
         {% endif %}
     {% endif %}
 
@@ -660,7 +682,7 @@ dl dd p { margin: 0; }
                     </tr>
                 {% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
                     <tr>
-                        <td width="100%">Au Dep&ocirc;t: </td>
+                        <td width="100%">Au D&eacute;p&ocirc;t: </td>
                         <td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|number_format(2, '.')}}$</td>
                     </tr>
                 {% endif %}
@@ -790,7 +812,7 @@ dl dd p { margin: 0; }
         <table class="layways totals">
             <tr>
                 <td width="100%">Sous-total</td>
-                <td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|number_format(2, '.')}}$</td>
+                <td class="amount">{{Customer.MetaData.layawaysSubtotal|number_format(2, '.')}}$</td>
             </tr>
             {% if Customer.MetaData.layawaysAllDiscounts>0.00 %}
                 <tr>
