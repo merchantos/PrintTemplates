@@ -215,31 +215,35 @@ Set any of the options in this section from 'false' to 'true' in order to enable
                 {% for category in normal_label_categories %}
                     {% if category == Label.Item.categoryID %}
                         <div class="label size225x125{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                            <div class="label size225x125 custom_margin">
                         {% set size_specified = true %}
                     {% endif %}
                 {% endfor %}
                 {% for category in alt_label_categories %}
                     {% if category == Label.Item.categoryID %}
                         <div class="label size200x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                            <div class="label size200x100 custom_margin">
                         {% set size_specified = true %}
                     {% endif %}
                 {% endfor %}
                 {% for category in small_label_categories %}
                     {% if category == Label.Item.categoryID %}
                         <div class="label size125x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                         <div class="label size125x100 custom_margin">
                         {% set size_specified = true %}
                     {% endif %}
                 {% endfor %}
                 {% for category in jewelry_label_categories %}
                     {% if category == Label.Item.categoryID %}
                         <div class="label size220x50{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                            <div class="label size220x50 custom_margin">
                         {% set size_specified = true %}
                     {% endif %}
                 {% endfor %}
                 {% if size_specified == false %}
                     <div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
+                        <div class="label size{{Label.MetaData.size}} custom_margin">
                 {% endif %}
-                <div class="label size{{Label.MetaData.size}} custom_margin">
     				<article>
     					<h1>{{ Label.MetaData.title }}</h1>
                         {% if hide_price == false %}
