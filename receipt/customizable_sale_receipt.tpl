@@ -21,7 +21,8 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set store_copy_show_lines = false %}         {# Shows Sale Lines on Credit Card Store Copy receipts #}
 {% set quote_to_invoice = false %}              {# Changes Quote wording to Invoice in Sales and in Sale Quotes (does not apply to Work Order Quotes) #}
 {% set gift_receipt_no_lines = false %}         {# Removes Sale Lines from Gift Receipts #}
-{% set hide_barcode = false %}             {# Removes barcode from bottom of receipts #}
+{% set hide_barcode = false %}                  {# Removes barcode from bottom of receipts #}
+{% set hide_barcode_sku = false %}              {# Remove the System ID from displaying at the bottom of barcdoes #}
 
 {# Customer information #}
 
@@ -354,7 +355,12 @@ dl dd p { margin: 0; }
     {% endif %}
 
     {% if hide_barcode == false %}
-        <img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+        {% if hide_barcode_sku == true %}
+           {% set hide_text = 1 %}
+        {% else %}
+           {% set hide_text = 0 %}
+        {% endif %}
+        <img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}&hide_text={{ hide_text }}">
     {% endif %}
 </div>
 

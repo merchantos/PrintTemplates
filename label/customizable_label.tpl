@@ -14,6 +14,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set hide_price = false %}                        {# Remove the price from displaying on label #}
 {% set hide_description = false %}                  {# Remove the description from displaying on label #}
 {% set hide_barcode = false %}                      {# Remove the barcode from displaying on label #}
+{% set hide_barcode_sku = false %}                  {# Remove the System ID from displaying at the bottom of barcdoes #}
 
 {# Enter Category IDs (found in Settings > Categories by clicking on the desired Category and looking at the id=number at in the URL for the Category)
     into the appropriate section, separated by commas and enclosed in single quotes #}
@@ -292,9 +293,14 @@ Set any of the options in this section from 'false' to 'true' in order to enable
     					</p>
     				</article>
                     {% if hide_barcode == false %}
+                        {% if hide_barcode_sku == true %}
+                            {% set hide_text = 1 %}
+                        {% else %}
+                            {% set hide_text = 0 %}
+                        {% endif %}
         				<footer class="barcode">
-        					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1">
-        					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1">
+        					<img class="ean8" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;ean8=1&amp;noframe=1&amp;hide_text={{ hide_text }}">
+        					<img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1&amp;hide_text={{ hide_text }}">
         				</footer>
                     {% endif %}
     			</div>
