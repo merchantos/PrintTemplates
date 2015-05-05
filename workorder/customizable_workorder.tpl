@@ -3,19 +3,21 @@
 Set any of the options in this section from 'false' to 'true' in order to enable them in the template
 #}
 
-{% set chrome_right_margin_fix = false %}       	{# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
-{% set firefox_margin_fix = false %}            	{# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
+{% set chrome_right_margin_fix = false %}			{# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
+{% set firefox_margin_fix = false %}				{# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
 
 {% set itemized_hours_labor = false %}				{# Shows time spent on Labor item if time spent is present in the charge #}
 {% set per_line_subtotal = false %}					{# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set employee_name_on_labor_charges = false %}	{# Display Employee name on Labor Charges #}
+
 {% set tag_header_information = false %}			{# Shows shop header information on Tags #}
+{% set notes_on_tag_only = false %}					{# Displays notes on tags only (these will still show up in the Sales screen when ringing out the Work Order) #}
 
-{% set hide_barcode = false %}                  	{# Removes barcode from bottom of receipts #}
-{% set hide_barcode_sku = false %}              	{# Remove the System ID from displaying at the bottom of barcdoes #}
+{% set hide_barcode = false %}						{# Removes barcode from bottom of receipts #}
+{% set hide_barcode_sku = false %}					{# Remove the System ID from displaying at the bottom of barcdoes #}
 
-{% set logo_width = '225px' %}                  	{# Default width is 225px. A smaller number will scale logo down #}
-{% set multi_shop_logos = false %}              	{# Allows multiple logos to be added for separate locations when used with options below #}
+{% set logo_width = '225px' %}						{# Default width is 225px. A smaller number will scale logo down #}
+{% set multi_shop_logos = false %}					{# Allows multiple logos to be added for separate locations when used with options below #}
 
 {#
     Use the following shop_logo_array to enter all of your locations and the link to the logo image that you have uploaded to the internet.
@@ -349,11 +351,20 @@ img.barcode {
 				</tbody>
 			</table>
 
-			{% if Workorder.note|strlen > 0 %}
-				<div class="notes">
-					<h3>Notes:</h3>
-					{{ Workorder.note|noteformat|raw }}
-				</div>
+			{% if notes_on_tag_only == false %}
+				{% if Workorder.note|strlen > 0 %}
+					<div class="notes">
+						<h3>Notes:</h3>
+						{{ Workorder.note|noteformat|raw }}
+					</div>
+				{% endif %}
+			{% else %}
+				{% if Workorder.note|strlen > 0 and parameters.type == 'shop-tag' %}
+					<div class="notes">
+						<h3>Notes:</h3>
+						{{ Workorder.note|noteformat|raw }}
+					</div>
+				{% endif %}
 			{% endif %}
 
 			{% if hide_barcode == false %}
