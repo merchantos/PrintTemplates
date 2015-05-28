@@ -17,6 +17,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
 {# Misc. adjustments #}
 
+{% set hide_thank_you = false %}                {# Displays Thank You! Above bottom barcode #}
 {% set transaction_item_count = false %}        {# Gives a total quantity of items sold near the bottom of the receipt #}
 {% set store_copy_show_lines = false %}         {# Shows Sale Lines on Credit Card Store Copy receipts #}
 {% set quote_to_invoice = false %}              {# Changes Quote wording to Invoice in Sales and in Sale Quotes (does not apply to Work Order Quotes) #}
@@ -349,9 +350,14 @@ dl dd p { margin: 0; }
     {% endif %}
 
     {% if not parameters.gift_receipt %}
+        {% if hide_thank_you == false %}
+           {% set hide_text = 0 %}
+        {% else %}
         <p id="receiptThankYouNote" class="thankyou">
             Thank You{% if Sale.Customer %} {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!
-        </p>
+            </p>
+        {% endif %}
+
     {% endif %}
 
     {% if hide_barcode == false %}
