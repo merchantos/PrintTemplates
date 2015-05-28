@@ -19,6 +19,8 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set logo_width = '225px' %}						{# Default width is 225px. A smaller number will scale logo down #}
 {% set multi_shop_logos = false %}					{# Allows multiple logos to be added for separate locations when used with options below #}
 
+{% set minimal_mode = false %}
+
 {#
     Use the following shop_logo_array to enter all of your locations and the link to the logo image that you have uploaded to the internet.
     Enter your EXACT shop name (Case Sensitive!) in the Quotes after the "name": entry and then enter the URL to your logo after the "logo": entry.
@@ -66,7 +68,11 @@ body {
 
 .header {
 	text-align: center;
-	margin-bottom: 30px;
+	{% if minimal_mode == false %}
+		margin-bottom: 30px;
+	{% else %}
+		margin-bottom: 10px;
+	{% endif %}
 }
 
 .header p {
@@ -102,7 +108,11 @@ body {
 .detail h2, .detail h3 {
 	margin: 0px 0px 10px 0px;
 	padding: 0px;
-	font-size: 11pt;
+	{% if minimal_mode == false %}
+		font-size: 11pt;
+	{% else %}
+		font-size: 10pt;
+	{% endif %}
 }
 
 .detail p {
@@ -178,7 +188,11 @@ table.totals tr.total td {
 
 img.barcode {
 	display: block;
-	margin: 2em auto;
+	{% if minimal_mode == false %}
+		margin: 2em auto;
+	{% else %}
+		margin: 1em auto;
+	{% endif %}
 }
 
 {% endblock extrastyles %}
@@ -191,20 +205,22 @@ img.barcode {
 
 			<div class="header">
 				{% if parameters.type != 'shop-tag' or tag_header_information == true %}
-					{% set logo_printed = false %}
-			        {% if multi_shop_logos == true %}
-			            {% for shop in shop_logo_array %}
-			                {% if shop.name == Workorder.Shop.name %}
-			                    {% if shop.logo_url|strlen > 0 %}
-			                        <img src="{{ shop.logo_url }}" width ={{ logo_width }}>
-			                        {% set logo_printed = true %}
-			                    {% endif %}
-			                {% endif %}
-			            {% endfor %}
-			        {% elseif Workorder.Shop.ReceiptSetup.hasLogo == 'true' %}
-			            <img src="{{ Workorder.Shop.ReceiptSetup.logo }}" width={{ logo_width }}>
-			            {% set logo_printed = true %}
-			        {% endif %}
+					{% if minimal_mode == false %}
+						{% set logo_printed = false %}
+				        {% if multi_shop_logos == true %}
+				            {% for shop in shop_logo_array %}
+				                {% if shop.name == Workorder.Shop.name %}
+				                    {% if shop.logo_url|strlen > 0 %}
+				                        <img src="{{ shop.logo_url }}" width={{ logo_width }}>
+				                        {% set logo_printed = true %}
+				                    {% endif %}
+				                {% endif %}
+				            {% endfor %}
+				        {% elseif Workorder.Shop.ReceiptSetup.hasLogo == 'true' %}
+				            <img src="{{ Workorder.Shop.ReceiptSetup.logo }}" width={{ logo_width }}>
+				            {% set logo_printed = true %}
+				        {% endif %}
+				    {% endif %}
 			        {% if logo_printed == false %}
 			            <h3>{{ Workorder.Shop.name }}</h3>
 			        {% endif %}
@@ -217,11 +233,16 @@ img.barcode {
 						<p>{{ Workorder.Shop.Contact.Phones.ContactPhone.number }}</p>
 					{% endif %}
 				{% endif %}
-				<h1 id="receiptTypeTitle">Work Order</h1>
-				{{ _self.date(Workorder) }}
-				<br />
-				<h1 id="receiptTypeId"><strong>#{{ Workorder.workorderID }}</strong></h1>
-				<br />
+				{% if minimal_mode == true %}
+					<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
+					{{ _self.date(Workorder) }}
+				{% else %}
+					<h1 id="receiptTypeTitle">Work Order</h1>
+					{{ _self.date(Workorder) }}
+					<br />
+					<h1 id="receiptTypeId"><strong>#{{ Workorder.workorderID }}</strong></h1>
+					<br />
+				{% endif %}
 				{% if parameters.type == 'shop-tag' %}
 					{% if Workorder.hookIn|strlen > 0 or Workorder.hookOut|strlen > 0 %}
 						<h1 style="margin-top:20px;">Hook In: {{Workorder.hookIn}} <br />
@@ -282,7 +303,9 @@ img.barcode {
 				<tr>
 					<th class="description">Item/Labor</th>
 					<th class="quantity">#</th>
-					<th class="amount">Price</th>
+					{% if parameters.type == 'shop-tag' %}
+						<th class="amount">Price</th>
+					{% endif %}
 				</tr>
 				{% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
 					{% if WorkorderItem.isSpecialOrder == 'false' %}
@@ -311,44 +334,46 @@ img.barcode {
 			</table>
 
 			<table class="totals">
-				<tbody>
-					<tr>
-						<td>Labor</td>
-						<td id="totalsLaborValue" class="amount">
-							{{Workorder.MetaData.labor|money}}
-						</td>
-					</tr>
-
-					<tr>
-						<td>Parts</td>
-						<td id="totalsPartsValue" class="amount">
-							{{Workorder.MetaData.parts|money}}
-						</td>
-					</tr>
-
-					{% if Workorder.MetaData.discount > 0 %}
+				{% if parameters.type == 'shop-tag' %}
+					<tbody>
 						<tr>
-							<td>Discounts</td>
-							<td id="totalsDiscountsValue" class="amount">
-								{{Workorder.MetaData.discount|getinverse|money}}
+							<td>Labor</td>
+							<td id="totalsLaborValue" class="amount">
+								{{Workorder.MetaData.labor|money}}
 							</td>
 						</tr>
-					{% endif %}
 
-					<tr>
-						<td>Tax</td>
-						<td id="totalsTaxValue" class="amount">
-							{{Workorder.MetaData.tax|money}}
-						</td>
-					</tr>
+						<tr>
+							<td>Parts</td>
+							<td id="totalsPartsValue" class="amount">
+								{{Workorder.MetaData.parts|money}}
+							</td>
+						</tr>
 
-					<tr class="total">
-						<td>Total</td>
-						<td id="totalsTotalValue" class="amount">
-							{{Workorder.MetaData.total|money}}
-						</td>
-					</tr>
-				</tbody>
+						{% if Workorder.MetaData.discount > 0 %}
+							<tr>
+								<td>Discounts</td>
+								<td id="totalsDiscountsValue" class="amount">
+									{{Workorder.MetaData.discount|getinverse|money}}
+								</td>
+							</tr>
+						{% endif %}
+
+						<tr>
+							<td>Tax</td>
+							<td id="totalsTaxValue" class="amount">
+								{{Workorder.MetaData.tax|money}}
+							</td>
+						</tr>
+
+						<tr class="total">
+							<td>Total</td>
+							<td id="totalsTotalValue" class="amount">
+								{{Workorder.MetaData.total|money}}
+							</td>
+						</tr>
+					</tbody>
+				{% endif %}
 			</table>
 
 			{% if notes_on_tag_only == false %}
@@ -393,19 +418,21 @@ img.barcode {
 
 
 {% macro date(Workorder) %}
-	<p>
-		{{"now"|date('m/d/Y h:i:s A')}}
-	</p>
+    <p>
+        {{"now"|correcttimezone|date('m/d/Y h:i:s A')}}
+    </p>
 {% endmacro %}
 
 {% macro line(Line,parameters,options) %}
 	<tr data-automation="lineItemRow">
 		<td data-automation="lineItemRowItemLabor" class="description">
 			{{ _self.lineDescription(Line,options) }}
-			{% if Line.Discount %}
-				<small>Discount: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
+			{% if parameters.type == 'shop-tag' %}
+				{% if Line.Discount %}
+					<small>Discount: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
+				{% endif %}
 			{% endif %}
-			</td>
+		</td>
 		{% if options.per_line_subtotal == true %}
 			{% if options.itemized_hours_labor == true %}
 				{% if Line.unitPriceOverride > 0 %}
@@ -431,13 +458,15 @@ img.barcode {
 		{% else %}
 			<td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
 		{% endif %}
-		<td data-automation="lineItemRowCharge" class="amount">
-			{% if Line.warranty == 'false' %}
-				{{Line.SaleLine.calcSubtotal|money}}
-			{% elseif Line.warranty == 'true' %}
-				$0.00
-			{% endif %}
-		</td>
+		{% if parameters.type == 'shop-tag' %}
+			<td data-automation="lineItemRowCharge" class="amount">
+				{% if Line.warranty == 'false' %}
+					{{Line.SaleLine.calcSubtotal|money}}
+				{% elseif Line.warranty == 'true' %}
+					$0.00
+				{% endif %}
+			</td>
+		{% endif %}
 	</tr>
 {% endmacro %}
 
