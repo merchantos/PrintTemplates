@@ -186,12 +186,18 @@ table.totals tr.total td {
 	margin: 0 0 1em;
 }
 
+.notes h3 {
+	{% if minimal_mode == true %}
+		font-size: 10pt;
+	{% endif %}
+}
+
 img.barcode {
 	display: block;
 	{% if minimal_mode == false %}
 		margin: 2em auto;
 	{% else %}
-		margin: 1em auto;
+		margin: 0px auto;
 	{% endif %}
 }
 
@@ -303,9 +309,7 @@ img.barcode {
 				<tr>
 					<th class="description">Item/Labor</th>
 					<th class="quantity">#</th>
-					{% if parameters.type == 'shop-tag' %}
-						<th class="amount">Price</th>
-					{% endif %}
+					<th class="amount">Price</th>
 				</tr>
 				{% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
 					{% if WorkorderItem.isSpecialOrder == 'false' %}
@@ -334,46 +338,44 @@ img.barcode {
 			</table>
 
 			<table class="totals">
-				{% if parameters.type == 'shop-tag' %}
-					<tbody>
+				<tbody>
+					<tr>
+						<td>Labor</td>
+						<td id="totalsLaborValue" class="amount">
+							{{Workorder.MetaData.labor|money}}
+						</td>
+					</tr>
+
+					<tr>
+						<td>Parts</td>
+						<td id="totalsPartsValue" class="amount">
+							{{Workorder.MetaData.parts|money}}
+						</td>
+					</tr>
+
+					{% if Workorder.MetaData.discount > 0 %}
 						<tr>
-							<td>Labor</td>
-							<td id="totalsLaborValue" class="amount">
-								{{Workorder.MetaData.labor|money}}
+							<td>Discounts</td>
+							<td id="totalsDiscountsValue" class="amount">
+								{{Workorder.MetaData.discount|getinverse|money}}
 							</td>
 						</tr>
+					{% endif %}
 
-						<tr>
-							<td>Parts</td>
-							<td id="totalsPartsValue" class="amount">
-								{{Workorder.MetaData.parts|money}}
-							</td>
-						</tr>
+					<tr>
+						<td>Tax</td>
+						<td id="totalsTaxValue" class="amount">
+							{{Workorder.MetaData.tax|money}}
+						</td>
+					</tr>
 
-						{% if Workorder.MetaData.discount > 0 %}
-							<tr>
-								<td>Discounts</td>
-								<td id="totalsDiscountsValue" class="amount">
-									{{Workorder.MetaData.discount|getinverse|money}}
-								</td>
-							</tr>
-						{% endif %}
-
-						<tr>
-							<td>Tax</td>
-							<td id="totalsTaxValue" class="amount">
-								{{Workorder.MetaData.tax|money}}
-							</td>
-						</tr>
-
-						<tr class="total">
-							<td>Total</td>
-							<td id="totalsTotalValue" class="amount">
-								{{Workorder.MetaData.total|money}}
-							</td>
-						</tr>
-					</tbody>
-				{% endif %}
+					<tr class="total">
+						<td>Total</td>
+						<td id="totalsTotalValue" class="amount">
+							{{Workorder.MetaData.total|money}}
+						</td>
+					</tr>
+				</tbody>
 			</table>
 
 			{% if notes_on_tag_only == false %}
@@ -427,10 +429,8 @@ img.barcode {
 	<tr data-automation="lineItemRow">
 		<td data-automation="lineItemRowItemLabor" class="description">
 			{{ _self.lineDescription(Line,options) }}
-			{% if parameters.type == 'shop-tag' %}
-				{% if Line.Discount %}
-					<small>Discount: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
-				{% endif %}
+			{% if Line.Discount %}
+				<small>Discount: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
 			{% endif %}
 		</td>
 		{% if options.per_line_subtotal == true %}
@@ -458,15 +458,13 @@ img.barcode {
 		{% else %}
 			<td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
 		{% endif %}
-		{% if parameters.type == 'shop-tag' %}
-			<td data-automation="lineItemRowCharge" class="amount">
-				{% if Line.warranty == 'false' %}
-					{{Line.SaleLine.calcSubtotal|money}}
-				{% elseif Line.warranty == 'true' %}
-					$0.00
-				{% endif %}
-			</td>
-		{% endif %}
+		<td data-automation="lineItemRowCharge" class="amount">
+			{% if Line.warranty == 'false' %}
+				{{Line.SaleLine.calcSubtotal|money}}
+			{% elseif Line.warranty == 'true' %}
+				$0.00
+			{% endif %}
+		</td>
 	</tr>
 {% endmacro %}
 
