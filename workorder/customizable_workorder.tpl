@@ -192,6 +192,13 @@ table.totals tr.total td {
 	{% endif %}
 }
 
+.workorderAgree {
+	margin-bottom: 40px;
+	{% if minimal_mode == true %}
+		font-size: 9pt;
+	{% endif %}
+}
+
 img.barcode {
 	display: block;
 	{% if minimal_mode == false %}
@@ -406,7 +413,7 @@ img.barcode {
 			{% if parameters.type == 'invoice' %}
 				{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
 					<div id="signatureSection" style="padding: 10px 0px">
-						<p style="margin-bottom:40px;">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
+						<p class="workorderAgree">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
 						X_______________________________
 						<br/>
 						{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
