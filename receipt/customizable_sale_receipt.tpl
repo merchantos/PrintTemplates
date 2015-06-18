@@ -503,7 +503,7 @@ dl dd p { margin: 0; }
         {% endif %}
         {% if options.show_customer_notes == true %}
             {% if Sale.Customer.Note.note|strlen > 0 %}
-                Note: {{ Sale.Customer.Note.note }}<br />
+                Note: {{ Sale.Customer.Note.note|noteformat|raw }}<br />
             {% endif %}
         {% endif %}
     {% endif %}
