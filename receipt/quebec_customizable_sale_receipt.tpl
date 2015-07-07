@@ -697,7 +697,7 @@ dl dd p { margin: 0; }
         {% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
         <table class="totals">
             <tr class="total">
-                <td width="100%">Balance Monquant </td>
+                <td width="100%">Balance Montant </td>
                 <td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|number_format(2, '.')}}$</td>
             </tr>
         </table>
