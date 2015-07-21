@@ -30,6 +30,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set display_full_customer_address = false %} {# Displays Customer's full address, if available #}
 {% set customer_name_only = false %}            {# Hides all Customer information except for their name #}
 {% set show_customer_notes = false %}           {# Displays Notes entered in the Customer's profile #}
+{% set company_name_override = false %}         {# Forces the Company Name to be displayed instead of the Customer Name if Company Name is present #}
 
 {# Customer Account  #}
 
@@ -477,14 +478,12 @@ dl dd p { margin: 0; }
     {% if Sale.Register %}Register: <span id="receiptRegisterName">{{Sale.Register.name}}</span><br />{% endif %}
     {% if Sale.Employee %}Employee: <span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br />{% endif %}
     {% if Sale.Customer %}
-        {% set company_name_printed = false %}
-        {% if options.company_name_override_customer_name == true or (Sale.Customer.firstName|strlen == 0 and options.company_name_as_customer_name == true) %}
+        {% if options.company_name_override == true and Sale.Customer.company|strlen > 0 %}
             Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
-            {% set company_name_printed = true %}
         {% elseif Sale.Customer.firstName|strlen > 0 %}
             Customer: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
         {% endif %}
-        {% if Sale.Customer.company|strlen > 0 and company_name_printed == false %}
+        {% if Sale.Customer.company|strlen > 0 and options.company_name_override == false %}
             Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
         {% endif %}
         <span id="receiptPhonesContainer" class="indent">
