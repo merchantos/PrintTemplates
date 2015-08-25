@@ -532,7 +532,7 @@ dl dd p { margin: 0; }
     {% if options.show_manufacturer_sku == true %}
         <td class="sku">{{ Line.Item.manufacturerSku }}</td>
     {% endif %}
-    {% if options.show_msrp == true %}
+    {% if options.show_msrp == true and not parameters.gift_receipt %}
         {% set msrp_printed = false %}
         {% for price in Line.Item.Prices.ItemPrice %}
             {% if price.useType == "MSRP" and price.amount != "0"%}
@@ -588,7 +588,7 @@ dl dd p { margin: 0; }
                 {% elseif options.show_manufacturer_sku == true %}
                     <th class="sku">SKU</th>
                 {% endif %}
-                {% if options.show_msrp == true %}
+                {% if options.show_msrp == true and not parameters.gift_receipt %}
                     <th class="sku">MSRP</th>
                 {% endif %}
                 <th class="quantity">#</th>

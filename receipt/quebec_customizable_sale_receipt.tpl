@@ -21,6 +21,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set per_line_employee = false %}
 {% set show_custom_sku = false %}               {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
 {% set show_manufacturer_sku = false %}         {# Adds SKU column for Manufacturer SKU, if available, on each Sale Line #}
+{% set show_msrp = false %}                     {# Adds MSRP column for the item's MSRP, if available, on each Sale Line #}
 
 {# Misc. adjustments #}
 
@@ -532,6 +533,18 @@ dl dd p { margin: 0; }
     {% if options.show_manufacturer_sku == true %}
         <td class="sku">{{ Line.Item.manufacturerSku }}</td>
     {% endif %}
+    {% if options.show_msrp == true and not parameters.gift_receipt %}
+        {% set msrp_printed = false %}
+        {% for price in Line.Item.Prices.ItemPrice %}
+            {% if price.useType == "MSRP" and price.amount != "0"%}
+                <td class="sku">{{ price.amount|money }}</td>
+                {% set msrp_printed = true %}
+            {% endif %}
+        {% endfor %}
+        {% if msrp_printed == false %}
+            <td class="sku">N/A</td>
+        {% endif %}
+    {% endif %}
     {% if not parameters.gift_receipt %}
         {% if options.per_line_subtotal == true %}
             {% if options.per_line_discounted_subtotal == true and Line.calcLineDiscount > 0 %}
@@ -575,6 +588,9 @@ dl dd p { margin: 0; }
                     <th class="sku">Man. SKU </th>
                 {% elseif options.show_manufacturer_sku == true %}
                     <th class="sku">SKU</th>
+                {% endif %}
+                {% if options.show_msrp == true and not parameters.gift_card %}
+                    <th class="sku">MSRP</th>
                 {% endif %}
                 <th class="quantity">#</th>
                 {% if not parameters.gift_receipt %}<th class="amount">Prix</th>{% endif %}
