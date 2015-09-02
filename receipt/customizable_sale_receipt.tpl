@@ -479,32 +479,38 @@ dl dd p { margin: 0; }
     {% if Sale.Register %}Register: <span id="receiptRegisterName">{{Sale.Register.name}}</span><br />{% endif %}
     {% if Sale.Employee %}Employee: <span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br />{% endif %}
     {% if Sale.Customer %}
-        {% if options.company_name_override == true and Sale.Customer.company|strlen > 0 %}
-            Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
-        {% elseif Sale.Customer.firstName|strlen > 0 %}
-            Customer: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
-        {% endif %}
-        {% if Sale.Customer.company|strlen > 0 and options.company_name_override == false %}
-            Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
-        {% endif %}
         <span id="receiptPhonesContainer" class="indent">
-        {% if options.display_full_customer_address == true %}
-            {% for ContactAddress in Sale.Customer.Contact.Addresses.ContactAddress %}
-                Address: {{ ContactAddress.address1 }}
-                {{ ContactAddress.city }},
-                {{ ContactAddress.state }},
-                {{ ContactAddress.zip }}<br />
-            {% endfor %}
-        {% endif %}
-        {% if not options.customer_name_only == true %}
+        {% if options.customer_name_only == true %}
+            {% if options.company_name_override == true and Sale.Customer.company|strlen > 0 %}
+                Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
+            {% elseif Sale.Customer.firstName|strlen > 0 %}
+                Customer: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
+            {% endif %}
+        {% else %}
+            {% if options.company_name_override == true and Sale.Customer.company|strlen > 0 %}
+                Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
+            {% elseif Sale.Customer.firstName|strlen > 0 %}
+                Customer: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
+            {% endif %}
+            {% if options.display_full_customer_address == true %}
+                {% for ContactAddress in Sale.Customer.Contact.Addresses.ContactAddress %}
+                    Address: {{ ContactAddress.address1 }}
+                    {{ ContactAddress.city }},
+                    {{ ContactAddress.state }},
+                    {{ ContactAddress.zip }}<br />
+                {% endfor %}
+            {% endif %}
             {% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-            <span data-automation="receiptPhoneNumber">{{Phone.useType}}: {{Phone.number}}</span><br />
+                <span data-automation="receiptPhoneNumber">{{Phone.useType}}: {{Phone.number}}</span><br />
             {% endfor %}
             {% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
-            Email: <span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
+                Email: <span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
             {% endfor %}
-            </span>
+            {% if Sale.Customer.company|strlen > 0 and options.company_name_override == false %}
+                Company: <span id="receiptCompanyName"> {{Sale.Customer.company}}</span><br />
+            {% endif %}
         {% endif %}
+        </span>
         {% if options.show_customer_notes == true %}
             {% if Sale.Customer.Note.note|strlen > 0 %}
                 Note: {{ Sale.Customer.Note.note|noteformat|raw }}<br />
