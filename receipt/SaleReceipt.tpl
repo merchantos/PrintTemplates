@@ -534,11 +534,11 @@ dl dd p { margin: 0; }
 		{% endif %}
 
 		<td data-automation="lineItemQuantity" class="quantity">
-			{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 %}
+			{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
 				<span class="strike">{{Line.unitQuantity}} x {{Line.displayableUnitPrice|money}}</span>
 			{% endif %}
 			{{Line.unitQuantity}}
-			{% if options.per_line_subtotal %} x
+			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
 				{% if options.discounted_line_items %}
 					{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
 				{% else %}
