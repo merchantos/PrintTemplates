@@ -868,12 +868,12 @@ dl dd p { margin: 0; }
 		<table class="layways totals">
 			<tr>
 				<td width="100%">Subtotal</td>
-				<td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
+				<td class="amount">{{Customer.MetaData.layawaysSubtotal|money}}</td>
 			</tr>
-			{% if Sale.Customer.MetaData.layawaysAllDiscounts>0.00 %}
+			{% if Customer.MetaData.layawaysAllDiscounts > 0 %}
 				<tr>
 					<td width="100%">Discounts</td>
-					<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|money}}</td>
+					<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|getinverse|money}}</td>
 				</tr>
 			{% endif %}
 			<tr>
