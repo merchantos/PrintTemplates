@@ -9,9 +9,20 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set itemized_hours_labor = false %}				{# Shows time spent on Labor item if time spent is present in the charge #}
 {% set per_line_subtotal = false %}					{# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set employee_name_on_labor_charges = false %}	{# Display Employee name on Labor Charges #}
+{% set make_work_order_number_small = false %}		{# Makes work order number inline with the header #}
+{% set remove_logo = false %}						{# Removes logo from receipt #}
 
 {% set tag_header_information = false %}			{# Shows shop header information on Tags #}
 {% set notes_on_tag_only = false %}					{# Displays notes on tags only (these will still show up in the Sales screen when ringing out the Work Order) #}
+
+{% set hide_work_order_item = false %}				{# Removes the Start and end date from receipts #}
+{% set hide_status = false %}						{# Removes the Status receipts #}
+{% set hide_warranty = false %}						{# Removes warranty line from receipts #}
+{% set hide_start_and_date = false %}				{# Removes the Start and end date from receipts #}
+
+{% set hide_employee = false %}						{# Removes the the employee from the Work order header #}
+{% set hide_work_order_agreement = false %}			{# Removes the the employee from the Work order header #}
+
 
 {% set hide_barcode = false %}						{# Removes barcode from bottom of receipts #}
 {% set hide_barcode_sku = false %}					{# Remove the System ID from displaying at the bottom of barcdoes #}
@@ -58,7 +69,7 @@ body {
     {% if firefox_margin_fix == true %}
         margin: 25px;
     {% endif %}
-    padding: 1px; <!-- You need this to make the printer behave -->
+    padding: 1px;
 }
 
 .workorder {
@@ -117,6 +128,11 @@ body {
 
 .detail p {
 	margin: 0;
+}
+
+.workOrderItem {
+	font-size: 15px;
+	font-weight: bold;
 }
 
 table {
@@ -218,7 +234,7 @@ img.barcode {
 
 			<div class="header">
 				{% if parameters.type != 'shop-tag' or tag_header_information == true %}
-					{% if minimal_mode == false %}
+					{% if minimal_mode or remove_logo == false %}
 						{% set logo_printed = false %}
 				        {% if multi_shop_logos == true %}
 				            {% for shop in shop_logo_array %}
@@ -250,11 +266,16 @@ img.barcode {
 					<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
 					{{ _self.date(Workorder) }}
 				{% else %}
-					<h1 id="receiptTypeTitle">Work Order</h1>
-					{{ _self.date(Workorder) }}
-					<br />
-					<h1 id="receiptTypeId"><strong>#{{ Workorder.workorderID }}</strong></h1>
-					<br />
+						{% if make_work_order_number_small == true %}
+							<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
+							{{ _self.date(Workorder) }}
+						{% elseif make_work_order_number_small == false %}
+							<h1 id="receiptTypeTitle">Work Order</h1>
+							{{ _self.date(Workorder) }}
+							<br />
+							<h1 id="receiptTypeId"><strong>#{{ Workorder.workorderID }}</strong></h1>
+							<br />
+						{% endif %}
 				{% endif %}
 				{% if parameters.type == 'shop-tag' %}
 					{% if Workorder.hookIn|strlen > 0 or Workorder.hookOut|strlen > 0 %}
@@ -277,36 +298,48 @@ img.barcode {
 				{% for ContactEmail in Workorder.Customer.Contact.Emails.ContactEmail %}
 					<p data-automation="customerEmail">{{ ContactEmail.address }}</p>
 				{% endfor %}
-				<br />
 				{% for serializedID in Workorder.Serialized %}
-					<h3>Work Order Item:</h3>
-						<p>{% if Workorder.Serialized.description|strlen > 0 %}
-							{{ Workorder.Serialized.description }}
-						{% elseif Workorder.Serialized.Item.description|strlen > 0 %}
-							{{ Workorder.Serialized.Item.description }}
-						{% endif %}
-						{% if Workorder.Serialized.colorName|strlen > 0 %}
-							/ {{ Workorder.Serialized.colorName }}
-						{% endif %}
-						{% if Workorder.Serialized.sizeName|strlen > 0 %}
-							/ {{ Workorder.Serialized.sizeName }}
-						{% endif %}
-						{% if Workorder.Serialized.serial|strlen > 0 %}
-							/ {{ Workorder.Serialized.serial }}
-						{% endif %}</p>
-					<br />
+					{% if hide_hide_work_order_item == false %}
+						<div class="workOrderItem" >Work Order Item:</div>
+							{% if Workorder.Serialized.description|strlen > 0 %}
+								{{ Workorder.Serialized.description }}
+							{% elseif Workorder.Serialized.Item.description|strlen > 0 %}
+								{{ Workorder.Serialized.Item.description }}
+							{% endif %}
+							{% if Workorder.Serialized.colorName|strlen > 0 %}
+								/ {{ Workorder.Serialized.colorName }}
+							{% endif %}
+							{% if Workorder.Serialized.sizeName|strlen > 0 %}
+								/ {{ Workorder.Serialized.sizeName }}
+							{% endif %}
+							{% if Workorder.Serialized.serial|strlen > 0 %}
+								/ {{ Workorder.Serialized.serial }}
+							{% endif %}
+					{% else %}
+					{% endif %}
 				{% endfor %}
 				<h2 id="woQuoteInfo">
-					Status: {{ Workorder.WorkorderStatus.name }}<br />
+				{% if hide_status == false %}
+					Status: {{ Workorder.WorkorderStatus.name }}
+				{% endif %}
+				{% if hide_warranty == false %}
 					{% if Workorder.warranty == 'true' %}
-						Warranty: Yes
+							<br />Warranty: Yes
+						{% else %}
+							<br />Warranty: No
+						{% endif %}
 					{% else %}
-						Warranty: No
 					{% endif %}
-					<br />
+						<br />
+				{% if hide_start_and_date == false %}
 					Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
 					Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}<br />
+					{% else %}
+				{% endif %}
+				{% if hide_employee == false %}
 					Employee: {{ Workorder.Employee.firstName }} {{ Workorder.Employee.lastName }}
+				{% else %}
+				{% endif %}
 				</h2>
 			</div>
 
@@ -409,15 +442,16 @@ img.barcode {
         		{% endif %}
 				<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}&hide_text={{ hide_text }}">
 			{% endif %}
-
-			{% if parameters.type == 'invoice' %}
-				{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
-					<div id="signatureSection" style="padding: 10px 0px">
-						<p class="workorderAgree">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
-						X_______________________________
-						<br/>
-						{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
-					</div>
+			{% if hide_work_order_agreement == false %}
+				{% if parameters.type == 'invoice' %}
+					{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
+						<div id="signatureSection" style="padding: 10px 0px">
+							<p class="workorderAgree">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
+							X_______________________________
+							<br/>
+							{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
+						</div>
+					{% endif %}
 				{% endif %}
 			{% endif %}
 		</div>
