@@ -21,7 +21,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set hide_start_and_date = false %}				{# Removes the Start and end date from receipts #}
 
 {% set hide_employee = false %}						{# Removes the the employee from the Work order header #}
-{% set hide_work_order_agreement = false %}			{# Removes the the employee from the Work order header #}
+{% set hide_Work_Order_Agreement = false %}			{# Removes the the employee from the Work order header #}
 
 
 {% set hide_barcode = false %}						{# Removes barcode from bottom of receipts #}
@@ -69,7 +69,7 @@ body {
     {% if firefox_margin_fix == true %}
         margin: 25px;
     {% endif %}
-    padding: 1px;
+    padding: 1px; 
 }
 
 .workorder {
@@ -266,10 +266,10 @@ img.barcode {
 					<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
 					{{ _self.date(Workorder) }}
 				{% else %}
-						{% if make_work_order_number_small == true %}
+						{% if make_work_order_number_small == true %} 
 							<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
 							{{ _self.date(Workorder) }}
-						{% elseif make_work_order_number_small == false %}
+						{% elseif make_work_order_number_small == false %}	
 							<h1 id="receiptTypeTitle">Work Order</h1>
 							{{ _self.date(Workorder) }}
 							<br />
@@ -299,7 +299,7 @@ img.barcode {
 					<p data-automation="customerEmail">{{ ContactEmail.address }}</p>
 				{% endfor %}
 				{% for serializedID in Workorder.Serialized %}
-					{% if hide_hide_work_order_item == false %}
+					{% if hide_work_order_item == false %}
 						<div class="workOrderItem" >Work Order Item:</div>
 							{% if Workorder.Serialized.description|strlen > 0 %}
 								{{ Workorder.Serialized.description }}
@@ -328,9 +328,9 @@ img.barcode {
 						{% else %}
 							<br />Warranty: No
 						{% endif %}
+						<br />
 					{% else %}
 					{% endif %}
-						<br />
 				{% if hide_start_and_date == false %}
 					Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
 					Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}<br />
@@ -442,7 +442,7 @@ img.barcode {
         		{% endif %}
 				<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}&hide_text={{ hide_text }}">
 			{% endif %}
-			{% if hide_work_order_agreement == false %}
+			{% if hide_Work_Order_Agreement == false %}
 				{% if parameters.type == 'invoice' %}
 					{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
 						<div id="signatureSection" style="padding: 10px 0px">
