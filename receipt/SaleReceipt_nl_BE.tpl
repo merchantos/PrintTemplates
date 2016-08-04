@@ -4,8 +4,15 @@
 #}
 
 {# Layout Adjustments #}
+{% set print_layout = parameters.print_layout == "true" ? true : false %} {# Improves receipt layout for large display/paper size (A4/Letter/Email) #}
 {% set chrome_right_margin_fix = false %}           {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
 {% set firefox_margin_fix = false %}                {# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
+
+{# Sale #}
+{% set sale_id_instead_of_ticket_number = false %}  {# Displays the Sale ID instead of the Ticket Number #}
+{% set invoice_as_title = false %}                  {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
+{% set quote_id_prefix = "" %}                      {# Adds a string of text as a prefix for the Quote ID. Ex: "Q-". To be used when "sale_id_instead_of_ticket_number" is true #}
+{% set sale_id_prefix = "" %}                       {# Adds a string of text as a prefix for the Sales ID. Ex: "S-". To be used when "sale_id_instead_of_ticket_number" is true #}
 
 {# Item Lines #}
 {% set per_line_discount = false %}                 {# Displays Discounts on each Sale Line #}
@@ -17,6 +24,7 @@
 {% set show_msrp = false %}                         {# Adds MSRP column for the items MSRP, if available, on each Sale Line #}
 
 {# Misc. Adjustments #}
+{% set show_shop_name_with_logo = false %}          {# Displays the Shop Name under the Shop Logo #}
 {% set show_thank_you = true %}                     {# Displays "Bedankt <Customer Name>!" above bottom barcode #}
 {% set show_transaction_item_count = false %}       {# Gives a total quantity of items sold near the bottom of the receipt #}
 {% set show_sale_lines_on_store_copy = false %}     {# Shows Sale Lines on Credit Card Store Copy receipts #}
@@ -24,6 +32,8 @@
 {% set show_sale_lines_on_gift_receipt = true %}    {# Displays Sale Lines on Gift Receipts #}
 {% set show_barcode = true %}                       {# Displays barcode at bottom of receipts #}
 {% set show_barcode_sku = true %}                   {# Displays the System ID at the bottom of barcodes #}
+{% set hide_ticket_number_on_quote = false %}       {# Hides the Ticket Number on Quotes #}
+{% set hide_quote_id_on_sale = false %}             {# Hides the Quote ID on Sales #}
 
 {# Customer Information #}
 {% set show_full_customer_address = false %}        {# Displays Customers full address, if available #}
@@ -71,8 +81,10 @@
 
 body {
 	font: normal 10pt 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	margin: 0;
+	width: {{parameters.page_width|pageWidthToCss}};
+	margin: 0 auto;
 	padding: 1px; <!-- You need this to make the printer behave -->
+
 	{% if chrome_right_margin_fix == true %}
 		margin-right: .13in;
 	{% endif %}
@@ -114,19 +126,25 @@ h2 {
 	margin: .5em 0 0;
 }
 
-.header {
+.receiptHeader {
 	text-align: center;
 }
 
-.header h3 {
+.receiptHeader h3 {
 	font-size: 12pt;
 	margin: 0;
 }
 
-.header img {
-	display: block;
-	margin: 8px auto 4px;
-	text-align: center;
+.shipping h4 {
+	margin-top: 0;
+}
+
+.receiptHeader img {
+	margin: 8px 0 4px;
+}
+
+.receiptShopContact {
+	margin: 0;
 }
 
 table {
@@ -208,9 +226,10 @@ p.thankyou {
 
 .note { text-align: center; }
 
-img.barcode {
-	display: block;
-	margin: 0 auto;
+
+.barcodeContainer {
+	margin-top: 15px;
+	text-align: center;
 }
 
 dl {
@@ -234,6 +253,257 @@ dl dd {
 dl dd p { margin: 0; }
 
 .strike { text-decoration: line-through; }
+
+
+.receiptCompanyNameField,
+.receiptCustomerNameField,
+.receiptCustomerVatField,
+.receiptCustomerCompanyVatField {
+	display: block;
+	padding-top: 5px;
+}
+
+table.payments td.label {
+	font-weight: normal;
+	text-align: right;
+	width: 100%;
+}
+
+{% if print_layout %}
+
+	/* Receipts only */
+	@media (max-width: 299px) {
+		.show-on-print {
+			display: none;
+		}
+		.hide-on-print {
+			display: block;
+		}
+	}
+
+	@media (min-width: 480px) {
+		/* Emails hacks, don't mind the optimisation */
+		table.saletotals {
+			Float: right;
+			Margin-top: 50px;
+			width: 50% !important;
+		}
+
+		table.payments {
+			width: 100%;
+		}
+
+		table.payments {
+			Float: left;
+			margin-top: 5px;
+			width: 50%;
+			text-align: left;
+		}
+
+		table.payments tr td.amount {
+			text-align: right;
+			width: auto;
+		}
+
+		table.payments tr td.amount {
+			text-align: left;
+			width: 100%;
+		}
+
+
+		table.payments td.label {
+			font-weight: bold;
+			text-align: left;
+			white-space: nowrap;
+			width: inherit;
+		}
+	}
+
+/* Email, Letter, A4 only */
+	@media (min-width: 300px) {
+
+		.show-on-print {
+			display: block;
+		}
+		.hide-on-print {
+			display: none;
+		}
+
+		body {
+			padding: 15px;
+			position: relative;
+		}
+
+		.receiptHeader {
+			Float: left;
+			position: relative;
+			max-width: 50%;
+			text-align: left;
+		}
+
+		.receiptHeader img {
+			display: block;
+			margin: 0 0 10px;
+			max-width: 120px;
+		}
+
+		.receiptHeader h3.receiptShopName {
+			font-size: 14pt;
+			margin-bottom: 3px;
+			text-decoration: underline;
+		}
+
+		.receiptShopName,
+		.receiptShopContact {
+			text-align: left;
+		}
+
+		.receiptTypeTitle,
+		.receiptTypeTitle span {
+			font-size: 18pt;
+			Float: right;
+			clear: right;
+			text-align: center;
+			margin-top: 0;
+		}
+
+		.receiptTypeTitle span.hide-on-print {
+			font-size: 0;
+			display: none;
+		}
+
+		p.date,
+		p.copy {
+			Float: right;
+			clear: right;
+		}
+
+		#receiptInfo {
+			clear: both;
+			padding-top: 15px;
+			padding-left: 0px;
+		}
+
+		#receiptInfo:after {
+			content: "";
+			display: table;
+			clear: both;
+		}
+
+		.receiptQuoteIdField,
+		.receiptTicketIdField {
+			clear: right;
+			Float: right;
+		}
+		.receiptQuoteIdLabel,
+		.receiptTicketIdLabel {
+			display: none !important;
+		}
+		#receiptQuoteId,
+		#receiptTicketId {
+			font-size: 14pt;
+			font-weight: bold;
+			display: block;
+			Float: right;
+		}
+
+		.vatNumberField,
+		.companyRegistrationNumberField,
+		.receiptRegisterNameField,
+		.receiptEmployeeNameField {
+			clear: right;
+			Float: right;
+			text-align: right;
+		}
+		.vatNumberField span,
+		.companyRegistrationNumberField span,
+		.receiptRegisterNameField span,
+		.receiptEmployeeNameField span {
+			font-size: 8pt;
+		}
+
+		.receiptCustomerAddressLabel,
+		.receiptEmailLabel {
+			display: none !important;
+		}
+
+		.receiptCompanyNameField,
+		.receiptCustomerNameField,
+		.receiptCustomerVatField,
+		.receiptCustomerCompanyVatField {
+			margin-bottom: 3px;
+			margin-top: 3px;
+		}
+
+		.receiptCompanyNameLabel,
+		.receiptCustomerNameLabel,
+		.receiptCustomerVatLabel,
+		.receiptCustomerCompanyVatLabel {
+			font-size: 11pt;
+			font-weight: bold;
+		}
+		#receiptCompanyName,
+		#receiptCustomerName {
+			font-size: 12pt;
+		}
+
+		.receiptCompanyNameField,
+		.receiptCustomerNameField,
+		.receiptCustomerVatField,
+		.receiptCustomerCompanyVatField,
+		.receiptCustomerAddressField,
+		.receiptPhonesContainer,
+		.receiptCustomerNoteField {
+			display: block;
+			max-width: 40%;
+		}
+
+		table.sale {
+			clear: both;
+			padding-top: 30px;
+		}
+		table.sale thead th {
+			padding-top: 30px;
+		}
+
+		table.sale tbody tr:first-child th,
+		table.sale tbody tr:first-child td {
+			padding-top: 10px;
+		}
+		table.sale tbody tr:last-child th,
+		table.sale tbody tr:last-child td {
+			padding-bottom: 10px;
+		}
+		table.sale tbody th,
+		table.sale tbody td {
+			padding-bottom: 5px;
+			padding-top: 5px;
+		}
+
+		.paymentTitle,
+		.footerSectionTitle {
+			font-size: 12pt;
+			padding-top: 15px;
+			text-transform: none;
+		}
+		.footerSectionTitle {
+			clear: both;
+		}
+
+		.thankyou {
+			clear: both;
+			padding-top: 30px;
+		}
+
+		img.barcode {
+			border: none;
+			height: 30px;
+			width: 150px;
+		}
+
+	}
+
+{% endif %}
 
 {% endblock extrastyles %}
 
@@ -260,36 +530,7 @@ dl dd p { margin: 0; }
 			<!-- replace.email_custom_header_msg -->
 			<div>
 				{{ _self.ship_to(Sale) }}
-
-				<div class="header">
-					{% set logo_printed = false %}
-					{% if multi_shop_logos %}
-						{% for shop in shop_logo_array if not logo_printed %}
-							{% if shop.name == Sale.Shop.name %}
-								{% if shop.logo_url|strlen > 0 %}
-									<img src="{{ shop.logo_url }}" width ={{ logo_width }} height="{{ logo_height }}" class="logo">
-									{% set logo_printed = true %}
-								{% endif %}
-							{% endif %}
-						{% endfor %}
-					{% endif %}
-
-					{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 and not logo_printed %}
-						<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ logo_width }}" height="{{ logo_height }}" class="logo">
-					{% else %}
-						<h3>{{ Sale.Shop.name }}</h3>
-					{% endif %}
-
-					{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
-						<p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
-					{% else %}
-						{{ _self.address(Sale.Shop.Contact) }}
-						{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
-							<br />{{ContactPhone.number}}
-						{% endfor %}
-					{% endif %}
-				</div>
-
+				{{ _self.header(Sale) }}
 				{{ _self.title(Sale,parameters,_context) }}
 				{{ _self.date(Sale) }}
 				{{ _self.sale_details(Sale,_context) }}
@@ -320,7 +561,9 @@ dl dd p { margin: 0; }
 				{% endif %}
 
 				{% if show_barcode %}
+				<p class="barcodeContainer">
 					<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}&hide_text={{ not show_barcode_sku }}">
+				</p>
 				{% endif %}
 			</div>
 
@@ -345,18 +588,15 @@ dl dd p { margin: 0; }
 
 {% macro store_receipt(Sale,parameters,options,Payment) %}
 	<div class="store">
-		<div class="header">
-			{{ _self.title(Sale,parameters,options) }}
+		{{ _self.title(Sale,parameters,options) }}
 			<p class="copy">Winkelbon</p>
-			{{ _self.date(Sale) }}
-		</div>
-
+		{{ _self.date(Sale) }}
 		{{ _self.sale_details(Sale,options) }}
 
 		{% if options.show_sale_lines_on_store_copy %}
 			{{ _self.receipt(Sale,parameters,true,options) }}
 		{% else %}
-			<h2>Betalingen</h2>
+			<h2 class="paymentTitle">Betalingen</h2>
 			<table class="payments">
 				{{ _self.cc_payment_info(Sale,Payment) }}
 			</table>
@@ -407,17 +647,26 @@ dl dd p { margin: 0; }
 
 
 {% macro title(Sale,parameters,options) %}
-	<h1 id="receiptTypeTitle">
+	<h1 class="receiptTypeTitle">
 		{% if Sale.calcTotal >= 0 %}
 			{% if Sale.completed == 'true' %}
-				{% if parameters.gift_receipt %}
-					Geschenkbewijs
-				{%else%}
-					Ontvangstbewijs
-				{%endif%}
+				{% if options.invoice_as_title and options.print_layout %}
+					<span class="hide-on-print">
+				{% endif %}
+				{% if parameters.gift_receipt %}Geschenkbewijs{% else %}Ontvangstbewijs{% endif %}
+				{% if options.invoice_as_title and options.print_layout %}
+					</span>
+					<span class="show-on-print">Factuur</span>
+				{% endif %}
 			{% elseif Sale.voided == 'true' %}
-				BON
-				<large>GEANNULEERD</large>
+				{% if options.invoice_as_title and options.print_layout %}
+					<span class="hide-on-print">
+				{% endif %}
+					BON <large>GEANNULEERD</large>
+				{% if options.invoice_as_title and options.print_layout %}
+					</span>
+					<span class="show-on-print">Factuur GEANNULEERD</span>
+				{% endif %}
 			{% else %}
 				{% if options.quote_to_invoice %}
 					Factuur
@@ -429,7 +678,14 @@ dl dd p { margin: 0; }
 				{% endif %}
 			{% endif %}
 		{% else %}
-			Retourbon
+			{% if options.invoice_as_title and options.print_layout %}
+				<span class="hide-on-print">
+			{% endif %}
+					Retourbon
+			{% if options.invoice_as_title and options.print_layout %}
+				</span>
+				<span class="show-on-print">Retour Factuur</span>
+			{% endif %}
 		{% endif %}
 	</h1>
 {% endmacro %}
@@ -446,47 +702,77 @@ dl dd p { margin: 0; }
 
 {% macro sale_details(Sale,options) %}
 	<p id="receiptInfo" class="details">
-		{% if Sale.quoteID > 0 %}
-			{% if options.quote_to_invoice %}
-				Factuurnr.:
-			{% else %}
-				Offertenr.:
+		{% if options.hide_quote_id_on_sale and Sale.completed == 'true' %}
+		{% else %}
+			{% if Sale.quoteID > 0 %}
+				<span class="receiptQuoteIdField">
+					<span class="receiptQuoteIdLabel">
+						{% if options.quote_to_invoice %}
+						Factuurnr #:
+						{% else %}
+						Offertenr.:
+						{% endif %}
+					</span>
+					<span id="receiptQuoteId">{{options.quote_id_prefix}}{{Sale.quoteID}}</span>
+					<br />
+				</span>
 			{% endif %}
-			<span id="receiptQuoteId">{{Sale.quoteID}}</span><br />
 		{% endif %}
 
-		Ticket: <span id="receiptTicketId">{{Sale.ticketNumber}}</span><br />
+		{% if options.hide_ticket_number_on_quote and Sale.completed != 'true' and Sale.quoteID > 0 %}
+		{% else %}
+			<span class="receiptTicketIdField">
+				<span class="receiptTicketIdLabel">
+					{% if options.sale_id_instead_of_ticket_number %}verkoop: {% else %}Ticket: {% endif %}</span>
+				<span id="receiptTicketId">
+					{% if options.sale_id_instead_of_ticket_number %}
+						{{options.sale_id_prefix}}{{Sale.saleID}}
+					{% else %}
+						{{Sale.ticketNumber}}
+					{% endif %}
+				</span>
+				<br />
+			</span>
+		{% endif %}
 
 		{% if isVATAndRegistrationNumberOnReceipt() %}
 			{% if Sale.Shop.vatNumber|strlen %}
-				BTW-nr.: <span id="vatNumber">{{Sale.Shop.vatNumber}}</span><br />
+				<span class="vatNumberField">
+					<span class="vatNumberLabel">BTW-nr.: </span>
+					<span id="vatNumber">{{Sale.Shop.vatNumber}}</span>
+					<br />
+				</span>
 			{% endif %}
 			{% if Sale.Shop.companyRegistrationNumber|strlen %}
-				Handelsregisternr.: <span id="companyRegistrationNumber">{{Sale.Shop.companyRegistrationNumber}}</span><br />
+				<span class="companyRegistrationNumberField">
+					<span class="companyRegistrationNumberLabel">Handelsregisternr.: </span>
+					<span id="companyRegistrationNumber">{{Sale.Shop.companyRegistrationNumber}}</span>
+					<br />
+				</span>
 			{% endif %}
 		{% endif %}
 
 		{% if Sale.Register %}
-			Kassa: <span id="receiptRegisterName">{{Sale.Register.name}}</span><br />
+			<span class="receiptRegisterNameField"><span class="receiptRegisterNameLabel">Kassa: </span><span id="receiptRegisterName">{{Sale.Register.name}}</span><br /></span>
 		{% endif %}
 
 		{% if Sale.Employee %}
-			Medewerker: <span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br />
+			<span class="receiptEmployeeNameField"><span class="receiptEmployeeNameLabel">Medewerker: </span><span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br /></span>
 		{% endif %}
 
 		{% if Sale.Customer %}
 			{% if Sale.Customer.company|strlen > 0 %}
-				Bedrijf: <span id="receiptCompanyName">{{Sale.Customer.company}}</span><br />
+				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Bedrijf: </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
 			{% endif %}
 
 			{% if not options.company_name_override or not Sale.Customer.company|strlen > 0 %}
-				Klant: <span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br />
+				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Klant: </span><span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br /></span>
 			{% endif %}
 
 			{% if not options.show_customer_name_only %}
 				{% set ContactAddress = Sale.Customer.Contact.Addresses.ContactAddress %}
 				{% if options.show_full_customer_address and ContactAddress.address1 %}
-					Adres: {{ ContactAddress.address1 }}{% if ContactAddress.city %}, {{ ContactAddress.city }}{% endif %}{% if ContactAddress.state %}, {{ ContactAddress.state }}{% endif %}{% if ContactAddress.zip %}, {{ ContactAddress.zip }}{% endif %}<br />
+					<span class="receiptCustomerAddressField"><span class="receiptCustomerAddressLabel">Adres: </span>{{ ContactAddress.address1 }}{% if ContactAddress.city %}, {{ ContactAddress.city }}{% endif %}{% if ContactAddress.state %}, {{ ContactAddress.state }}{% endif %}{% if ContactAddress.zip %}, {{ ContactAddress.zip }}{% endif %}<br /></span>
 				{% endif %}
 
 				<span id="receiptPhonesContainer" class="indent">
@@ -495,24 +781,32 @@ dl dd p { margin: 0; }
 					{% endfor %}
 
 					{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
-						E-mailadres: <span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
+						<span class="receiptEmailLabel">E-mailadres: </span><span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
 					{% endfor %}
 				</span>
 			{% endif %}
 
 			{% if isVATAndRegistrationNumberOnReceipt() %}
 				{% if Sale.Customer.vatNumber|strlen %}
-					Klant BTW-nr: <span id="customerVatNumber">{{Sale.Customer.vatNumber}}</span><br />
+					<span class="receiptCustomerVatField">
+						<span class="receiptCustomerVatLabel">Klant BTW-nr: </span>
+						<span id="customerVatNumber">{{Sale.Customer.vatNumber}}</span>
+						<br />
+					</span>
 				{% endif %}
 
 				{% if Sale.Customer.companyRegistrationNumber|strlen %}
-					Klant handelsregisternr: <span id="customerCompanyRegistrationNumber">{{Sale.Customer.companyRegistrationNumber}}</span><br />
+					<span class="receiptCustomerCompanyVatField">
+						<span class="receiptCustomerCompanyVatLabel">Klant handelsregisternr: </span>
+						<span id="customerCompanyVatNumber">{{Sale.Customer.companyRegistrationNumber}}</span>
+						<br />
+					</span>
 				{% endif %}
 			{% endif %}
 
 			{% if options.show_customer_notes %}
 				{% if Sale.Customer.Note.note|strlen > 0 %}
-					Opmerking: {{ Sale.Customer.Note.note|noteformat|raw }}<br />
+					<span class="receiptCustomerNoteField"><span class="receiptCustomerNoteLabel">Opmerking: </span>{{ Sale.Customer.Note.note|noteformat|raw }}<br /></span>
 				{% endif %}
 			{% endif %}
 		{% endif %}
@@ -587,6 +881,7 @@ dl dd p { margin: 0; }
 			<thead>
 				<tr>
 					<th class="description">Product</th>
+
 					{% if options.show_custom_sku and options.show_manufacturer_sku %}
 						<th class="custom_field">Aangepaste voorraadeenheid</th>
 						<th class="custom_field">Voorraadeenheid fabr.</th>
@@ -613,14 +908,14 @@ dl dd p { margin: 0; }
 		</table>
 
 		{% if not parameters.gift_receipt %}
-			<table class="totals">
+			<table class="saletotals totals">
 				<tbody id="receiptSaleTotals">
 					<tr>
 						<td width="100%">
 							{% if options.discounted_line_items and Sale.calcDiscount != 0 %}
-								Subtotaal + kortingen
+							Subtotaal + kortingen
 							{% else %}
-								Subtotaal
+							Subtotaal
 							{% endif %}
 						</td>
 						<td id="receiptSaleTotalsSubtotal" class="amount">
@@ -653,7 +948,7 @@ dl dd p { margin: 0; }
 
 	{% if Sale.completed == 'true' and not parameters.gift_receipt %}
 		{% if Sale.SalePayments %}
-			<h2>Betalingen</h2>
+			<h2 class="paymentTitle">Betalingen</h2>
 			<table id="receiptPayments" class="payments">
 				<tbody>
 					{% for Payment in Sale.SalePayments.SalePayment %}
@@ -663,29 +958,29 @@ dl dd p { margin: 0; }
 								<!--  Gift Card -->
 								{% if Payment.amount > 0 %}
 									<tr>
-										<td>Afgeschreven van cadeaubon</td>
+										<td class="label">Afgeschreven van cadeaubon</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|money}}</td>
 									</tr>
 									<tr>
-										<td>Saldo</td>
+										<td class="label">Saldo</td>
 										<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
 									</tr>
 								{% elseif Payment.amount < 0 and Sale.calcTotal < 0 %}
 									<tr>
-										<td>Restitutie op cadeaubon bijschrijven</td>
+										<td class="label">Restitutie op cadeaubon bijschrijven</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 									</tr>
 									<tr>
-										<td>Saldo</td>
+										<td class="label">Saldo</td>
 										<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
 									</tr>
 								{% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
 									<tr>
-										<td>Aankoop cadeaubon</td>
+										<td class="label">Aankoop cadeaubon</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 									</tr>
 									<tr>
-										<td>Saldo</td>
+										<td class="label">Saldo</td>
 										<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}</td>
 									</tr>
 								{% endif %}
@@ -696,11 +991,11 @@ dl dd p { margin: 0; }
 								<!-- Customer Account -->
 								<tr>
 									{% if Payment.amount < 0 %}
-										<td>Storten op rekening</td>
-										<td id="receiptPaymentsCreditAccountDepositValue" class="amount">{{Payment.amount|getinverse|money}}</td>
+									<td class="label">Storten op rekening</td>
+									<td id="receiptPaymentsCreditAccountDepositValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 									{% else %}
-										<td>Betalen met rekening</td>
-										<td id="receiptPaymentsCreditAccountChargeValue" class="amount">{{Payment.amount|money}}</td>
+									<td class="label">Betalen met rekening</td>
+									<td id="receiptPaymentsCreditAccountChargeValue" class="amount">{{Payment.amount|money}}</td>
 									{% endif %}
 								</tr>
 							{% endif %}
@@ -726,7 +1021,7 @@ dl dd p { margin: 0; }
 
 		{% if options.show_customer_credit_account and Sale.Customer and not parameters.gift_receipt and not store_copy %}
 			{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
-				<h2>Winkelrekening</h2>
+				<h2 class="footerSectionTitle">Winkelrekening</h2>
 				<table class="totals">
 					{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
 						<tr>
@@ -735,7 +1030,7 @@ dl dd p { margin: 0; }
 						</tr>
 					{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 						<tr>
-							<td width="100%">Deposito </td>
+							<td width="100%">Deposito: </td>
 							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
 						</tr>
 					{% endif %}
@@ -744,7 +1039,7 @@ dl dd p { margin: 0; }
 			{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 				<table class="totals">
 					<tr class="total">
-						<td width="100%">Resterend saldo </td>
+						<td width="100%">Resterend saldo: </td>
 						<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 					</tr>
 				</table>
@@ -757,9 +1052,9 @@ dl dd p { margin: 0; }
 	<tr>
 		{% if Payment.archived == 'false' %}
 			{% if Payment.ccChargeID > 0 and Payment.CCCharge.declined == 'false' %}
-				<td width="100%">
+				<td class="label" width="100%">
 					{{ Payment.PaymentType.name }}
-					<br>Kaartnr.: {{Payment.CCCharge.xnum}}
+					<br>Kaartnr: {{Payment.CCCharge.xnum}}
 					{% if Payment.CCCharge.cardType|strlen > 0 %}
 						<br>Type: {{Payment.CCCharge.cardType}}
 					{% endif %}
@@ -780,7 +1075,7 @@ dl dd p { margin: 0; }
 							<br>AID: {{Payment.CCCharge.MetaData.AID}}
 						{% endif %}
 						{% if Payment.CCCharge.MetaData.ApplicationLabel|strlen > 0 %}
-							<br>Applicatielabel:: {{Payment.CCCharge.MetaData.ApplicationLabel}}
+							<br>Applicatielabel: {{Payment.CCCharge.MetaData.ApplicationLabel}}
 						{% endif %}
 						{% if Payment.CCCharge.exp|strlen > 0 and
 							Payment.CCCharge.cardType|upper != 'MASTERCARD' and
@@ -794,7 +1089,7 @@ dl dd p { margin: 0; }
 				</td>
 				<td class="amount">{{Payment.amount|money}}</td>
 			{% elseif Payment.ccChargeID == 0 %}
-				<td width="100%">
+				<td class="label" width="100%">
 					{{ Payment.PaymentType.name }}
 				</td>
 				<td class="amount">{{Payment.amount|money}}</td>
@@ -841,7 +1136,7 @@ dl dd p { margin: 0; }
 			{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
 
 			{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
-				<p>Telefoonnr.: {{Phone.number}} ({{Phone.useType}})</p>
+				<p>Telefoonnr: {{Phone.number}} ({{Phone.useType}})</p>
 			{% endif %}{% endfor %}
 
 			{% if Sale.ShipTo.shipNote|strlen > 0 %}
@@ -855,7 +1150,7 @@ dl dd p { margin: 0; }
 {% macro shipping_address(Customer,Contact) %}
 	<p>
 		{% if Customer.company|strlen > 0 %}{{Customer.company}}<br>{% endif %}
-		{% if Customer.company|strlen > 0 %}NB:{% endif %} {{Customer.firstName}} {{Customer.lastName}}<br>
+		{% if Customer.company|strlen > 0 %}Attn:{% endif %} {{Customer.firstName}} {{Customer.lastName}}<br>
 		{{ _self.address(Contact) }}
 	</p>
 {% endmacro %}
@@ -873,9 +1168,44 @@ dl dd p { margin: 0; }
 	{% endautoescape %}
 {% endmacro %}
 
+{% macro header(Sale) %}
+	<div class="receiptHeader">
+		{% set logo_printed = false %}
+		{% if multi_shop_logos %}
+			{% for shop in shop_logo_array if not logo_printed %}
+				{% if shop.name == Sale.Shop.name %}
+					{% if shop.logo_url|strlen > 0 %}
+						<img src="{{ shop.logo_url }}" width ={{ logo_width }} height="{{ logo_height }}" class="logo">
+						{% set logo_printed = true %}
+					{% endif %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
+		{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 and not logo_printed %}
+			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ logo_width }}" height="{{ logo_height }}" class="logo">
+			{% if show_shop_name_with_logo %}
+				<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
+			{% endif %}
+		{% else %}
+			<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
+		{% endif %}
+		<p class="receiptShopContact">
+			{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
+				<p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
+			{% else %}
+				{{ _self.address(Sale.Shop.Contact) }}
+				{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
+					<br />{{ContactPhone.number}}
+				{% endfor %}
+			{% endif %}
+		</p>
+	</div>
+{% endmacro %}
+
 {% macro layaways(Customer,isTaxInclusive,parameters,options) %}
 	{% if Customer.Layaways and Customer.Layaways|length > 0 %}
-		<h2>Apart gehouden items</h2>
+		<h2 class="footerSectionTitle">Apart gehouden items</h2>
 		<table class="lines layaways">
 			<tbody>
 			{% for Line in Customer.Layaways.SaleLine %}
@@ -885,21 +1215,21 @@ dl dd p { margin: 0; }
 		</table>
 		<table class="layways totals">
 			<tr>
-				<td width="100%">Subtotaal</td>
+				<td class="label" width="100%">Subtotaal</td>
 				<td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
 			</tr>
 			{% if Customer.MetaData.layawaysAllDiscounts > 0 %}
 				<tr>
-					<td width="100%">Kortingen</td>
+					<td class="label" width="100%">Kortingen</td>
 					<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|getinverse|money}}</td>
 				</tr>
 			{% endif %}
 			<tr>
-				<td width="100%">Totaal belasting</td>
+				<td class="label" width="100%">Totaal belasting</td>
 				<td class="amount">{{Customer.MetaData.layawaysTaxTotal|money}}</td>
 			</tr>
 			<tr class="total">
-				<td width="100%">Totaal</td>
+				<td class="label" width="100%">Totaal</td>
 				<td class="amount">{{Customer.MetaData.layawaysTotal|money}}</td>
 			</tr>
 		</table>
@@ -908,7 +1238,7 @@ dl dd p { margin: 0; }
 
 {% macro specialorders(Customer,isTaxInclusive,parameters,options) %}
 	{% if Customer.SpecialOrders|length > 0 %}
-		<h2 id="lineItemSectionSO">Speciale bestellingen</h2>
+		<h2 class="footerSectionTitle" id="lineItemSectionSO">Speciale bestellingen</h2>
 		<table id="containerSOLineItems" class="lines specialorders">
 			<tbody>
 				{% for Line in Customer.SpecialOrders.SaleLine %}
@@ -918,21 +1248,21 @@ dl dd p { margin: 0; }
 		</table>
 		<table id="containerSOTotals" class="specialorders totals">
 			<tr>
-				<td width="100%">Subtotaal</td>
+				<td class="label" width="100%">Subtotaal</td>
 				<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
 			</tr>
 			{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 				<tr>
-					<td width="100%">Kortingen</td>
+					<td class="label" width="100%">Kortingen</td>
 					<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
 				</tr>
 			{% endif %}
 			<tr>
-				<td width="100%">Totaal belasting</td>
+				<td class="label" width="100%">Totaal belasting</td>
 				<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
 			</tr>
 			<tr class="total">
-				<td width="100%">Totaal</td>
+				<td class="label" width="100%">Totaal</td>
 				<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
 			</tr>
 		</table>
@@ -941,7 +1271,7 @@ dl dd p { margin: 0; }
 
 {% macro workorders(Customer,parameters,options) %}
 	{% if Customer.Workorders|length > 0 %}
-		<h2>Open werkbonnen</h2>
+		<h2 class="footerSectionTitle">Open werkbonnen</h2>
 		<table class="lines workorders">
 			{% for Line in Customer.Workorders.SaleLine %}
 				<tr>
@@ -957,21 +1287,21 @@ dl dd p { margin: 0; }
 		{% if Customer.MetaData.workordersTotal > 0 %}
 			<table class="workorders totals">
 				<tr>
-					<td width="100%">Subtotaal</td>
+					<td class="label" width="100%">Subtotaal</td>
 					<td class="amount">{{Customer.MetaData.workordersSubtotalNoDiscount|money}}</td>
 				</tr>
 				{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 					<tr>
-						<td width="100%">Kortingen</td>
+						<td class="label" width="100%">Kortingen</td>
 						<td class="amount">{{Customer.MetaData.workordersAllDiscounts|getinverse|money}}</td>
 					</tr>
 				{% endif %}
 				<tr>
-					<td width="100%">Totaal belasting</td>
+					<td class="label" width="100%">Totaal belasting</td>
 					<td class="amount">{{Customer.MetaData.workordersTaxTotal|money}}</td>
 				</tr>
 				<tr class="total">
-					<td width="100%">Totaal</td>
+					<td class="label" width="100%">Totaal</td>
 					<td class="amount">{{Customer.MetaData.workordersTotal|money}}</td>
 				</tr>
 			</table>
@@ -989,7 +1319,7 @@ dl dd p { margin: 0; }
 		{% endif %}
 	{% endfor %}
 	{% if pay_cash == 'true' %}
-		<tr><td width="100%">Contant</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
-		<tr><td width="100%">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+		<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
+		<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
 	{% endif %}
 {% endmacro %}
