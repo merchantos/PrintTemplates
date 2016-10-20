@@ -153,7 +153,7 @@ table {
 	border-collapse:collapse;
 }
 
-table thead th { text-align: left; }
+table th { text-align: left; }
 
 table tbody th {
 	font-weight: normal;
@@ -181,7 +181,11 @@ table td.custom_field {
 }
 
 table.sale { border-bottom: 1px solid black; }
-table.sale thead th { border-bottom: 1px solid black; }
+
+table.sale th {
+	border-bottom: 1px solid black;
+	font-weight: bold;
+}
 
 table div.line_description {
 	text-align: left;
@@ -462,9 +466,6 @@ table.payments td.label {
 			clear: both;
 			padding-top: 30px;
 		}
-		table.sale thead th {
-			padding-top: 30px;
-		}
 
 		table.sale tbody tr:first-child th,
 		table.sale tbody tr:first-child td {
@@ -555,7 +556,7 @@ table.payments td.label {
 					{{ _self.no_tax_applied_text(Sale) }}
 					<p id="receiptThankYouNote" class="thankyou">
 						{% if show_thank_you %}
-							Bedankt {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!
+							Bedankt{% if Sale.Customer %} {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!
 						{% endif %}
 					</p>
 				{% endif %}
@@ -878,28 +879,26 @@ table.payments td.label {
 {% macro receipt(Sale,parameters,store_copy,options) %}
 	{% if Sale.SaleLines %}
 		<table class="sale lines">
-			<thead>
-				<tr>
-					<th class="description">Product</th>
+			<tr>
+				<th class="description">Product</th>
 
-					{% if options.show_custom_sku and options.show_manufacturer_sku %}
-						<th class="custom_field">Aangepaste voorraadeenheid</th>
-						<th class="custom_field">Voorraadeenheid fabr.</th>
-					{% elseif options.show_custom_sku or options.show_manufacturer_sku %}
-						<th class="custom_field">Voorraadeenheid</th>
-					{% endif %}
+				{% if options.show_custom_sku and options.show_manufacturer_sku %}
+					<th class="custom_field">Aangepaste voorraadeenheid</th>
+					<th class="custom_field">Voorraadeenheid fabr.</th>
+				{% elseif options.show_custom_sku or options.show_manufacturer_sku %}
+					<th class="custom_field">Voorraadeenheid</th>
+				{% endif %}
 
-					{% if options.show_msrp and not parameters.gift_receipt %}
-						<th class="custom_field">Adviesprijs</th>
-					{% endif %}
+				{% if options.show_msrp and not parameters.gift_receipt %}
+					<th class="custom_field">Adviesprijs</th>
+				{% endif %}
 
-					<th class="quantity">Nr.</th>
+				<th class="quantity">Nr.</th>
 
-					{% if not parameters.gift_receipt %}
-						<th class="amount">Prijs</th>
-					{% endif %}
-				</tr>
-			</thead>
+				{% if not parameters.gift_receipt %}
+					<th class="amount">Prijs</th>
+				{% endif %}
+			</tr>
 			<tbody>
 				{% for Line in Sale.SaleLines.SaleLine %}
 					{{ _self.line(Sale.isTaxInclusive,Line,parameters,options) }}

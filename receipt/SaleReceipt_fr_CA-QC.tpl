@@ -157,7 +157,7 @@ table {
 	border-collapse:collapse;
 }
 
-table thead th { text-align: left; }
+table th { text-align: left; }
 
 table tbody th {
 	font-weight: normal;
@@ -185,7 +185,11 @@ table td.custom_field {
 }
 
 table.sale { border-bottom: 1px solid black; }
-table.sale thead th { border-bottom: 1px solid black; }
+
+table.sale th {
+	border-bottom: 1px solid black;
+	font-weight: bold;
+}
 
 table div.line_description {
 	text-align: left;
@@ -464,9 +468,6 @@ table.payments td.label {
 
 		table.sale {
 			clear: both;
-			padding-top: 30px;
-		}
-		table.sale thead th {
 			padding-top: 30px;
 		}
 
@@ -882,28 +883,26 @@ table.payments td.label {
 {% macro receipt(Sale,parameters,store_copy,options) %}
 	{% if Sale.SaleLines %}
 		<table class="sale lines">
-			<thead>
-				<tr>
-					<th class="description">Item</th>
+			<tr>
+				<th class="description">Item</th>
 
-					{% if options.show_custom_sku and options.show_manufacturer_sku %}
-						<th class="custom_field">SKU pers.</th>
-						<th class="custom_field">SKU man.</th>
-					{% elseif options.show_custom_sku or options.show_manufacturer_sku %}
-						<th class="custom_field">SKU</th>
-					{% endif %}
+				{% if options.show_custom_sku and options.show_manufacturer_sku %}
+					<th class="custom_field">SKU pers.</th>
+					<th class="custom_field">SKU man.</th>
+				{% elseif options.show_custom_sku or options.show_manufacturer_sku %}
+					<th class="custom_field">SKU</th>
+				{% endif %}
 
-					{% if options.show_msrp and not parameters.gift_receipt %}
-						<th class="custom_field">PDSF</th>
-					{% endif %}
+				{% if options.show_msrp and not parameters.gift_receipt %}
+					<th class="custom_field">PDSF</th>
+				{% endif %}
 
-					<th class="quantity">#</th>
+				<th class="quantity">#</th>
 
-					{% if not parameters.gift_receipt %}
-						<th class="amount">Prix</th>
-					{% endif %}
-				</tr>
-			</thead>
+				{% if not parameters.gift_receipt %}
+					<th class="amount">Prix</th>
+				{% endif %}
+			</tr>
 			<tbody>
 				{% for Line in Sale.SaleLines.SaleLine %}
 					{{ _self.line(Sale.isTaxInclusive,Line,parameters,options) }}
