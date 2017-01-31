@@ -15,6 +15,7 @@
 {# Sale #}
 {% set sale_id_instead_of_ticket_number = false %}  {# Displays the Sale ID instead of the Ticket Number #}
 {% set invoice_as_title = false %}                  {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
+{% set workorders_as_title = false %}               {# Changes the receipt title to "Work Orders" if there is no Salesline items and 1 or more workorders #}
 {% set quote_id_prefix = "" %}                      {# Adds a string of text as a prefix for the Quote ID. Ex: "Q-". To be used when "sale_id_instead_of_ticket_number" is true #}
 {% set sale_id_prefix = "" %}                       {# Adds a string of text as a prefix for the Sales ID. Ex: "S-". To be used when "sale_id_instead_of_ticket_number" is true #}
 
@@ -36,6 +37,8 @@
 {% set show_sale_lines_on_gift_receipt = true %}    {# Displays Sale Lines on Gift Receipts #}
 {% set show_barcode = true %}                       {# Displays barcode at bottom of receipts #}
 {% set show_barcode_sku = true %}                   {# Displays the System ID at the bottom of barcodes #}
+{% set show_workorders_barcode = false %}           {# Displays workorders barcode #}
+{% set show_workorders_barcode_sku = true %}        {# Displays the System ID at the bottom of workorders barcodes #}
 {% set hide_ticket_number_on_quote = false %}       {# Hides the Ticket Number on Quotes #}
 {% set hide_quote_id_on_sale = false %}             {# Hides the Quote ID on Sales #}
 
@@ -238,6 +241,11 @@ p.thankyou {
 .barcodeContainer {
 	margin-top: 15px;
 	text-align: center;
+}
+
+.workorders .barcodeContainer {
+	margin-left: 15px;
+	text-align: left;
 }
 
 dl {
@@ -535,7 +543,7 @@ table.payments td.label {
 			<!-- replace.email_custom_header_msg -->
 			<div>
 				{{ _self.ship_to(Sale) }}
-				{{ _self.header(Sale) }}
+				{{ _self.header(Sale,_context) }}
 				{{ _self.title(Sale,parameters,_context) }}
 				{{ _self.date(Sale) }}
 				{{ _self.sale_details(Sale,_context) }}
@@ -650,7 +658,6 @@ table.payments td.label {
 	{% endif %}
 {% endmacro %}
 
-
 {% macro title(Sale,parameters,options) %}
 	<h1 class="receiptTypeTitle">
 		{% if Sale.calcTotal >= 0 %}
@@ -658,10 +665,20 @@ table.payments td.label {
 				{% if options.invoice_as_title and options.print_layout %}
 					<span class="hide-on-print">
 				{% endif %}
-				{% if parameters.gift_receipt %}Reçu cadeau{% else %}Reçu de vente{% endif %}
+				{% if options.workorders_as_title and Sale.SaleLines is empty and Sale.Customer.Workorders is defined %}
+					Demandes de service
+				{% else %}
+					{% if parameters.gift_receipt %}Reçu cadeau{% else %}Reçu de vente{% endif %}
+				{% endif %}
 				{% if options.invoice_as_title and options.print_layout %}
 					</span>
-					<span class="show-on-print">Facture</span>
+					<span class="show-on-print">
+						{% if options.workorders_as_title and Sale.SaleLines is empty and Sale.Customer.Workorders is defined %}
+							Demandes de service
+						{% else %}
+							Facture
+						{% endif %}
+					</span>
 				{% endif %}
 			{% elseif Sale.voided == 'true' %}
 				{% if options.invoice_as_title and options.print_layout %}
@@ -936,10 +953,10 @@ table.payments td.label {
 					{% endif %}
 					{% for Tax in Sale.TaxClassTotals.Tax %}
 						{% if Tax.taxname and Tax.rate > 0 %}
-							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.P.S : {% if options.tps_number != '' %}[{{ options.tps_number }}]{% endif %} ({{Sale.calcTaxable|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.P.S : {% if options.tps_number != '' %}[{{ options.tps_number }}]{% endif %} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
 						{% endif %}
 						{% if Tax.taxname2 and Tax.rate2 > 0 %}
-							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.V.Q : {% if options.tvq_number != '' %}[{{ options.tvq_number }}]{% endif %} ({{Sale.calcTaxable|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.V.Q : {% if options.tvq_number != '' %}[{{ options.tvq_number }}]{% endif %} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
 						{% endif %}
 					{% endfor %}
 					<tr><td width="100%">Total des taxes</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
@@ -1171,14 +1188,14 @@ table.payments td.label {
 	{% endautoescape %}
 {% endmacro %}
 
-{% macro header(Sale) %}
+{% macro header(Sale,options) %}
 	<div class="receiptHeader">
 		{% set logo_printed = false %}
-		{% if multi_shop_logos %}
-			{% for shop in shop_logo_array if not logo_printed %}
+		{% if options.multi_shop_logos %}
+			{% for shop in options.shop_logo_array if not logo_printed %}
 				{% if shop.name == Sale.Shop.name %}
 					{% if shop.logo_url|strlen > 0 %}
-						<img src="{{ shop.logo_url }}" width ={{ logo_width }} height="{{ logo_height }}" class="logo">
+						<img src="{{ shop.logo_url }}" width ={{ options.logo_width }} height="{{ options.logo_height }}" class="logo">
 						{% set logo_printed = true %}
 					{% endif %}
 				{% endif %}
@@ -1186,7 +1203,7 @@ table.payments td.label {
 		{% endif %}
 
 		{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 and not logo_printed %}
-			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ logo_width }}" height="{{ logo_height }}" class="logo">
+			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
 			{% if show_shop_name_with_logo %}
 				<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 			{% endif %}
@@ -1279,7 +1296,18 @@ table.payments td.label {
 			{% for Line in Customer.Workorders.SaleLine %}
 				<tr>
 					{% if Line.MetaData.workorderTotal %}
-						<td class="workorder" colspan="2">{{ _self.lineDescription(Line,options) }}</td>
+						<td class="workorder" colspan="2">
+							{{ _self.lineDescription(Line,options) }}
+							{% if options.show_workorders_barcode %}
+								<p class="barcodeContainer">
+									<img id="barcodeImage"
+											 height="50"
+											 width="250"
+											 class="barcode"
+											 src="/barcode.php?type=receipt&number={{ Line.MetaData.workorderSystemSku }}&&hide_text={{ not options.show_workorders_barcode_sku }}">
+								</p>
+							{% endif %}
+						</td>
 					{% else %}
 						<td>{{ _self.lineDescription(Line,options) }}</td>
 						<td class="amount">{{Line.calcSubtotal|money}}</td>
