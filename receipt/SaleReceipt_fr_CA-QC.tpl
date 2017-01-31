@@ -953,10 +953,10 @@ table.payments td.label {
 					{% endif %}
 					{% for Tax in Sale.TaxClassTotals.Tax %}
 						{% if Tax.taxname and Tax.rate > 0 %}
-							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.P.S : {% if options.tps_number != '' %}[{{ options.tps_number }}]{% endif %} ({{Sale.calcTaxable|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.P.S : {% if options.tps_number != '' %}[{{ options.tps_number }}]{% endif %} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
 						{% endif %}
 						{% if Tax.taxname2 and Tax.rate2 > 0 %}
-							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.V.Q : {% if options.tvq_number != '' %}[{{ options.tvq_number }}]{% endif %} ({{Sale.calcTaxable|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.V.Q : {% if options.tvq_number != '' %}[{{ options.tvq_number }}]{% endif %} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
 						{% endif %}
 					{% endfor %}
 					<tr><td width="100%">Total des taxes</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
