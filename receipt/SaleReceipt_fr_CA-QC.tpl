@@ -564,6 +564,8 @@ table.payments td.label {
 
 				{% if Sale.Shop.ReceiptSetup.generalMsg|strlen > 0 %}<p id="receiptNote" class="note">{{ Sale.Shop.ReceiptSetup.generalMsg|noteformat|raw }}</p>{% endif %}
 
+				{{ _self.client_workorder_agreement(Sale,_context) }}
+
 				{% if not parameters.gift_receipt %}
 					{{ _self.no_tax_applied_text(Sale) }}
 					<p id="receiptThankYouNote" class="thankyou">
@@ -618,7 +620,7 @@ table.payments td.label {
 		{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
 
 		{{ _self.cc_agreement(Sale,Payment,options) }}
-		{{ _self.workorder_agreement(Sale) }}
+		{{ _self.shop_workorder_agreement(Sale) }}
 
 		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
 
@@ -1118,7 +1120,6 @@ table.payments td.label {
 	</tr>
 {% endmacro %}
 
-
 {% macro cc_agreement(Sale,Payment,options) %}
 	{% if Payment.CCCharge %}
 		{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
@@ -1133,7 +1134,7 @@ table.payments td.label {
 	{% endif %}
 {% endmacro %}
 
-{% macro workorder_agreement(Sale) %}
+{% macro shop_workorder_agreement(Sale) %}
 	{% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 and Sale.Workorders %}
 	<!--
 		@FIXME
@@ -1146,6 +1147,12 @@ table.payments td.label {
 				<dd>{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</dd>
 			</dl>
 		</div>
+	{% endif %}
+{% endmacro %}
+
+{% macro client_workorder_agreement(Sale,options) %}
+	{% if options.workorders_as_title and Sale.SaleLines is empty and Sale.Customer.Workorders is defined and Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
+		<p>{{Sale.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
 	{% endif %}
 {% endmacro %}
 
