@@ -1222,11 +1222,6 @@ table.payments td.label {
 						{% if Payment.CCCharge.MetaData.ApplicationLabel|strlen > 0 %}
 							<br>Application Label: {{Payment.CCCharge.MetaData.ApplicationLabel}}
 						{% endif %}
-						{% if Payment.CCCharge.exp|strlen > 0 and
-							Payment.CCCharge.cardType|upper != 'MASTERCARD' and
-							Payment.CCCharge.cardType|upper != 'VISA' %}
-							<br>Card Expires: {{Payment.CCCharge.exp}}
-						{% endif %}
 						{% if Payment.CCCharge.MetaData.PINStatement|strlen > 0 %}
 							<br>PIN Statement: {{Payment.CCCharge.MetaData.PINStatement}}
 						{% endif %}
