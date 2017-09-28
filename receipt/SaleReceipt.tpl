@@ -281,6 +281,24 @@ table.payments td.label {
 	width: 100%;
 }
 
+#receiptTransactionDetails table {
+	max-width: 245px;
+	margin: 0 auto;
+}
+
+#receiptTransactionDetails table td {
+	text-align: right;
+}
+
+#receiptTransactionDetails table td.top {
+	font-weight: bold;
+}
+
+#receiptTransactionDetails table td.label {
+	padding-right: 20px;
+	text-align: left;
+}
+
 {% if print_layout %}
 
 	/* Receipts only */
@@ -576,6 +594,115 @@ table.payments td.label {
 					<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}&hide_text={{ not show_barcode_sku }}">
 				</p>
 				{% endif %}
+
+				{% if Sale.completed == 'true' and Sale.SalePayments and not parameters.gift_receipt %}
+					{# 
+						DO NOT CONSOLIDATE THESE IF STATEMENTS. 
+						Twig doesnt play nice with these functions.
+					#}
+					{% if hasCCPayment(Sale.SalePayments) %}
+						{% if isUnifiedReceipt(Sale.SalePayments) %}
+							<h2 class="paymentTitle">Transaction Details</h2><br />
+							<div id="receiptTransactionDetails">
+								<table>
+									<tbody>
+										{% for Payment in Sale.SalePayments.SalePayment %}
+											{% if Payment.PaymentType.type == 'credit card' and Payment.MetaData.ReceiptData.status != 'error' and Payment.archived == 'false' %}
+												{% if Payment.MetaData.ReceiptData.type and Payment.MetaData.ReceiptData.authorized_amount %}
+													<tr>
+														<td class="label top">{{ mostranslate(Payment.MetaData.ReceiptData.type, 'capitalize', true) }}</td>
+														<td class="top">{{ Payment.MetaData.ReceiptData.authorized_amount|money }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.extra_parameters.statusCode %}
+													<tr>
+														<td class="label">Status:</td>
+														<td>{{ Payment.MetaData.ReceiptData.extra_parameters.statusCode }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.card_brand and Payment.MetaData.ReceiptData.card_number %}
+													<tr>
+														<td class="label">{{ Payment.MetaData.ReceiptData.card_brand }}</td>
+														<td>{{ getDisplayableCardNumber(Payment.MetaData.ReceiptData.card_number) }}</td>
+													</tr>
+												{% endif %}
+
+												{# TODO We dont receive these as of yet #}
+												{# <tr>
+													<td class="label">Location ID:</td>
+													<td>Acceptor ID</td>
+												</tr> #}
+
+												{% if Payment.MetaData.ReceiptData.processed_date %}
+													<tr>
+														<td class="label">Date:</td>
+														<td>
+															{{ Payment.MetaData.ReceiptData.processed_date|correcttimezone|date(getDateTimeFormat()) }}
+														</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.entry_method %}
+													<tr>
+														<td class="label">Method:</td>
+														<td>{{ Payment.MetaData.ReceiptData.entry_method }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.authorization_number %}
+													<tr>
+														<td class="label">Auth Code:</td>
+														<td>{{ Payment.MetaData.ReceiptData.authorization_number }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode or Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage %}
+													<tr>
+														<td class="label">Response:</td>
+														<td>{{ Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode }}/{{ Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.emv_application_id %}
+													<tr>
+														<td class="label">AID:</td>
+														<td>{{ Payment.MetaData.ReceiptData.emv_application_id }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.emv_application_preferred_name %}
+													<tr>
+														<td class="label">APN:</td>
+														<td>{{ Payment.MetaData.ReceiptData.emv_application_preferred_name }}</td>
+													</tr>
+												{% endif %}
+
+												{% if Payment.MetaData.ReceiptData.emv_cryptogram_type or Payment.MetaData.ReceiptData.emv_cryptogram %}
+													<tr>
+														<td class="label">Cryptogram:</td>
+														<td>{{ Payment.MetaData.ReceiptData.emv_cryptogram_type }}/{{ Payment.MetaData.ReceiptData.emv_cryptogram }}</td>
+													</tr>
+												{% endif %}
+
+												{% for emvTag in Payment.MetaData.ReceiptData.extra_parameters.emv_tags.children() %}
+													<tr>
+														<td class="label">{{ emvTag.getName() }}</td>
+														<td>{{ emvTag }}</td>
+													</tr>
+												{% endfor %}
+
+												{# Creates a Line Break for the next Payment #}
+												<tr><td colspan="2"><br /></td></tr>
+											{% endif %}
+										{% endfor %}
+									</tbody>
+								</table>
+							</div>
+						{% endif %}
+					{% endif %}
+				{% endif %}	
 			</div>
 
 			<!-- replace.email_custom_footer_msg -->
@@ -1005,7 +1132,7 @@ table.payments td.label {
 							{% elseif Payment.creditAccountID == 0 %}
 								<!--  NOT Customer Account -->
 								{{ _self.cc_payment_info(Sale,Payment) }}
-							{% elseif Payment.CreditAccount %}
+							{% elseif Payment.CreditAccount and Payment.archived == 'false' %}
 								<!-- Customer Account -->
 								<tr>
 									{% if Payment.amount < 0 %}
@@ -1094,11 +1221,6 @@ table.payments td.label {
 						{% endif %}
 						{% if Payment.CCCharge.MetaData.ApplicationLabel|strlen > 0 %}
 							<br>Application Label: {{Payment.CCCharge.MetaData.ApplicationLabel}}
-						{% endif %}
-						{% if Payment.CCCharge.exp|strlen > 0 and
-							Payment.CCCharge.cardType|upper != 'MASTERCARD' and
-							Payment.CCCharge.cardType|upper != 'VISA' %}
-							<br>Card Expires: {{Payment.CCCharge.exp}}
 						{% endif %}
 						{% if Payment.CCCharge.MetaData.PINStatement|strlen > 0 %}
 							<br>PIN Statement: {{Payment.CCCharge.MetaData.PINStatement}}
