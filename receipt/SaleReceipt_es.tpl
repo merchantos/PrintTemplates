@@ -526,7 +526,7 @@ table.payments td.label {
 						{{ _self.store_receipt(Sale,parameters,_context,SalePayment) }}
 						{% set page_loaded = true %}
 					{% else %}
-						{% if SalePayment.archived == 'false' and SalePayment.CCCharge and SalePayment.CCCharge.declined == 'false' and SalePayment.CCCharge.isDebit == 'false' %}
+                        {% if SalePayment.archived == 'false' and SalePayment.MetaData.ReceiptData.requires_receipt_signature == true %}
 							{{ _self.store_receipt(Sale,parameters,_context,SalePayment) }}
 							{% set page_loaded = true %}
 						{% endif %}
@@ -599,6 +599,7 @@ table.payments td.label {
 
 {% macro store_receipt(Sale,parameters,options,Payment) %}
 	<div class="store">
+        {{ _self.header(Sale,_context) }}
 		{{ _self.title(Sale,parameters,options) }}
 			<p class="copy">Copia para la tienda</p>
 		{{ _self.date(Sale) }}
@@ -713,7 +714,7 @@ table.payments td.label {
 {% macro date(Sale) %}
 	<p class="date" id="receiptDateTime">
 		{% if Sale.timeStamp %}
-			{{Sale.timeStamp|correcttimezone|date(getDateTimeFormat())}}
+			{{Sale.timeStamp|correcttimezone|date(getDateTimeFormat(), false)}}
 		{% else %}
 			{{"now"|date(getDateTimeFormat())}}
 		{% endif %}
@@ -1095,11 +1096,6 @@ table.payments td.label {
 						{% if Payment.CCCharge.MetaData.ApplicationLabel|strlen > 0 %}
 							<br>Rótulo aplicación: {{Payment.CCCharge.MetaData.ApplicationLabel}}
 						{% endif %}
-						{% if Payment.CCCharge.exp|strlen > 0 and
-							Payment.CCCharge.cardType|upper != 'MASTERCARD' and
-							Payment.CCCharge.cardType|upper != 'VISA' %}
-							<br>Fecha caducidad: {{Payment.CCCharge.exp}}
-						{% endif %}
 						{% if Payment.CCCharge.MetaData.PINStatement|strlen > 0 %}
 							<br>Frase PIN: {{Payment.CCCharge.MetaData.PINStatement}}
 						{% endif %}
@@ -1117,7 +1113,7 @@ table.payments td.label {
 {% endmacro %}
 
 {% macro cc_agreement(Sale,Payment,options) %}
-	{% if Payment.CCCharge %}
+	{% if Payment.MetaData.ReceiptData.requires_receipt_signature == true %}
 		{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
 			<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
 		{% endif %}
