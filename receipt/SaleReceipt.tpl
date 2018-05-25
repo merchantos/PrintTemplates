@@ -9,6 +9,12 @@
 {% set firefox_margin_fix = false %}                {# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
 
 {# Sale #}
+{% set hide_register_name = false %}                {# Hide the Register Name on Sales #}
+{% set hide_employee_name = false %}                {# Hide the Employee Name on Sales #}
+{% set hide_shop_vat_number = false %}              {# Hide the Shop VAT Number on Sales #}
+{% set hide_shop_registration_number = false %}     {# Hide the Shop Registration Number on Sales #}
+{% set hide_customer_vat_number = false %}          {# Hide the Customer VAT Number on Sales #}
+{% set hide_customer_registration_number = false %} {# Hide the Customer Registration Number on Sales #}
 {% set sale_id_instead_of_ticket_number = false %}  {# Displays the Sale ID instead of the Ticket Number #}
 {% set invoice_as_title = false %}                  {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
 {% set workorders_as_title = false %}               {# Changes the receipt title to "Work Orders" if there is no Salesline items and 1 or more workorders #}
@@ -17,7 +23,7 @@
 
 {# Item Lines #}
 {% set per_line_discount = false %}                 {# Displays Discounts on each Sale Line #}
-{% set per_line_subtotal = false %}                 {# Displays Subtotals for each Sale Line (ex: "1 x $5.00") #}
+{% set per_line_subtotal = false %}                 {# Displays Subtotals for each Sale Line (ex: "1 x 5.00") #}
 {% set discounted_line_items = false %}             {# Strikes out the original price and displays the discounted price on each Sale Line #}
 {% set per_line_employee = false %}                 {# Display Employee for each Sale line #}
 {% set show_custom_sku = false %}                   {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
@@ -266,13 +272,14 @@ dl dd p { margin: 0; }
 
 .strike { text-decoration: line-through; }
 
-
 .receiptCompanyNameField,
 .receiptCustomerNameField,
 .receiptCustomerVatField,
-.receiptCustomerCompanyVatField {
+.receiptCustomerCompanyVatField,
+.receiptCustomerAddressField,
+.receiptPhonesContainer,
+.receiptCustomerNoteField {
 	display: block;
-	padding-top: 5px;
 }
 
 table.payments td.label {
@@ -556,7 +563,7 @@ table.payments td.label {
 		{% if not parameters.page or parameters.page == 2 or not page_loaded %}
 			<!-- replace.email_custom_header_msg -->
 			<div>
-				{{ _self.ship_to(Sale) }}
+				{{ _self.ship_to(Sale,_context) }}
 				{{ _self.header(Sale,_context) }}
 				{{ _self.title(Sale,parameters,_context) }}
 				{{ _self.date(Sale) }}
@@ -596,12 +603,12 @@ table.payments td.label {
 				{% endif %}
 
 				{% if Sale.completed == 'true' and Sale.SalePayments and not parameters.gift_receipt %}
-					{# 
-						DO NOT CONSOLIDATE THESE IF STATEMENTS. 
+					{#
+						DO NOT CONSOLIDATE THESE IF STATEMENTS.
 						Twig doesnt play nice with these functions.
 					#}
                     {{ _self.transaction_details(Sale) }}
-				{% endif %}	
+				{% endif %}
 			</div>
 
 			<!-- replace.email_custom_footer_msg -->
@@ -651,7 +658,7 @@ table.payments td.label {
 
 		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
 
-		{{ _self.ship_to(Sale) }}
+		{{ _self.ship_to(Sale,options) }}
 	</div>
 {% endmacro %}
 
@@ -744,7 +751,7 @@ table.payments td.label {
 {% macro date(Sale) %}
 	<p class="date" id="receiptDateTime">
 		{% if Sale.timeStamp %}
-			{{Sale.timeStamp|correcttimezone|date(getDateTimeFormat())}}
+            {{Sale.timeStamp|correcttimezone|date(getDateTimeFormat())}}
 		{% else %}
 			{{"now"|date(getDateTimeFormat())}}
 		{% endif %}
@@ -787,14 +794,14 @@ table.payments td.label {
 		{% endif %}
 
 		{% if isVATAndRegistrationNumberOnReceipt() %}
-			{% if Sale.Shop.vatNumber|strlen %}
+			{% if Sale.Shop.vatNumber|strlen and not options.hide_shop_vat_number %}
 				<span class="vatNumberField">
 					<span class="vatNumberLabel">VAT #: </span>
 					<span id="vatNumber">{{Sale.Shop.vatNumber}}</span>
 					<br />
 				</span>
 			{% endif %}
-			{% if Sale.Shop.companyRegistrationNumber|strlen %}
+			{% if Sale.Shop.companyRegistrationNumber|strlen and not options.hide_shop_registration_number %}
 				<span class="companyRegistrationNumberField">
 					<span class="companyRegistrationNumberLabel">Company registration #: </span>
 					<span id="companyRegistrationNumber">{{Sale.Shop.companyRegistrationNumber}}</span>
@@ -803,11 +810,11 @@ table.payments td.label {
 			{% endif %}
 		{% endif %}
 
-		{% if Sale.Register %}
+		{% if Sale.Register and not options.hide_register_name %}
 			<span class="receiptRegisterNameField"><span class="receiptRegisterNameLabel">Register: </span><span id="receiptRegisterName">{{Sale.Register.name}}</span><br /></span>
 		{% endif %}
 
-		{% if Sale.Employee %}
+		{% if Sale.Employee and not options.hide_employee_name %}
 			<span class="receiptEmployeeNameField"><span class="receiptEmployeeNameLabel">Employee: </span><span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br /></span>
 		{% endif %}
 
@@ -821,9 +828,11 @@ table.payments td.label {
 			{% endif %}
 
 			{% if not options.show_customer_name_only %}
-				{% set ContactAddress = Sale.Customer.Contact.Addresses.ContactAddress %}
-				{% if options.show_full_customer_address and ContactAddress.address1 %}
-					<span class="receiptCustomerAddressField"><span class="receiptCustomerAddressLabel">Address: </span>{{ ContactAddress.address1 }}{% if ContactAddress.city %}, {{ ContactAddress.city }}{% endif %}{% if ContactAddress.state %}, {{ ContactAddress.state }}{% endif %}{% if ContactAddress.zip %}, {{ ContactAddress.zip }}{% endif %}<br /></span>
+				{% if options.show_full_customer_address %}
+					<span class="receiptCustomerAddressField">
+						<span class="receiptCustomerAddressLabel">Address:</span>
+						{{ _self.address(Sale.Customer.Contact,',',options) }}
+					</span>
 				{% endif %}
 
 				<span id="receiptPhonesContainer" class="indent">
@@ -838,7 +847,7 @@ table.payments td.label {
 			{% endif %}
 
 			{% if isVATAndRegistrationNumberOnReceipt() %}
-				{% if Sale.Customer.vatNumber|strlen %}
+				{% if Sale.Customer.vatNumber|strlen and not options.hide_customer_vat_number %}
 					<span class="receiptCustomerVatField">
 						<span class="receiptCustomerVatLabel">Customer VAT #: </span>
 						<span id="customerVatNumber">{{Sale.Customer.vatNumber}}</span>
@@ -846,7 +855,7 @@ table.payments td.label {
 					</span>
 				{% endif %}
 
-				{% if Sale.Customer.companyRegistrationNumber|strlen %}
+				{% if Sale.Customer.companyRegistrationNumber|strlen and not options.hide_customer_registration_number %}
 					<span class="receiptCustomerCompanyVatField">
 						<span class="receiptCustomerCompanyVatLabel">Customer company registration #: </span>
 						<span id="customerCompanyVatNumber">{{Sale.Customer.companyRegistrationNumber}}</span>
@@ -1165,12 +1174,6 @@ table.payments td.label {
             </tr>
         {% endif %}
 
-        {# TODO We dont receive these as of yet #}
-        {# <tr>
-            <td class="label">Location ID:</td>
-            <td>Acceptor ID</td>
-        </tr> #}
-
         {% if Payment.MetaData.ReceiptData.processed_date %}
             <tr>
                 <td class="label">Date:</td>
@@ -1184,6 +1187,13 @@ table.payments td.label {
             <tr>
                 <td class="label">Method:</td>
                 <td>{{ Payment.MetaData.ReceiptData.entry_method }}</td>
+            </tr>
+        {% endif %}
+
+        {% if Payment.MetaData.ReceiptData.extra_parameters.acceptorId %}
+            <tr>
+                <td class="label">MLC:</td>
+                <td>{{ Payment.MetaData.ReceiptData.extra_parameters.acceptorId }}</td>
             </tr>
         {% endif %}
 
@@ -1302,11 +1312,11 @@ table.payments td.label {
 	{% endif %}
 {% endmacro %}
 
-{% macro ship_to(Sale) %}
+{% macro ship_to(Sale,options) %}
 	{% if Sale.ShipTo %}
 		<div class="shipping">
 			<h4>Ship To</h4>
-			{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
+			{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact,options) }}
 
 			{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
 				<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
@@ -1320,24 +1330,25 @@ table.payments td.label {
 	{% endif %}
 {% endmacro %}
 
-{% macro shipping_address(Customer,Contact) %}
+{% macro shipping_address(Customer,Contact,options) %}
 	<p>
 		{% if Customer.company|strlen > 0 %}{{Customer.company}}<br>{% endif %}
 		{% if Customer.company|strlen > 0 %}Attn:{% endif %} {{Customer.firstName}} {{Customer.lastName}}<br>
-		{{ _self.address(Contact) }}
+		{{ _self.address(Contact,'<br>',options) }}
 	</p>
 {% endmacro %}
 
-{% macro address(Contact,delimiter) %}
-	{% if delimiter|strlen == 0 %}{% set delimiter = '<br>' %}{% endif %}
+{% macro address(Contact,delimiter,options) %}
 	{% autoescape false %}
-		{% for Address in Contact.Addresses.ContactAddress %}
-			{% if loop.first and Address.address1 %}
-				{{Address.address1}}{{delimiter}}
-				{% if Address.address2|strlen > 0 %} {{Address.address2}}{{delimiter}}{% endif %}
-				{{Address.city}}, {{Address.state}} {{Address.zip}} {{Address.country}}
-			{% endif %}
-		{% endfor %}
+		{% set Address = Contact.Addresses.ContactAddress %}
+
+		{% if Address.address1|strlen > 0 %}{{Address.address1}}{{delimiter}}{% endif %}
+		{% if Address.address2|strlen > 0 %}{{Address.address2}}{{delimiter}}{% endif %}
+		{% if Address.city|strlen > 0 %}{{Address.city}}{% if Address.state|strlen > 0 or Address.zip|strlen > 0%},{% endif %}{% endif %}
+		{% if Address.state|strlen > 0 %}{{Address.state}}{% if Address.zip|strlen > 0%},{% endif %}{% endif %}
+		{% if Address.zip|strlen > 0 %}{{Address.zip}}{% endif %}{% if Address.zip|strlen > 0 or Address.city|strlen > 0 or Address.state|strlen > 0 %}{{delimiter}}{% endif %}
+		{% if Address.country|strlen > 0 %}{{Address.country}}{% endif %}
+
 	{% endautoescape %}
 {% endmacro %}
 
@@ -1367,7 +1378,7 @@ table.payments td.label {
 			{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
 				<p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
 			{% else %}
-				{{ _self.address(Sale.Shop.Contact) }}
+				{{ _self.address(Sale.Shop.Contact,'<br>',options) }}
 				{% for ContactPhone in Sale.Shop.Contact.Phones.ContactPhone %}
 					<br />{{ContactPhone.number}}
 				{% endfor %}
@@ -1497,7 +1508,7 @@ table.payments td.label {
 	{% set total = Sale.change|floatval %}
 	{% set pay_cash = 'false' %}
 	{% for Payment in Sale.SalePayments.SalePayment %}
-		{% if Payment.PaymentType.name == 'Cash' %}
+		{% if Payment.PaymentType.name == 'Cash' and Payment.archived == 'false' %}
 			{% set total = total + Payment.amount|floatval %}
 			{% set pay_cash = 'true' %}
 		{% endif %}
