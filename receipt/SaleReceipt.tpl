@@ -551,7 +551,7 @@ table.payments td.label {
 						{{ _self.store_receipt(Sale,parameters,_context,SalePayment) }}
 						{% set page_loaded = true %}
 					{% else %}
-						{% if SalePayment.archived == 'false' and SalePayment.MetaData.ReceiptData.requires_receipt_signature|CompBool == true %}
+						{% if SalePayment.archived == 'false' and SalePayment.MetaData.ReceiptData.requires_receipt_signature == true %}
 							{{ _self.store_receipt(Sale,parameters,_context,SalePayment) }}
 							{% set page_loaded = true %}
 						{% endif %}
@@ -1277,7 +1277,7 @@ table.payments td.label {
 {% endmacro %}
 
 {% macro cc_agreement(Sale,Payment,options) %}
-	{% if Payment.MetaData.ReceiptData.requires_receipt_signature|CompBool == true %}
+	{% if Payment.MetaData.ReceiptData.requires_receipt_signature == true %}
 		{% if Sale.Shop.ReceiptSetup.creditcardAgree|strlen > 0 %}
 			<p>{{Sale.Shop.ReceiptSetup.creditcardAgree|noteformat|raw}}</p>
 		{% endif %}
