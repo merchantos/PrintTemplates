@@ -1019,7 +1019,7 @@ table.payments td.label {
 								<!-- Customer Account -->
 								<tr>
 									{% if Payment.amount < 0 %}
-									<td class="label">Storten op rekening</td>
+									<td class="label">Aanbetaling op rekening</td>
 									<td id="receiptPaymentsCreditAccountDepositValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 									{% else %}
 									<td class="label">Betalen op rekening</td>
@@ -1058,7 +1058,7 @@ table.payments td.label {
 						</tr>
 					{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 						<tr>
-							<td width="100%">Deposito: </td>
+							<td width="100%">Aanbetaling op rekening: </td>
 							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
 						</tr>
 					{% endif %}
@@ -1067,7 +1067,7 @@ table.payments td.label {
 			{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 				<table class="totals">
 					<tr class="total">
-						<td width="100%">Op rekening betaald: </td>
+						<td width="100%">Resterend bedrag: </td>
 						<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 					</tr>
 				</table>
