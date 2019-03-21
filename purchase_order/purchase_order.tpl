@@ -21,7 +21,7 @@ font-family: sans-serif;
 -webkit-text-size-adjust: 100%;
 -ms-text-size-adjust: 100%;
 }
-body { margin: 0;}
+body { margin: 30px;}
 b,
 strong { font-weight: bold; }
 small { font-size: 80%; }
