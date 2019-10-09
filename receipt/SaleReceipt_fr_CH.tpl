@@ -20,6 +20,7 @@
 {% set workorders_as_title = false %}               {# Changes the receipt title to "Work Orders" if there is no Salesline items and 1 or more workorders #}
 {% set quote_id_prefix = "" %}                      {# Adds a string of text as a prefix for the Quote ID. Ex: "Q-". To be used when "sale_id_instead_of_ticket_number" is true #}
 {% set sale_id_prefix = "" %}                       {# Adds a string of text as a prefix for the Sales ID. Ex: "S-". To be used when "sale_id_instead_of_ticket_number" is true #}
+{% set hide_notes = false %}                        {# Show the printed note for the sale, if any #}
 
 {# Item Lines #}
 {% set per_line_discount = false %}                 {# Displays Discounts on each Sale Line #}
@@ -619,6 +620,9 @@ table.payments td.label {
 			<table class="payments">
 				{{ _self.cc_payment_info(Sale,Payment) }}
 			</table>
+			{% if not hide_notes %}
+				{{ _self.show_note(Sale.SaleNotes) }}
+			{% endif %}
 		{% endif %}
 
 		{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
@@ -1035,6 +1039,10 @@ table.payments td.label {
 			</table>
 		{% endif %}
 
+		{% if not hide_notes %}
+			{{ _self.show_note(Sale.SaleNotes) }}
+		{% endif %}
+
 		{% if Sale.Customer and not store_copy %}
 			{% if options.show_customer_layaways %}
 				{{ _self.layaways(Sale.Customer,Sale.isTaxInclusive,parameters.gift_receipt,options)}}
@@ -1362,4 +1370,19 @@ table.payments td.label {
 		<tr><td class="label">Espèces</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
 		<tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
 	{% endif %}
+{% endmacro %}
+
+{% macro show_note(SaleNotes) %}
+	{% for SaleNote in SaleNotes %}
+		{% if SaleNote.PrintedNote and SaleNote.PrintedNote.note != '' %}
+			<h2 class="paymentTitle">Note</h2>
+			<table>
+				<tr>
+					<td>
+			            {{SaleNote.PrintedNote.note}}
+					</td>
+				</tr>
+			</table>
+		{% endif %}
+	{% endfor %}
 {% endmacro %}
