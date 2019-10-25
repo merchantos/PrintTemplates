@@ -20,7 +20,8 @@
 {% set workorders_as_title = false %}               {# Changes the receipt title to "Work Orders" if there is no Salesline items and 1 or more workorders #}
 {% set quote_id_prefix = "" %}                      {# Adds a string of text as a prefix for the Quote ID. Ex: "Q-". To be used when "sale_id_instead_of_ticket_number" is true #}
 {% set sale_id_prefix = "" %}                       {# Adds a string of text as a prefix for the Sales ID. Ex: "S-". To be used when "sale_id_instead_of_ticket_number" is true #}
-{% set hide_notes = false %}                        {# Show the printed note for the sale, if any #}
+{% set hide_notes_in_sale_receipt = false %}        {# Hide the printed note in the sale receipt, if any #}
+{% set hide_notes_in_gift_receipt = false %}        {# Hide the printed note in the gift receipt, if any #}
 
 {# Item Lines #}
 {% set per_line_discount = false %}                 {# Displays Discounts on each Sale Line #}
@@ -649,9 +650,6 @@ table.payments td.label {
                 <table class="payments">
                     {{ _self.cc_payment_info(Sale,Payment) }}
                 </table>
-				{% if not hide_notes %}
-					{{ _self.show_note(Sale.SaleNotes) }}
-				{% endif %}
             {% endif %}
 		{% endif %}
 
@@ -1069,10 +1067,6 @@ table.payments td.label {
 			</table>
 		{% endif %}
 
-		{% if not hide_notes %}
-			{{ _self.show_note(Sale.SaleNotes) }}
-		{% endif %}
-
 		{% if Sale.Customer and not store_copy %}
 			{% if options.show_customer_layaways %}
 				{{ _self.layaways(Sale.Customer,Sale.isTaxInclusive,parameters.gift_receipt,options)}}
@@ -1111,6 +1105,9 @@ table.payments td.label {
 				</table>
 			{% endif %}
 		{% endif %}
+	{% endif %}
+	{% if (not parameters.gift_receipt and not options.hide_notes_in_sale_receipt) or (parameters.gift_receipt and not options.hide_notes_in_gift_receipt) %}
+		{{ _self.show_note(Sale.SaleNotes) }}
 	{% endif %}
 {% endmacro %}
 
