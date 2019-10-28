@@ -1230,6 +1230,13 @@ table.payments td.label {
             </tr>
         {% endif %}
 
+        {% if Payment.MetaData.ReceiptData.extra_parameters.accountType %}
+        <tr>
+            <td class="label">Account Type:</td>
+            <td>{{ Payment.MetaData.ReceiptData.extra_parameters.accountType }}</td>
+        </tr>
+        {% endif %}
+
         {% if Payment.MetaData.ReceiptData.emv_cryptogram_type or Payment.MetaData.ReceiptData.emv_cryptogram %}
             <tr>
                 <td class="label">Cryptogram:</td>
