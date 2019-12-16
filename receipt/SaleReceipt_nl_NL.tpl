@@ -499,6 +499,7 @@ table.payments td.label {
 		}
 
 		.paymentTitle,
+		.notesTitle,
 		.footerSectionTitle {
 			font-size: 12pt;
 			padding-top: 15px;
@@ -506,6 +507,10 @@ table.payments td.label {
 		}
 		.footerSectionTitle {
 			clear: both;
+		}
+		.notesTitle {
+			float: left;
+			width: 100%;
 		}
 
 		.thankyou {
@@ -1372,7 +1377,7 @@ table.payments td.label {
 {% macro show_note(SaleNotes) %}
 	{% for SaleNote in SaleNotes %}
 		{% if SaleNote.PrintedNote and SaleNote.PrintedNote.note != '' %}
-			<h2 class="paymentTitle">AANTEKENINGEN</h2>
+			<h2 class="notesTitle">AANTEKENINGEN</h2>
 			<table>
 				<tr>
 					<td>
