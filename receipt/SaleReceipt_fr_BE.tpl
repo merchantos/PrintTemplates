@@ -499,6 +499,7 @@ table.payments td.label {
 		}
 
 		.paymentTitle,
+		.notesTitle,
 		.footerSectionTitle {
 			font-size: 12pt;
 			padding-top: 15px;
@@ -506,6 +507,10 @@ table.payments td.label {
 		}
 		.footerSectionTitle {
 			clear: both;
+		}
+		.notesTitle {
+			float: left;
+			width: 100%;
 		}
 
 		.thankyou {
@@ -970,7 +975,23 @@ table.payments td.label {
 						{% endif %}
 					{% endfor %}
 					<tr><td width="100%">Total des taxes</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
-					<tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+                    {% set cash_total = 0 %}
+                    {% set non_cash_total =  0 %}
+                    {% for Payment in Sale.SalePayments.SalePayment %}
+                        {% if Payment.PaymentType.code == "Cash" %}
+                            {% set cash_total = cash_total + Payment.amount|floatval %}
+                        {% else %}
+                            {% set non_cash_total = non_cash_total + Payment.amount|floatval %}
+                        {% endif %}
+                    {% endfor %}
+                        {% set roundedCashTotal = ((cash_total * 20) | round) / 20 %}
+                        {% set roundedTotal = roundedCashTotal + non_cash_total %}
+                    {% if roundedTotal != Sale.calcTotal %}
+                        <tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+                        <tr class="total"><td>Total arrondi</td><td id="receiptSaleTotalsRoundedTotal" class="amount">{{roundedTotal|money}}</td></tr>
+                    {% else %}
+                        <tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+                    {% endif %}
 				</tbody>
 			</table>
 		{% endif %}
@@ -1355,24 +1376,44 @@ table.payments td.label {
 {% endmacro %}
 
 {% macro sale_cash_payment(Sale) %}
-	{% set total = Sale.change|floatval %}
-	{% set pay_cash = 'false' %}
-	{% for Payment in Sale.SalePayments.SalePayment %}
-		{% if Payment.PaymentType.name == 'Cash' and Payment.archived == 'false' %}
-			{% set total = total + Payment.amount|floatval %}
-			{% set pay_cash = 'true' %}
-		{% endif %}
-	{% endfor %}
-	{% if pay_cash == 'true' %}
-		<tr><td class="label">Comptant</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
-		<tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-	{% endif %}
+	{% set cashTotal = 0 %}
+	{% set payCash = 'false' %}
+		{% for Payment in Sale.SalePayments.SalePayment %}
+			{% if Payment.PaymentType.code == 'Cash' %}
+            	{% set cashTotal = cashTotal + Payment.amount|floatval %}
+            	{% set payCash = 'true' %}
+        	{% endif %}
+    	{% endfor %}
+	{% if payCash == 'true' %}
+		{% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}
+		{% set roundedCashAmount = (((cashTotal * 20)|round) / 20) %}
+		{% set originalCashPayedTotalValue = Sale.change|floatval + cashTotal %}
+		{% set roundedCashPayedTotalValue = roundedCashAmount + Sale.change|floatval %}
+    	{% if originalCashPayedTotalValue == roundedCashPayedTotalValue %}
+        	<tr><td class="label">Espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+        	{% if (Sale.change|floatval) != roundedCashChange %}
+        	<tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+        	<tr><td class="label">Arrondi de la monnaie rendue</td><td id="receiptPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+        	{% else %}
+        	<tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+        	{% endif %}
+    	{% else %}
+        	<tr><td class="label">Espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+        	<tr><td class="label">Total arrondi en espèces </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
+            {% if (Sale.change|floatval) != roundedCashChange %}
+        	<tr><td class="label">Monnaie </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+        	<tr><td class="label"> Arrondi de la monnaie rendue </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+        	{% else %}
+        	<tr><td class="label">Monnaie </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+        	{% endif %}
+    	{% endif %}
+   	{% endif %}
 {% endmacro %}
 
 {% macro show_note(SaleNotes) %}
 	{% for SaleNote in SaleNotes %}
 		{% if SaleNote.PrintedNote and SaleNote.PrintedNote.note != '' %}
-			<h2 class="paymentTitle">NOTES</h2>
+			<h2 class="notesTitle">NOTES</h2>
 			<table>
 				<tr>
 					<td>
