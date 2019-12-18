@@ -517,6 +517,7 @@ table.payments td.label {
 		}
 
 		.paymentTitle,
+		.notesTitle,
 		.footerSectionTitle {
 			font-size: 12pt;
 			padding-top: 15px;
@@ -524,6 +525,10 @@ table.payments td.label {
 		}
 		.footerSectionTitle {
 			clear: both;
+		}
+		.notesTitle {
+			float: left;
+			width: 100%;
 		}
 
 		.thankyou {
@@ -941,7 +946,7 @@ table.payments td.label {
 	{% if Sale.SaleLines %}
 		<table class="sale lines">
 			<tr>
-				<th class="description">Item</th>
+				<th class="description">Items</th>
 
 				{% if options.show_custom_sku and options.show_manufacturer_sku %}
 					<th class="custom_field">Custom SKU</th>
@@ -1534,7 +1539,7 @@ table.payments td.label {
 {% macro show_note(SaleNotes) %}
 	{% for SaleNote in SaleNotes %}
 		{% if SaleNote.PrintedNote and SaleNote.PrintedNote.note != '' %}
-			<h2 class="paymentTitle">NOTES</h2>
+			<h2 class="notesTitle">NOTES</h2>
 			<table>
 				<tr>
 					<td>
