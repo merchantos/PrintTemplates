@@ -322,6 +322,15 @@ img.barcode {
                 </div>
             {% endif %}
 
+            {% if parameters.type == 'shop-tag' %}
+                {% if Workorder.internalNote|strlen > 0 %}
+                    <div class="notes">
+                        <h3>Internal Notes:</h3>
+                        {{ Workorder.internalNote|noteformat|raw }}
+                    </div>
+                {% endif %}
+            {% endif %}
+
             <img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
             
             {% if parameters.type == 'invoice' %}
