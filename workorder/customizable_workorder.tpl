@@ -434,6 +434,15 @@ img.barcode {
 				{% endif %}
 			{% endif %}
 
+			{% if parameters.type == 'shop-tag' %}
+				{% if Workorder.internalNote|strlen > 0 %}
+					<div class="notes">
+						<h3>Internal Notes:</h3>
+						{{ Workorder.internalNote|noteformat|raw }}
+					</div>
+				{% endif %}
+			{% endif %}
+
 			{% if hide_barcode == false %}
 				{% if hide_barcode_sku == true %}
            			{% set hide_text = 1 %}
