@@ -663,7 +663,9 @@ table.payments td.label {
 		{{ _self.cc_agreement(Sale,Payment,options) }}
 		{{ _self.shop_workorder_agreement(Sale) }}
 
-		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+		<p class="barcodeContainer">
+			<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+		</p>
 
 		{{ _self.ship_to(Sale,options) }}
 	</div>
@@ -882,7 +884,7 @@ table.payments td.label {
 
 {% macro line(isTaxInclusive,Line,parameters,options) %}
 	<tr>
-		<th data-automation="lineItemDescription" class="description">
+		<td data-automation="lineItemDescription" class="description">
 			{{ _self.lineDescription(Line,options) }}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
@@ -891,7 +893,7 @@ table.payments td.label {
 					<small>Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
 				{% endif %}
 			{% endif %}
-		</th>
+		</td>
 
 		{% if options.show_custom_sku and Line.Item.customSku %}
 			<td class="custom_field">{{ Line.Item.customSku }}</td>
@@ -1163,28 +1165,28 @@ table.payments td.label {
 
 {% macro transaction(Payment) %}
     {% if Payment.PaymentType.type == 'credit card' and Payment.MetaData.ReceiptData.status != 'error' and Payment.archived == 'false' %}
-        {% if Payment.MetaData.ReceiptData.type and Payment.MetaData.ReceiptData.authorized_amount %}
+        {% if Payment.MetaData.ReceiptData.type|strlen and Payment.MetaData.ReceiptData.authorized_amount|strlen %}
             <tr>
                 <td class="label top">{{ mostranslate(Payment.MetaData.ReceiptData.type, 'capitalize', true) }}</td>
                 <td class="top">{{ Payment.MetaData.ReceiptData.authorized_amount|money }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.extra_parameters.statusCode %}
+        {% if Payment.MetaData.ReceiptData.extra_parameters.statusCode|strlen %}
             <tr>
                 <td class="label">Status:</td>
                 <td>{{ Payment.MetaData.ReceiptData.extra_parameters.statusCode }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.card_brand and Payment.MetaData.ReceiptData.card_number %}
+        {% if Payment.MetaData.ReceiptData.card_brand|strlen and Payment.MetaData.ReceiptData.card_number|strlen %}
             <tr>
                 <td class="label">{{ Payment.MetaData.ReceiptData.card_brand }}</td>
                 <td>{{ getDisplayableCardNumber(Payment.MetaData.ReceiptData.card_number) }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.processed_date %}
+        {% if Payment.MetaData.ReceiptData.processed_date|strlen %}
             <tr>
                 <td class="label">Date:</td>
                 <td>
@@ -1193,59 +1195,59 @@ table.payments td.label {
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.entry_method %}
+        {% if Payment.MetaData.ReceiptData.entry_method|strlen %}
             <tr>
                 <td class="label">Method:</td>
                 <td>{{ Payment.MetaData.ReceiptData.entry_method }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.extra_parameters.acceptorId %}
+        {% if Payment.MetaData.ReceiptData.extra_parameters.acceptorId|strlen %}
             <tr>
                 <td class="label">MLC:</td>
                 <td>{{ Payment.MetaData.ReceiptData.extra_parameters.acceptorId }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.authorization_number %}
+        {% if Payment.MetaData.ReceiptData.authorization_number|strlen %}
             <tr>
                 <td class="label">Auth Code:</td>
                 <td>{{ Payment.MetaData.ReceiptData.authorization_number }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode or Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage %}
+        {% if Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode|strlen or Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage|strlen %}
             <tr>
                 <td class="label">Response:</td>
                 <td>{{ Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode }}/{{ Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.emv_application_id %}
+        {% if Payment.MetaData.ReceiptData.emv_application_id|strlen %}
             <tr>
                 <td class="label">AID:</td>
                 <td>{{ Payment.MetaData.ReceiptData.emv_application_id }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.emv_application_preferred_name %}
+        {% if Payment.MetaData.ReceiptData.emv_application_preferred_name|strlen %}
             <tr>
                 <td class="label">APN:</td>
                 <td>{{ Payment.MetaData.ReceiptData.emv_application_preferred_name }}</td>
             </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.extra_parameters.accountType %}
+        {% if Payment.MetaData.ReceiptData.extra_parameters.accountType|strlen %}
         <tr>
             <td class="label">Account Type:</td>
             <td>{{ Payment.MetaData.ReceiptData.extra_parameters.accountType }}</td>
         </tr>
         {% endif %}
 
-        {% if Payment.MetaData.ReceiptData.emv_cryptogram_type or Payment.MetaData.ReceiptData.emv_cryptogram %}
+        {% if Payment.MetaData.ReceiptData.emv_cryptogram_type|strlen or Payment.MetaData.ReceiptData.emv_cryptogram|strlen %}
             <tr>
                 <td class="label">Cryptogram:</td>
-                <td>{{ Payment.MetaData.ReceiptData.emv_cryptogram_type }}/{{ Payment.MetaData.ReceiptData.emv_cryptogram }}</td>
+                <td>{{ Payment.MetaData.ReceiptData.emv_cryptogram_type }} {{ Payment.MetaData.ReceiptData.emv_cryptogram }}</td>
             </tr>
         {% endif %}
 
