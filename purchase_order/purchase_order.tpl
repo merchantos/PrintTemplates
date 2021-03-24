@@ -213,7 +213,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <tr>
 <th>Shipping</th>
 <th>Total Quantity</th>
-{% if Order.totalDiscount > 0 %}
+{% if Order.MetaData.totalDiscount > 0 %}
 <th>Discount</th>
 {% endif %}
 <th>Other</th>
@@ -221,8 +221,8 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 </thead>
 <tr>
 <td>
-{% if Order.shipCost|strlen > 0 %}
-{{Order.shipCost|money}}
+{% if Order.MetaData.shipping|strlen > 0 %}
+{{Order.MetaData.shipping|money}}
 {% else %}
 <i>None</i>
 {% endif %} 
@@ -234,12 +234,12 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <i>None</i>
 {% endif %}
 </td>
-{% if Order.totalDiscount > 0 %}
+{% if Order.MetaData.totalDiscount > 0 %}
 <td>{{Order.discount|floatval * 100}}%</td>
 {% endif %}
 <td>
-{% if Order.otherCost|strlen > 0 %} 
-{{Order.otherCost|money}}
+{% if Order.MetaData.other|strlen > 0 %} 
+{{Order.MetaData.other|money}}
 {% else %}
 <i>None</i>
 {% endif %}
@@ -287,8 +287,8 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <td>{{OrderLine.Item.upc}}</td>
 <td>{{OrderLine.Item.description}}</td>
 <td>{{OrderLine.quantity}}</td>
-<td class="money">{{OrderLine.originalPrice|money}}</td>
-<td class="money">{{OrderLine.total|money}}</td>
+<td class="money">{{OrderLine.MetaData.cost|money}}</td>
+<td class="money">{{OrderLine.MetaData.total|money}}</td>
 </tr>
 {% endfor %}
 <tfoot>
@@ -301,13 +301,13 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <td></td>
 <td class="money">{{Order.MetaData.subtotal|money}}</td>
 </tr>
-{% if Order.totalDiscount > 0 %}
+{% if Order.MetaData.totalDiscount > 0 %}
 <tr class="minor">
 <th>Discount</th>
 <th></th>
 <td></td>
 <td></td>
-<td class="money">{{Order.totalDiscount|getinverse|money}}</td>
+<td class="money">{{Order.MetaData.totalDiscount|getinverse|money}}</td>
 </tr>
 {% endif %}
 <tr class="total">
