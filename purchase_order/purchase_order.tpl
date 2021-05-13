@@ -289,10 +289,17 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <td>{{OrderLine.Item.upc}}</td>
 <td>{{OrderLine.Item.description}}</td>
 <td>{{OrderLine.quantity}}</td>
-<td class="money">{{OrderLine.MetaData.cost|money}}</td>
-<td class="money">{{OrderLine.MetaData.total|money}}</td>
-</tr>
+{% for Lines in OrderLine.Item.ItemVendorNums.ItemVendorNum if Lines.vendorID == Order.Vendor.vendorID|number_format  %}
+    {% if (Lines.cost|raw) != (OrderLine.MetaData.cost|raw) %}
+        <td class="money">{{Lines.cost|money}}</td>
+        <td class="money">{{(Lines.cost * OrderLine.quantity)|money}}</td>
+    {% else %}
+        <td class="money">{{OrderLine.MetaData.cost|money}}</td>
+        <td class="money">{{OrderLine.MetaData.total|money}}</td>
+    {% endif %}
 {% endfor %}
+</tr>
+
 <tfoot>
 <tr class="minor">
 <th>Subtotal</th>
