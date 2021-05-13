@@ -299,7 +299,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
     {% endif %}
 {% endfor %}
 </tr>
-
+{% endfor %}
 <tfoot>
 <tr class="minor">
 <th>Subtotal</th>
