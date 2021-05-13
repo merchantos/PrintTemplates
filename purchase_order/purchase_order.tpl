@@ -278,11 +278,13 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 {% for OrderLine in Order.OrderLines.OrderLine %}
 <tr>
 <td>
-{% if OrderLine.Item.ItemVendorNums.ItemVendorNum.value|strlen > 0 %}
-{{OrderLine.Item.ItemVendorNums.ItemVendorNum.value}}
-{% else %}
-<em>None</em>
-{% endif %} 
+    {% for Lines in OrderLine.Item.ItemVendorNums.ItemVendorNum if Lines.vendorID == Order.Vendor.vendorID|number_format  %}
+        {% if Lines.value|strlen > 0 %}
+        {{Lines.value}}
+        {% else %}
+        <em>None</em>
+        {% endif %} 
+    {% endfor %}
 </td>
 <td>{{OrderLine.Item.upc}}</td>
 <td>{{OrderLine.Item.description}}</td>
