@@ -977,6 +977,9 @@ table.payments td.label {
 					{% endfor %}
 					<tr><td width="100%">Total des taxes</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
 					<tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+                    {% if Sale.tipEnabled == 'true' %}
+                        <tr class="tip"><td>Pourboire</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
+                    {% endif %}
 				</tbody>
 			</table>
 		{% endif %}
