@@ -106,7 +106,6 @@ body {
 
 .store {
 	page-break-after: always;
-	margin-bottom: 40px;
 }
 
 .receipt {
@@ -613,7 +612,7 @@ table.payments td.label {
 
 {% macro store_receipt(Sale,parameters,options,Payment) %}
 	<div class="store">
-        {{ _self.header(Sale,_context) }}
+        {{ _self.header(Sale,options) }}
 		{{ _self.title(Sale,parameters,options) }}
 			<p class="copy">Copie de la boutique</p>
 		{{ _self.date(Sale) }}
@@ -633,7 +632,9 @@ table.payments td.label {
 		{{ _self.cc_agreement(Sale,Payment,options) }}
 		{{ _self.shop_workorder_agreement(Sale) }}
 
-		<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+		<p class="barcodeContainer">
+			<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
+		</p>
 
 		{{ _self.ship_to(Sale,options) }}
 	</div>
@@ -1214,7 +1215,7 @@ table.payments td.label {
 			{% for shop in options.shop_logo_array if not logo_printed %}
 				{% if shop.name == Sale.Shop.name %}
 					{% if shop.logo_url|strlen > 0 %}
-						<img src="{{ shop.logo_url }}" width ={{ options.logo_width }} height="{{ options.logo_height }}" class="logo">
+						<img src="{{ shop.logo_url }}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
 						{% set logo_printed = true %}
 					{% endif %}
 				{% endif %}
