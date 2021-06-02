@@ -110,7 +110,6 @@ body {
 
 .store {
 	page-break-after: always;
-	margin-bottom: 40px;
 }
 
 .receipt {
@@ -643,7 +642,7 @@ table.payments td.label {
 
 {% macro store_receipt(Sale,parameters,options,Payment) %}
 	<div class="store">
-        {{ _self.header(Sale,_context) }}
+        {{ _self.header(Sale,options) }}
 		{{ _self.title(Sale,parameters,options) }}
 			<p class="copy">Copie du magasin</p>
 		{{ _self.date(Sale) }}
@@ -1010,6 +1009,9 @@ table.payments td.label {
 					{% endfor %}
 					<tr><td width="100%">Total des taxes</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
 					<tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+                    {% if Sale.tipEnabled == 'true' %}
+                        <tr class="tip"><td>Pourboire</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
+                    {% endif %}
 				</tbody>
 			</table>
 		{% endif %}
@@ -1433,7 +1435,7 @@ table.payments td.label {
 			{% for shop in options.shop_logo_array if not logo_printed %}
 				{% if shop.name == Sale.Shop.name %}
 					{% if shop.logo_url|strlen > 0 %}
-						<img src="{{ shop.logo_url }}" width ={{ options.logo_width }} height="{{ options.logo_height }}" class="logo">
+						<img src="{{ shop.logo_url }}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
 						{% set logo_printed = true %}
 					{% endif %}
 				{% endif %}
