@@ -222,7 +222,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <tr>
 <td>
 {% if Order.MetaData.shipping|strlen > 0 %}
-{{Order.MetaData.shipping|money}}
+{{Order.MetaData.shipping|format_currency}}
 {% else %}
 <i>None</i>
 {% endif %} 
@@ -239,7 +239,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 {% endif %}
 <td>
 {% if Order.MetaData.other|strlen > 0 %} 
-{{Order.MetaData.other|money}}
+{{Order.MetaData.other|format_currency}}
 {% else %}
 <i>None</i>
 {% endif %}
@@ -287,8 +287,8 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <td>{{OrderLine.Item.upc}}</td>
 <td>{{OrderLine.Item.description}}</td>
 <td>{{OrderLine.quantity}}</td>
-<td class="money">{{OrderLine.MetaData.cost|money}}</td>
-<td class="money">{{OrderLine.MetaData.total|money}}</td>
+<td class="money">{{OrderLine.MetaData.cost|format_currency}}</td>
+<td class="money">{{OrderLine.MetaData.total|format_currency}}</td>
 </tr>
 {% endfor %}
 <tfoot>
@@ -299,7 +299,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 {% endif %}
 <td></td>
 <td></td>
-<td class="money">{{Order.MetaData.subtotal|money}}</td>
+<td class="money">{{Order.MetaData.subtotal|format_currency}}</td>
 </tr>
 {% if Order.MetaData.totalDiscount > 0 %}
 <tr class="minor">
@@ -307,7 +307,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 <th></th>
 <td></td>
 <td></td>
-<td class="money">{{Order.MetaData.totalDiscount|getinverse|money}}</td>
+<td class="money">{{Order.MetaData.totalDiscount|format_currency({invert: true})}}</td>
 </tr>
 {% endif %}
 <tr class="total">
@@ -317,7 +317,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 {% endif %}
 <td></td>
 <td></td>
-<td class="money">{{Order.MetaData.total|money}}</td>
+<td class="money">{{Order.MetaData.total|format_currency}}</td>
 </tr>
 </tfoot>
 </table>
