@@ -32,6 +32,7 @@
 {% set per_line_subtotal = false %}                 {# Displays Subtotals for each Sale Line (ex: "1 x 5.00") #}
 {% set discounted_line_items = false %}             {# Strikes out the original price and displays the discounted price on each Sale Line #}
 {% set per_line_employee = false %}                 {# Display Employee for each Sale line #}
+{% set per_line_employee_if_different = false %}    {# Display Employee name for each Sale line if different from the current employee #}
 {% set show_custom_sku = false %}                   {# Adds SKU column for Custom SKU, if available, on each Sale Line #}
 {% set show_manufacturer_sku = false %}             {# Adds SKU column for Manufacturer SKU, if available, on each Sale Line #}
 {% set show_msrp = false %}                         {# Adds MSRP column for the items MSRP, if available, on each Sale Line #}
@@ -672,7 +673,7 @@ table.payments td.label {
 	</div>
 {% endmacro %}
 
-{% macro lineDescription(Line,options) %}
+{% macro lineDescription(Sale,Line,options) %}
 	{% if Line.Item %}
 		<div class='line_description'>
 			{% autoescape true %}{{ Line.Item.description|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}{% endautoescape %}
@@ -697,7 +698,9 @@ table.payments td.label {
 			</div>
 		{% endfor %}
 	{% endif %}
-	{% if options.per_line_employee %}
+	{% if Line.Employee.firstName and options.per_line_employee and
+    (not options.per_line_employee_if_different or
+    (options.per_line_employee_if_different and Line.Employee.employeeID|intval != Sale.Employee.employeeID|intval)) %}
 		<div class='line_note'>
 			Employé(e) : {{ Line.Employee.firstName }}
 		</div>
@@ -883,10 +886,10 @@ table.payments td.label {
 	</p>
 {% endmacro %}
 
-{% macro line(isTaxInclusive,Line,parameters,options) %}
+{% macro line(Sale,Line,parameters,options) %}
 	<tr>
 		<td data-automation="lineItemDescription" class="description">
-			{{ _self.lineDescription(Line,options) }}
+			{{ _self.lineDescription(Sale,Line,options) }}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
 					<small>Réduction : '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
@@ -933,7 +936,7 @@ table.payments td.label {
 		<td data-automation="lineItemPrice" class="amount">
 			{% if not parameters.gift_receipt %}
 				{% if options.discounted_line_items and not options.per_line_subtotal and Line.calcLineDiscount != 0 %}
-					{% if not isTaxInclusive or isTaxInclusive == 'false' %}
+					{% if not Sale.isTaxInclusive or Sale.isTaxInclusive == 'false' %}
 						<span class="strike">{{ Line.calcSubtotal|money }}</span><br />
 					{% else %}
 						<span class="strike">{{ multiply(Line.displayableUnitPrice, Line.unitQuantity)|money }}</span><br />
@@ -970,7 +973,7 @@ table.payments td.label {
 			</tr>
 			<tbody>
 				{% for Line in Sale.SaleLines.SaleLine %}
-					{{ _self.line(Sale.isTaxInclusive,Line,parameters,options) }}
+					{{ _self.line(Sale,Line,parameters,options) }}
 				{% endfor %}
 			</tbody>
 		</table>
@@ -1080,13 +1083,13 @@ table.payments td.label {
 
 		{% if Sale.Customer and not store_copy %}
 			{% if options.show_customer_layaways %}
-				{{ _self.layaways(Sale.Customer,Sale.isTaxInclusive,parameters.gift_receipt,options)}}
+				{{ _self.layaways(Sale,parameters,options)}}
 			{% endif %}
 			{% if options.show_customer_specialorders %}
-				{{ _self.specialorders(Sale.Customer,Sale.isTaxInclusive,parameters.gift_receipt,options)}}
+				{{ _self.specialorders(Sale,parameters,options)}}
 			{% endif %}
 			{% if options.show_customer_workorders %}
-				{{ _self.workorders(Sale.Customer,parameters.gift_receipt,options)}}
+				{{ _self.workorders(Sale,parameters,options)}}
 			{% endif %}
 		{% endif %}
 
@@ -1463,81 +1466,81 @@ table.payments td.label {
 	</div>
 {% endmacro %}
 
-{% macro layaways(Customer,isTaxInclusive,parameters,options) %}
-	{% if Customer.Layaways and Customer.Layaways|length > 0 %}
+{% macro layaways(Sale,parameters,options) %}
+	{% if Sale.Customer.Layaways and Sale.Customer.Layaways|length > 0 %}
 		<h2 class="footerSectionTitle">Mises de côté</h2>
 		<table class="lines layaways">
 			<tbody>
-			{% for Line in Customer.Layaways.SaleLine %}
-				{{ _self.line(isTaxInclusive,Line,parameters,options)}}
+			{% for Line in Sale.Customer.Layaways.SaleLine %}
+				{{ _self.line(Sale,Line,parameters,options)}}
 			{% endfor %}
 			</tbody>
 		</table>
 		<table class="layways totals">
 			<tr>
 				<td class="label" width="100%">Sous-total</td>
-				<td class="amount">{{Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
+				<td class="amount">{{Sale.Customer.MetaData.layawaysSubtotalNoDiscount|money}}</td>
 			</tr>
-			{% if Customer.MetaData.layawaysAllDiscounts > 0 %}
+			{% if Sale.Customer.MetaData.layawaysAllDiscounts > 0 %}
 				<tr>
 					<td class="label" width="100%">Réductions</td>
-					<td class="amount">{{Customer.MetaData.layawaysAllDiscounts|getinverse|money}}</td>
+					<td class="amount">{{Sale.Customer.MetaData.layawaysAllDiscounts|getinverse|money}}</td>
 				</tr>
 			{% endif %}
 			<tr>
 				<td class="label" width="100%">Taxe</td>
-				<td class="amount">{{Customer.MetaData.layawaysTaxTotal|money}}</td>
+				<td class="amount">{{Sale.Customer.MetaData.layawaysTaxTotal|money}}</td>
 			</tr>
 			<tr class="total">
 				<td class="label" width="100%">Total</td>
-				<td class="amount">{{Customer.MetaData.layawaysTotal|money}}</td>
+				<td class="amount">{{Sale.Customer.MetaData.layawaysTotal|money}}</td>
 			</tr>
 		</table>
 	{% endif %}
 {% endmacro %}
 
-{% macro specialorders(Customer,isTaxInclusive,parameters,options) %}
-	{% if Customer.SpecialOrders|length > 0 %}
+{% macro specialorders(Sale,parameters,options) %}
+	{% if Sale.Customer.SpecialOrders|length > 0 %}
 		<h2 class="footerSectionTitle" id="lineItemSectionSO">Commandes spéciales</h2>
 		<table id="containerSOLineItems" class="lines specialorders">
 			<tbody>
-				{% for Line in Customer.SpecialOrders.SaleLine %}
-					{{ _self.line(isTaxInclusive,Line,parameters,options) }}
+				{% for Line in Sale.Customer.SpecialOrders.SaleLine %}
+					{{ _self.line(Sale,Line,parameters,options) }}
 				{% endfor %}
 			</tbody>
 		</table>
 		<table id="containerSOTotals" class="specialorders totals">
 			<tr>
 				<td class="label" width="100%">Sous-total</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
+				<td class="amount">{{Sale.Customer.MetaData.specialOrdersSubtotalNoDiscount|money}}</td>
 			</tr>
-			{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
+			{% if Sale.Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 				<tr>
 					<td class="label" width="100%">Réductions</td>
-					<td class="amount">{{Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
+					<td class="amount">{{Sale.Customer.MetaData.specialOrdersAllDiscounts|getinverse|money}}</td>
 				</tr>
 			{% endif %}
 			<tr>
 				<td class="label" width="100%">Taxe</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersTaxTotal|money}}</td>
+				<td class="amount">{{Sale.Customer.MetaData.specialOrdersTaxTotal|money}}</td>
 			</tr>
 			<tr class="total">
 				<td class="label" width="100%">Total</td>
-				<td class="amount">{{Customer.MetaData.specialOrdersTotal|money}}</td>
+				<td class="amount">{{Sale.Customer.MetaData.specialOrdersTotal|money}}</td>
 			</tr>
 		</table>
 	{% endif %}
 {% endmacro %}
 
-{% macro workorders(Customer,parameters,options) %}
-	{% if Customer.Workorders|length > 0 %}
+{% macro workorders(Sale,parameters,options) %}
+	{% if Sale.Customer.Workorders|length > 0 %}
 		<h2 class="footerSectionTitle">Demandes de service en cours</h2>
 		<table class="lines workorders">
-			{% for Line in Customer.Workorders.SaleLine %}
+			{% for Line in Sale.Customer.Workorders.SaleLine %}
 				<tr>
 					{% if Line.MetaData.workorderTotal %}
 						<td class="workorder" colspan="2">
-							{{ _self.lineDescription(Line,options) }}
+							{{ _self.lineDescription(Sale,Line,options) }}
 							{% if options.show_workorders_barcode %}
 								<p class="barcodeContainer">
 									<img id="barcodeImage"
@@ -1549,31 +1552,31 @@ table.payments td.label {
 							{% endif %}
 						</td>
 					{% else %}
-						<td>{{ _self.lineDescription(Line,options) }}</td>
+						<td>{{ _self.lineDescription(Sale,Line,options) }}</td>
 						<td class="amount">{{Line.calcSubtotal|money}}</td>
 					{% endif %}
 				</tr>
 			{% endfor %}
 		</table>
-		{% if Customer.MetaData.workordersTotal > 0 %}
+		{% if Sale.Customer.MetaData.workordersTotal > 0 %}
 			<table class="workorders totals">
 				<tr>
 					<td class="label" width="100%">Sous-total</td>
-					<td class="amount">{{Customer.MetaData.workordersSubtotalNoDiscount|money}}</td>
+					<td class="amount">{{Sale.Customer.MetaData.workordersSubtotalNoDiscount|money}}</td>
 				</tr>
-				{% if Customer.MetaData.specialOrdersAllDiscounts > 0 %}
+				{% if Sale.Customer.MetaData.specialOrdersAllDiscounts > 0 %}
 					<tr>
 						<td class="label" width="100%">Réductions</td>
-						<td class="amount">{{Customer.MetaData.workordersAllDiscounts|getinverse|money}}</td>
+						<td class="amount">{{Sale.Customer.MetaData.workordersAllDiscounts|getinverse|money}}</td>
 					</tr>
 				{% endif %}
 				<tr>
 					<td class="label" width="100%">Taxe</td>
-					<td class="amount">{{Customer.MetaData.workordersTaxTotal|money}}</td>
+					<td class="amount">{{Sale.Customer.MetaData.workordersTaxTotal|money}}</td>
 				</tr>
 				<tr class="total">
 					<td class="label" width="100%">Total</td>
-					<td class="amount">{{Customer.MetaData.workordersTotal|money}}</td>
+					<td class="amount">{{Sale.Customer.MetaData.workordersTotal|money}}</td>
 				</tr>
 			</table>
 		{% endif %}
