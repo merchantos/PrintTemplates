@@ -175,7 +175,11 @@ img.barcode {
                 <p>{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}</p>
                 <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address1 }}</p>
                 <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
-                <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}, {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }} {{ Workorder.Customer.Contact.Addresses.ContactAddress.zip }}</p>
+				        <p>
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}{% if Workorder.Customer.Contact.Addresses.ContactAddress.city and (Workorder.Customer.Contact.Addresses.ContactAddress.state or Workorder.Customer.Contact.Addresses.ContactAddress.zip) %},{% endif %}
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }}
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.zip }}
+                </p>
                 {% for ContactPhone in Workorder.Customer.Contact.Phones.ContactPhone %}
                     <p>{{ ContactPhone.number }} ({{ ContactPhone.useType }})</p>
                 {% endfor %}
