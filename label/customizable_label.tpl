@@ -255,7 +255,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
                             <div class="price">
                                 {% if price_with_no_cents == true %}
                                     <p class="saleprice">
-                                        <sup class="currency">$</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}
+                                        <sup class="currency">{{ Label.MetaData.currency_symbol }}</sup>{{ Label.MetaData.price|number_format(0, '', '')|raw }}
                                     </p>
                                 {% else %}
                                 <p class="saleprice">{{ Label.MetaData.price|money|htmlparsemoney|raw }}</p>
