@@ -7,7 +7,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set firefox_margin_fix = false %}				{# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
 
 {% set itemized_hours_labor = false %}				{# Shows time spent on Labor item if time spent is present in the charge #}
-{% set per_line_subtotal = true %}					{# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
+{% set per_line_subtotal = false %}					{# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set employee_name_on_labor_charges = false %}	{# Display Employee name on Labor Charges #}
 {% set make_work_order_number_small = false %}		{# Makes work order number inline with the header #}
 {% set remove_logo = false %}						{# Removes logo from receipt #}
