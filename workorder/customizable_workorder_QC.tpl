@@ -501,7 +501,7 @@ img.barcode {
         {% endif %}
         <td data-automation="lineItemRowCharge" class="amount">
             {% if Line.warranty == 'false' %}
-                {{Line.SaleLine.calcSubtotal|money}}
+                {{Line.SaleLine.displayableSubtotal|money}}
             {% elseif Line.warranty == 'true' %}
                 $0.00
             {% endif %}
