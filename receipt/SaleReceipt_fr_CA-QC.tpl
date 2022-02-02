@@ -791,7 +791,7 @@ table.payments td.label {
 		{% else %}
 			<span class="receiptTicketIdField">
 				<span class="receiptTicketIdLabel">
-					{% if options.sale_id_instead_of_ticket_number %}Vente&nbsp;:&nbsp;{% else %}Facture&nbsp;:&nbsp;{% endif %}</span>
+					{% if options.sale_id_instead_of_ticket_number %}Vente&nbsp;:{% else %}Facture&nbsp;:{% endif %}</span>
 				<span id="receiptTicketId">
 					{% if options.sale_id_instead_of_ticket_number %}
 						{{options.sale_id_prefix}}{{Sale.saleID}}

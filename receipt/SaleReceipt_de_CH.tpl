@@ -566,7 +566,7 @@ table.payments td.label {
 					{% for Line in Sale.SaleLines.SaleLine %}
 						{% set transaction_item_count = transaction_item_count + Line.unitQuantity %}
 					{% endfor %}
-					<p>Gesamtstückzahl: {{ transaction_item_count }}</p>
+					<p>Gesamtstückzahl:&nbsp;{{ transaction_item_count }}</p>
 				{% endif %}
 
 				{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p id="receiptQuoteNote" class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
