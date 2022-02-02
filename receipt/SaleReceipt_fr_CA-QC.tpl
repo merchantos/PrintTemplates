@@ -588,7 +588,7 @@ table.payments td.label {
 					{% for Line in Sale.SaleLines.SaleLine %}
 						{% set transaction_item_count = transaction_item_count + Line.unitQuantity %}
 					{% endfor %}
-					<p>Nombre total d'items : {{ transaction_item_count }}</p>
+					<p>Nombre total d'items&nbsp;:&nbsp;{{ transaction_item_count }}</p>
 				{% endif %}
 
 				{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p id="receiptQuoteNote" class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
@@ -791,7 +791,7 @@ table.payments td.label {
 		{% else %}
 			<span class="receiptTicketIdField">
 				<span class="receiptTicketIdLabel">
-					{% if options.sale_id_instead_of_ticket_number %}Vente : {% else %}Facture : {% endif %}</span>
+					{% if options.sale_id_instead_of_ticket_number %}Vente&nbsp;:&nbsp;{% else %}Facture&nbsp;:&nbsp;{% endif %}</span>
 				<span id="receiptTicketId">
 					{% if options.sale_id_instead_of_ticket_number %}
 						{{options.sale_id_prefix}}{{Sale.saleID}}
@@ -806,14 +806,14 @@ table.payments td.label {
 		{% if isVATAndRegistrationNumberOnReceipt() %}
 			{% if Sale.Shop.vatNumber|strlen and not options.hide_shop_vat_number %}
 				<span class="vatNumberField">
-					<span class="vatNumberLabel"> TVA : </span>
+					<span class="vatNumberLabel"> TVA&nbsp;: </span>
 					<span id="vatNumber">{{Sale.Shop.vatNumber}}</span>
 					<br />
 				</span>
 			{% endif %}
 			{% if Sale.Shop.companyRegistrationNumber|strlen and not options.hide_shop_registration_number %}
 				<span class="companyRegistrationNumberField">
-					<span class="companyRegistrationNumberLabel"># d'enregistrement cie : </span>
+					<span class="companyRegistrationNumberLabel"># d'enregistrement cie&nbsp;: </span>
 					<span id="companyRegistrationNumber">{{Sale.Shop.companyRegistrationNumber}}</span>
 					<br />
 				</span>
@@ -821,37 +821,37 @@ table.payments td.label {
 		{% endif %}
 
 		{% if Sale.Register and not options.hide_register_name %}
-			<span class="receiptRegisterNameField"><span class="receiptRegisterNameLabel">Caisse : </span><span id="receiptRegisterName">{{Sale.Register.name}}</span><br /></span>
+			<span class="receiptRegisterNameField"><span class="receiptRegisterNameLabel">Caisse&nbsp;: </span><span id="receiptRegisterName">{{Sale.Register.name}}</span><br /></span>
 		{% endif %}
 
 		{% if Sale.Employee and not options.hide_employee_name %}
-			<span class="receiptEmployeeNameField"><span class="receiptEmployeeNameLabel">Employé(e) : </span><span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br /></span>
+			<span class="receiptEmployeeNameField"><span class="receiptEmployeeNameLabel">Employé(e)&nbsp;: </span><span id="receiptEmployeeName">{{Sale.Employee.firstName}}</span><br /></span>
 		{% endif %}
 
 		{% if Sale.Customer %}
 			{% if Sale.Customer.company|strlen > 0 %}
-				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Entreprise : </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
+				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Entreprise&nbsp;: </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
 			{% endif %}
 
 			{% if not options.company_name_override or not Sale.Customer.company|strlen > 0 %}
-				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Client : </span><span id="receiptCustomerName">{{Sale.Customer.firstName}}&nbsp;{{Sale.Customer.lastName}}</span><br /></span>
+				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Client&nbsp;: </span><span id="receiptCustomerName">{{Sale.Customer.firstName}}&nbsp;{{Sale.Customer.lastName}}</span><br /></span>
 			{% endif %}
 
 			{% if not options.show_customer_name_only %}
 				{% if options.show_full_customer_address %}
 					<span class="receiptCustomerAddressField">
-						<span class="receiptCustomerAddressLabel">Address:</span>
+						<span class="receiptCustomerAddressLabel">Address&nbsp;:</span>
 						{{ _self.address(Sale.Customer.Contact,',',options) }}
 					</span>
 				{% endif %}
 
 				<span id="receiptPhonesContainer" class="indent">
 					{% for Phone in Sale.Customer.Contact.Phones.ContactPhone %}
-						<span data-automation="receiptPhoneNumber">{{Phone.useType}} : {{Phone.number}}</span><br />
+						<span data-automation="receiptPhoneNumber">{{Phone.useType}}&nbsp;: {{Phone.number}}</span><br />
 					{% endfor %}
 
 					{% for Email in Sale.Customer.Contact.Emails.ContactEmail %}
-						<span class="receiptEmailLabel">Courriel : </span><span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
+						<span class="receiptEmailLabel">Courriel&nbsp;: </span><span id="receiptEmail">{{Email.address}} ({{Email.useType}})</span><br />
 					{% endfor %}
 				</span>
 			{% endif %}
@@ -859,7 +859,7 @@ table.payments td.label {
 			{% if isVATAndRegistrationNumberOnReceipt() %}
 				{% if Sale.Customer.vatNumber|strlen and not options.hide_customer_vat_number %}
 					<span class="receiptCustomerVatField">
-						<span class="receiptCustomerVatLabel"># TVA client : </span>
+						<span class="receiptCustomerVatLabel"># TVA client&nbsp;: </span>
 						<span id="customerVatNumber">{{Sale.Customer.vatNumber}}</span>
 						<br />
 					</span>
@@ -867,7 +867,7 @@ table.payments td.label {
 
 				{% if Sale.Customer.companyRegistrationNumber|strlen and not options.hide_customer_registration_number %}
 					<span class="receiptCustomerCompanyVatField">
-						<span class="receiptCustomerCompanyVatLabel"># d'entreprise client : </span>
+						<span class="receiptCustomerCompanyVatLabel"># d'entreprise client&nbsp;: </span>
 						<span id="customerCompanyVatNumber">{{Sale.Customer.companyRegistrationNumber}}</span>
 						<br />
 					</span>
@@ -876,7 +876,7 @@ table.payments td.label {
 
 			{% if options.show_customer_notes %}
 				{% if Sale.Customer.Note.note|strlen > 0 %}
-					<span class="receiptCustomerNoteField"><span class="receiptCustomerNoteLabel">Note : </span>{{ Sale.Customer.Note.note|noteformat|raw }}<br /></span>
+					<span class="receiptCustomerNoteField"><span class="receiptCustomerNoteLabel">Note&nbsp;: </span>{{ Sale.Customer.Note.note|noteformat|raw }}<br /></span>
 				{% endif %}
 			{% endif %}
 		{% endif %}
@@ -1001,10 +1001,10 @@ table.payments td.label {
 					{% endif %}
 					{% for Tax in Sale.TaxClassTotals.Tax %}
 						{% if Tax.taxname and Tax.rate > 0 %}
-							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.P.S : {% if options.tps_number != '' %}[{{ options.tps_number }}]{% endif %} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.P.S&nbsp;: {% if options.tps_number != '' %}[{{ options.tps_number }}]{% endif %} ({{Tax.subtotal|money}} @ {{Tax.rate}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount|money}}</td></tr>
 						{% endif %}
 						{% if Tax.taxname2 and Tax.rate2 > 0 %}
-							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.V.Q : {% if options.tvq_number != '' %}[{{ options.tvq_number }}]{% endif %} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
+							<tr><td data-automation="receiptSaleTotalsTaxName" width="100%">T.V.Q&nbsp;: {% if options.tvq_number != '' %}[{{ options.tvq_number }}]{% endif %} ({{Tax.subtotal2|money}} @ {{Tax.rate2}}%)</td><td data-automation="receiptSaleTotalsTaxValue" class="amount">{{Tax.amount2|money}}</td></tr>
 						{% endif %}
 					{% endfor %}
 					<tr><td width="100%">Total des taxes</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
@@ -1096,12 +1096,12 @@ table.payments td.label {
 				<table class="totals">
 					{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
 						<tr>
-							<td width="100%">Solde dû : </td>
+							<td width="100%">Solde dû&nbsp;: </td>
 							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
 						</tr>
 					{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 						<tr>
-							<td width="100%">En dépôt : </td>
+							<td width="100%">En dépôt&nbsp;: </td>
 							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
 						</tr>
 					{% endif %}
@@ -1110,7 +1110,7 @@ table.payments td.label {
 			{% if Sale.Customer.MetaData.getAmountToCompleteAll > 0 %}
 				<table class="totals">
 					<tr class="total">
-						<td width="100%">Solde restant : </td>
+						<td width="100%">Solde restant&nbsp;: </td>
 						<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 					</tr>
 				</table>
@@ -1128,31 +1128,31 @@ table.payments td.label {
 			{% if Payment.ccChargeID > 0 and Payment.CCCharge.declined == 'false' %}
 				<td class="label" width="100%">
 					{{ Payment.PaymentType.name }}
-					<br>Numéro de carte : {{Payment.CCCharge.xnum}}
+					<br>Numéro de carte&nbsp;: {{Payment.CCCharge.xnum}}
 					{% if Payment.CCCharge.cardType|strlen > 0 %}
-						<br>Type : {{Payment.CCCharge.cardType}}
+						<br>Type&nbsp;: {{Payment.CCCharge.cardType}}
 					{% endif %}
 					{% if Payment.CCCharge.cardholderName|strlen > 0 %}
-						<br>Détenteur : {{Payment.CCCharge.cardholderName}}
+						<br>Détenteur&nbsp;: {{Payment.CCCharge.cardholderName}}
 					{% endif %}
 					{% if Payment.CCCharge.entryMethod|strlen > 0 %}
-						<br>Saisie : {{Payment.CCCharge.entryMethod}}
+						<br>Saisie&nbsp;: {{Payment.CCCharge.entryMethod}}
 					{% endif %}
 					{% if Payment.CCCharge.authCode|strlen > 0 %}
-						<br>Approbation : {{Payment.CCCharge.authCode}}
+						<br>Approbation&nbsp;: {{Payment.CCCharge.authCode}}
 					{% endif %}
 					{% if Payment.CCCharge.gatewayTransID|strlen > 0 and Payment.CCCharge.gatewayTransID|strlen < 48 %}
-						<br>ID : {{Payment.CCCharge.gatewayTransID}}
+						<br>ID&nbsp;: {{Payment.CCCharge.gatewayTransID}}
 					{% endif %}
 					{% if Payment.CCCharge.MetaData.isEMV %}
 						{% if Payment.CCCharge.MetaData.AID|strlen > 0 %}
-							<br>ID de l'appli : {{Payment.CCCharge.MetaData.AID}}
+							<br>ID de l'appli&nbsp;: {{Payment.CCCharge.MetaData.AID}}
 						{% endif %}
 						{% if Payment.CCCharge.MetaData.ApplicationLabel|strlen > 0 %}
-							<br>Étiquette de l'application : {{Payment.CCCharge.MetaData.ApplicationLabel}}
+							<br>Étiquette de l'application&nbsp;: {{Payment.CCCharge.MetaData.ApplicationLabel}}
 						{% endif %}
 						{% if Payment.CCCharge.MetaData.PINStatement|strlen > 0 %}
-							<br>Statut du code NIP : {{Payment.CCCharge.MetaData.PINStatement}}
+							<br>Statut du code NIP&nbsp;: {{Payment.CCCharge.MetaData.PINStatement}}
 						{% endif %}
 					{% endif %}
 				</td>
