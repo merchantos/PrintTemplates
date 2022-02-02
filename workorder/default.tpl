@@ -155,7 +155,7 @@ img.barcode {
                         {{ Workorder.Shop.ReceiptSetup.header|nl2br|raw }}
                     {% else %}
                         <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.address1 }}</p>
-                        <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.city }}, {{ Workorder.Shop.Contact.Addresses.ContactAddress.state }} {{ Workorder.Shop.Contact.Addresses.ContactAddress.zip }}</p>
+                        <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.city }},&nbsp;{{ Workorder.Shop.Contact.Addresses.ContactAddress.state }}&nbsp;{{ Workorder.Shop.Contact.Addresses.ContactAddress.zip }}</p>
                         <p>{{ Workorder.Shop.Contact.Phones.ContactPhone.number }}</p>
                     {% endif %}
                 {% endif %}
@@ -172,12 +172,12 @@ img.barcode {
             
             <div class="detail">
                 <h3>Customer:</h3>
-                <p>{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}</p>
+                <p>{{ Workorder.Customer.firstName}}&nbsp;{{ Workorder.Customer.lastName}}</p>
                 <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address1 }}</p>
                 <p>{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
-		<p>
-                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}{% if Workorder.Customer.Contact.Addresses.ContactAddress.city and (Workorder.Customer.Contact.Addresses.ContactAddress.state or Workorder.Customer.Contact.Addresses.ContactAddress.zip) %},{% endif %}
-                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }}
+								<p>
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}{% if Workorder.Customer.Contact.Addresses.ContactAddress.city and (Workorder.Customer.Contact.Addresses.ContactAddress.state or Workorder.Customer.Contact.Addresses.ContactAddress.zip) %},{% endif %}&nbsp;
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }}&nbsp;
                   {{ Workorder.Customer.Contact.Addresses.ContactAddress.zip }}
                 </p>
                 {% for ContactPhone in Workorder.Customer.Contact.Phones.ContactPhone %}
@@ -205,15 +205,15 @@ img.barcode {
                         {% endif %}</p>
                     <br />
                 {% endfor %}
-                <h2>Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
-                Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
+                <h2>Started:&nbsp;{{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
+                Due on:&nbsp;{{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}</h2>
             </div>
 
             <table class="lines">
                 <tr>
                     <th>Item/Labor</th>
                     <th>Notes</th>
-                        <th>Charge</th>
+										<th>Charge</th>
                 </tr>
                 {% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
                 <tr>
@@ -255,7 +255,7 @@ img.barcode {
                                 {{ WorkorderLine.Item.description }}
                                 {% if WorkorderLine.Discount %}
                                     <br />
-                                    <p>Discount: {{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})</p>
+                                    <p>Discount:&nbsp;{{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})</p>
                                 {% endif %}
                              </td>
                              <td class="notes">
@@ -266,7 +266,7 @@ img.barcode {
                             {{ WorkorderLine.note }}
                                 {% if WorkorderLine.Discount %}
                                     <br />
-                                    Discount: {{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})
+                                    Discount:&nbsp;{{ WorkorderLine.Discount.name }} (-{{ WorkorderLine.SaleLine.calcLineDiscount|money }})
                                 {% endif %}
                             </td>
                         {% endif %}
@@ -343,7 +343,7 @@ img.barcode {
                         <p style="margin-bottom:40px;">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
                         X_______________________________
                         <br/>
-                        {{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
+                        {{ Workorder.Customer.firstName}}&nbsp;{{ Workorder.Customer.lastName}}
                     </div>
             </div>
 

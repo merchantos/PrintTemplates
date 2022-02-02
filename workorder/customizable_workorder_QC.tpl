@@ -253,7 +253,7 @@ img.barcode {
                     {% else %}
                         <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.address1 }}</p>
                         <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.address2 }}</p>
-                        <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.city }}, {{ Workorder.Shop.Contact.Addresses.ContactAddress.state }} {{ Workorder.Shop.Contact.Addresses.ContactAddress.zip }}</p>
+                        <p>{{ Workorder.Shop.Contact.Addresses.ContactAddress.city }},&nbsp;{{ Workorder.Shop.Contact.Addresses.ContactAddress.state }}&nbsp;{{ Workorder.Shop.Contact.Addresses.ContactAddress.zip }}</p>
                         <p>{{ Workorder.Shop.Contact.Phones.ContactPhone.number }}</p>
                     {% endif %}
                 {% endif %}
@@ -282,12 +282,12 @@ img.barcode {
 
             <div class="detail">
                 <h3>Client:</h3>
-                <p id="customerName">{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}</p>
+                <p id="customerName">{{ Workorder.Customer.firstName}}&nbsp;{{ Workorder.Customer.lastName}}</p>
                 <p id="customerAddress1">{{ Workorder.Customer.Contact.Addresses.ContactAddress.address1 }}</p>
                 <p id="customerAddress2">{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
                 <p id="customerAddressCity">
-                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}{% if Workorder.Customer.Contact.Addresses.ContactAddress.city and (Workorder.Customer.Contact.Addresses.ContactAddress.state or Workorder.Customer.Contact.Addresses.ContactAddress.zip) %},{% endif %}
-                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }}
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}{% if Workorder.Customer.Contact.Addresses.ContactAddress.city and (Workorder.Customer.Contact.Addresses.ContactAddress.state or Workorder.Customer.Contact.Addresses.ContactAddress.zip) %},{% endif %}&nbsp;
+                  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }}&nbsp;
                   {{ Workorder.Customer.Contact.Addresses.ContactAddress.zip }}
                 </p>
                 <p id="customerCompany">{{ Workorder.Customer.company }}
@@ -320,7 +320,7 @@ img.barcode {
                 {% endfor %}
                 <h2 id="woQuoteInfo">
                 {% if hide_status == false %}
-                    Statut: {{ Workorder.WorkorderStatus.name }}<br />
+                    Statut:&nbsp;{{ Workorder.WorkorderStatus.name }}<br />
                 {% endif %}
                 {% if hide_warranty == false %}
                     {% if Workorder.warranty == 'true' %}
@@ -332,12 +332,12 @@ img.barcode {
                 {% else %}
                 {% endif %}
                 {% if hide_start_and_date == false %}
-                    D&eacute;but: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
-                    D&ucirc; le: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}<br />
+                    D&eacute;but:&nbsp;{{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
+                    D&ucirc; le:&nbsp;{{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}<br />
                     {% else %}
                 {% endif %}
                 {% if hide_employee == false %}
-                    Employ&eacute;&#40;e&#41;: {{ Workorder.Employee.firstName }} {{ Workorder.Employee.lastName }}
+                    Employ&eacute;&#40;e&#41;:&nbsp;{{ Workorder.Employee.firstName }}&nbsp;{{ Workorder.Employee.lastName }}
                     {% else %}
                 {% endif %}
                 </h2>
@@ -449,7 +449,7 @@ img.barcode {
                             <p class="workorderAgree">{{ Workorder.Shop.ReceiptSetup.workorderAgree|noteformat|raw }}</p>
                             X_______________________________
                             <br/>
-                            {{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}
+                            {{ Workorder.Customer.firstName}}&nbsp;{{ Workorder.Customer.lastName}}
                         </div>
                     {% endif %}
                 {% endif %}
@@ -471,7 +471,7 @@ img.barcode {
         <td data-automation="lineItemRowItemLabor" class="description">
             {{ _self.lineDescription(Line,options) }}
             {% if Line.Discount %}
-                <small>R&eacute;duction: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
+                <small>R&eacute;duction:&nbsp;'{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
             {% endif %}
         </td>
         {% if options.per_line_subtotal == true %}
@@ -521,7 +521,7 @@ img.barcode {
         {% endif %}
         {% if Line.isSpecialOrder == 'true' %}
             <div data-automation="lineItemRowEmployeeName" class='line_note'>
-                Employ&eacute;&#40;e&#41;: {{ Line.Employee.firstName }} {{ Line.Employee.lastName }}
+                Employ&eacute;&#40;e&#41;:&nbsp;{{ Line.Employee.firstName }}&nbsp;{{ Line.Employee.lastName }}
             </div>
         {% endif %}
     {% else %}
@@ -529,7 +529,7 @@ img.barcode {
             {% autoescape true %}{{ Line.note|noteformat|raw }}{% endautoescape %}
             {% if options.employee_name_on_labor_charges == true %}
                 <div data-automation="lineItemRowEmployeeName" class='line_note'>
-                    Employ&eacute;&#40;e&#41;: {{ Line.Employee.firstName }} {{ Line.Employee.lastName }}
+                    Employ&eacute;&#40;e&#41;:&nbsp;{{ Line.Employee.firstName }}&nbsp;{{ Line.Employee.lastName }}
                 </div>
             {% endif %}
         </div>
