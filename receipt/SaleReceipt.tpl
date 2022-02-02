@@ -691,13 +691,13 @@ table.payments td.label {
 	{% if Line.Serialized %}
 		{% for Serialized in Line.Serialized.Serialized %}
 			<div class='line_serial'>
-				Serial#: {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
+				Serial#:&nbsp;{{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
 			</div>
 		{% endfor %}
 	{% endif %}
 	{% if options.per_line_employee %}
 		<div class='line_note'>
-			Employee: {{ Line.Employee.firstName }}
+			Employee:&nbsp;{{ Line.Employee.firstName }}
 		</div>
 	{% endif %}
 {% endmacro %}
@@ -832,7 +832,7 @@ table.payments td.label {
 			{% endif %}
 
 			{% if not options.company_name_override or not Sale.Customer.company|strlen > 0 %}
-				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Customer: </span><span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br /></span>
+				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Customer: </span><span id="receiptCustomerName">{{Sale.Customer.firstName}}&nbsp;{{Sale.Customer.lastName}}</span><br /></span>
 			{% endif %}
 
 			{% if not options.show_customer_name_only %}
@@ -887,9 +887,9 @@ table.payments td.label {
 			{{ _self.lineDescription(Line,options) }}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
-					<small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
+					<small>Discount:&nbsp;'{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
 				{% elseif Line.calcLineDiscount < 0 %}
-					<small>Discount: '{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
+					<small>Discount:&nbsp;'{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
 				{% endif %}
 			{% endif %}
 		</td>
@@ -1340,7 +1340,7 @@ table.payments td.label {
 			{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact,options) }}
 
 			{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
-				<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
+				<p>Phone:&nbsp;{{Phone.number}} ({{Phone.useType}})</p>
 			{% endif %}{% endfor %}
 
 			{% if Sale.ShipTo.shipNote|strlen > 0 %}
