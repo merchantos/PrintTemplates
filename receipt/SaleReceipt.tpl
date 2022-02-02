@@ -597,7 +597,7 @@ table.payments td.label {
 					{{ _self.no_tax_applied_text(Sale) }}
 					<p id="receiptThankYouNote" class="thankyou">
 						{% if show_thank_you %}
-							Thank You {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!
+							Thank You&nbsp;{% if Sale.Customer %}{{Sale.Customer.firstName}}&nbsp;{{Sale.Customer.lastName}}{% endif %}!
 						{% endif %}
 					</p>
 				{% endif %}
@@ -1365,9 +1365,9 @@ table.payments td.label {
 
 		{% if Address.address1|strlen > 0 %}{{Address.address1}}{{delimiter}}{% endif %}
 		{% if Address.address2|strlen > 0 %}{{Address.address2}}{{delimiter}}{% endif %}
-		{% if Address.city|strlen > 0 %}{{Address.city}}{% if Address.state|strlen > 0 or Address.zip|strlen > 0%},{% endif %}{% endif %}
-		{% if Address.state|strlen > 0 %}{{Address.state}}{% if Address.zip|strlen > 0%},{% endif %}{% endif %}
-		{% if Address.zip|strlen > 0 %}{{Address.zip}}{% endif %}{% if Address.zip|strlen > 0 or Address.city|strlen > 0 or Address.state|strlen > 0 %}{{delimiter}}{% endif %}
+		{% if Address.city|strlen > 0 %}{{Address.city}}{% if Address.state|strlen > 0 or Address.zip|strlen > 0%},&nbsp;{% endif %}{% endif %}
+		{% if Address.state|strlen > 0 %}{{Address.state}}{% if Address.zip|strlen > 0%},&nbsp;{% endif %}{% endif %}
+		{% if Address.zip|strlen > 0 %}{{Address.zip}}&nbsp;{% endif %}{% if Address.zip|strlen > 0 or Address.city|strlen > 0 or Address.state|strlen > 0 %}{{delimiter}}{% endif %}
 		{% if Address.country|strlen > 0 %}{{Address.country}}{% endif %}
 
 	{% endautoescape %}
