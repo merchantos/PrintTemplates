@@ -601,7 +601,7 @@ table.payments td.label {
 					{{ _self.no_tax_applied_text(Sale) }}
 					<p id="receiptThankYouNote" class="thankyou">
 						{% if show_thank_you %}
-							Merci {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}!
+							Merci&nbsp;{% if Sale.Customer %}{{Sale.Customer.firstName}}&nbsp;{{Sale.Customer.lastName}}{% endif %}!
 						{% endif %}
 					</p>
 				{% endif %}
@@ -693,13 +693,13 @@ table.payments td.label {
 	{% if Line.Serialized %}
 		{% for Serialized in Line.Serialized.Serialized %}
 			<div class='line_serial'>
-				Numéro de série : {{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
+				Numéro de série :&nbsp;{{ Serialized.serial }}&nbsp;{{ Serialized.color }}&nbsp;{{ Serialized.size }}
 			</div>
 		{% endfor %}
 	{% endif %}
 	{% if options.per_line_employee %}
 		<div class='line_note'>
-			Employé(e) : {{ Line.Employee.firstName }}
+			Employé(e) :&nbsp;{{ Line.Employee.firstName }}
 		</div>
 	{% endif %}
 {% endmacro %}
@@ -834,7 +834,7 @@ table.payments td.label {
 			{% endif %}
 
 			{% if not options.company_name_override or not Sale.Customer.company|strlen > 0 %}
-				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Client : </span><span id="receiptCustomerName">{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}</span><br /></span>
+				<span class="receiptCustomerNameField"><span class="receiptCustomerNameLabel">Client : </span><span id="receiptCustomerName">{{Sale.Customer.firstName}}&nbsp;{{Sale.Customer.lastName}}</span><br /></span>
 			{% endif %}
 
 			{% if not options.show_customer_name_only %}
@@ -889,9 +889,9 @@ table.payments td.label {
 			{{ _self.lineDescription(Line,options) }}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
-					<small>Réduction : '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
+					<small>Réduction :&nbsp;'{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
 				{% elseif Line.calcLineDiscount < 0 %}
-					<small>Réduction : '{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
+					<small>Réduction :&nbsp;'{{ Line.Discount.name }}' {{Line.calcLineDiscount|getinverse|money}}</small>
 				{% endif %}
 			{% endif %}
 		</td>
@@ -1395,7 +1395,7 @@ table.payments td.label {
 			{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact,options) }}
 
 			{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
-				<p>Téléphone : {{Phone.number}} ({{Phone.useType}})</p>
+				<p>Téléphone :&nbsp;{{Phone.number}} ({{Phone.useType}})</p>
 			{% endif %}{% endfor %}
 
 			{% if Sale.ShipTo.shipNote|strlen > 0 %}
@@ -1420,8 +1420,8 @@ table.payments td.label {
 
 		{% if Address.address1|strlen > 0 %}{{Address.address1}}{{delimiter}}{% endif %}
 		{% if Address.address2|strlen > 0 %}{{Address.address2}}{{delimiter}}{% endif %}
-		{% if Address.city|strlen > 0 %}{{Address.city}}{% if Address.state|strlen > 0 or Address.zip|strlen > 0%},{% endif %}{% endif %}
-		{% if Address.state|strlen > 0 %}{{Address.state}}{% if Address.zip|strlen > 0%},{% endif %}{% endif %}
+		{% if Address.city|strlen > 0 %}{{Address.city}}{% if Address.state|strlen > 0 or Address.zip|strlen > 0%},&nbsp;{% endif %}{% endif %}
+		{% if Address.state|strlen > 0 %}{{Address.state}}{% if Address.zip|strlen > 0%},&nbsp;{% endif %}{% endif %}
 		{% if Address.zip|strlen > 0 %}{{Address.zip}}{% endif %}{% if Address.zip|strlen > 0 or Address.city|strlen > 0 or Address.state|strlen > 0 %}{{delimiter}}{% endif %}
 		{% if Address.country|strlen > 0 %}{{Address.country}}{% endif %}
 

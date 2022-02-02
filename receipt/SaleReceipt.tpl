@@ -691,7 +691,7 @@ table.payments td.label {
 	{% if Line.Serialized %}
 		{% for Serialized in Line.Serialized.Serialized %}
 			<div class='line_serial'>
-				Serial#:&nbsp;{{ Serialized.serial }} {{ Serialized.color }} {{ Serialized.size }}
+				Serial#:&nbsp;{{ Serialized.serial }}&nbsp;{{ Serialized.color }}&nbsp;{{ Serialized.size }}
 			</div>
 		{% endfor %}
 	{% endif %}
