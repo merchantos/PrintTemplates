@@ -894,10 +894,10 @@ table.payments td.label {
 			{% endif %}
 		</td>
 
-		{% if options.show_custom_sku and Line.Item.customSku %}
+		{% if options.show_custom_sku %}
 			<td class="custom_field">{{ Line.Item.customSku }}</td>
 		{% endif %}
-		{% if options.show_manufacturer_sku and Line.Item.manufacturerSku %}
+		{% if options.show_manufacturer_sku %}
 			<td class="custom_field">{{ Line.Item.manufacturerSku }}</td>
 		{% endif %}
 
