@@ -827,7 +827,7 @@ table.payments td.label {
 		{% endif %}
 
 		{% if Sale.Customer %}
-			{% if Sale.Customer.company|strlen > 0 %}
+			{% if Sale.Customer.company|strlen > 0 and not options.show_customer_name_only %}
 				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Company: </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
 			{% endif %}
 
@@ -1113,6 +1113,14 @@ table.payments td.label {
 					</tr>
 				</table>
 			{% endif %}
+      {% if options.show_credit_account_signature %}
+        <dl id="signatureSection" class="signature">
+          <dt>Signature:</dt>
+          <dd>
+            {% if Sale.Customer %}{{Sale.Customer.firstName}} {{Sale.Customer.lastName}}{% endif %}<br />
+          </dd>
+		    </dl>
+      {% endif %} 
 		{% endif %}
 	{% endif %}
 	{% if (not parameters.gift_receipt and not options.hide_notes_in_sale_receipt) or (parameters.gift_receipt and not options.hide_notes_in_gift_receipt) %}
