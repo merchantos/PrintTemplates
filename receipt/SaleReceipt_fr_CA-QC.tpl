@@ -20,7 +20,7 @@
 {% set hide_customer_vat_number = false %}          {# Hide the Customer VAT Number on Sales #}
 {% set hide_customer_registration_number = false %} {# Hide the Customer Registration Number on Sales #}
 {% set sale_id_instead_of_ticket_number = false %}  {# Displays the Sale ID instead of the Ticket Number #}
-{% set invoice_as_title = false %}                  {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
+{% set invoice_as_title = parameters.invoice_as_title == "true" ? true : false %} {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
 {% set workorders_as_title = false %}               {# Changes the receipt title to "Work Orders" if there is no Salesline items and 1 or more workorders #}
 {% set quote_id_prefix = "" %}                      {# Adds a string of text as a prefix for the Quote ID. Ex: "Q-". To be used when "sale_id_instead_of_ticket_number" is true #}
 {% set sale_id_prefix = "" %}                       {# Adds a string of text as a prefix for the Sales ID. Ex: "S-". To be used when "sale_id_instead_of_ticket_number" is true #}
