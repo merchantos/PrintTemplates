@@ -7,7 +7,6 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set hide_shipping_table = false %} {# Removes shipping table from PO template #}
 {% set hide_shipping_notes = false %} {# Removes shipping notes from PO template #}
 {% set hide_general_notes = false %} {# Removes general notes from PO template #}
-{% set note_line_break = true %} {# If set to true, it will respect the line breaks #}
 {#
 ***End Custom Options***
 #}
@@ -40,7 +39,6 @@ body { font-size: 75%; }
 body { margin: 1rem; }
 }
 body { font-family: "Open Sans", Helvetica, Arial, Verdana, sans-serif }
-#note-section {font-family: "Open Sans", Helvetica, Arial, Verdana, sans-serif;}
 h2,
 h3,
 h4,
