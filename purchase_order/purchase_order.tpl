@@ -325,7 +325,7 @@ Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
 {% if hide_general_notes == false %}
 {% if Order.Note.note|strlen > 0 %}
 <h3>Notes:</h3>
-<br>{{Order.Note.note}}
+<br>{{Order.Note.note|nl2br|raw}}
 {% endif %}
 {% endif %}
 {% endfor %}
