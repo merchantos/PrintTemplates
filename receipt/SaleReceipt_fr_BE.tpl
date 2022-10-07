@@ -1063,7 +1063,7 @@ table.payments td.label {
 										<td class="label">Solde</td>
 										<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
 									</tr>
-								{% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
+								{% elseif Payment.amount < 0 and Payment.archived != 'true' and Sale.calcTotal >= 0 %}
 									<tr>
 										<td class="label">Achat carte cadeau</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|money}}</td>
