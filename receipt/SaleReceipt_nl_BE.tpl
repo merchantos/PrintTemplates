@@ -63,7 +63,6 @@
 {% set logo_width = '225px' %}                      {# Default width is 225px. #}
 {% set logo_height = '' %}                          {# Default height is 55px. #}
 {% set multi_shop_logos = false %}                  {# Allows multiple logos to be added for separate locations when used with options below #}
-{% set show_multi_shop_name = false %}              {# Displays the associated shop name with the logo #}
 
 {#
 	Use the following shop_logo_array to enter all of your locations and the link to the logo image that you have uploaded to the internet.
@@ -1434,7 +1433,7 @@ table.payments td.label {
 						<img src="{{ shop.logo_url }}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
 						{% set logo_printed = true %}
 					{% endif %}
-					{% if options.show_multi_shop_name and shop.name|strlen > 0 %}
+					{% if options.show_shop_name_with_logo and shop.name|strlen > 0 %}
 						<h3 class="receiptShopName">{{ shop.name }}</h3>
 					{% endif %}
 				{% endif %}
