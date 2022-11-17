@@ -1402,9 +1402,8 @@ table.payments td.label {
 				{% if options.show_shop_name_with_logo == true %}
 					<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 				{% endif %}
-			{% else %}
-				<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 			{% endif %}
+			<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 		{% endif %}
 		<p class="receiptShopContact">
 			{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
