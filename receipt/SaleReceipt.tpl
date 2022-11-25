@@ -207,6 +207,12 @@ table div.line_note {
 	padding-left: 10px;
 }
 
+table div.line_extra {
+	text-align: left;
+	padding-left: 10px;
+	font-size: .8em;
+}
+
 table div.line_serial {
 	text-align: left;
 	font-weight: normal;
@@ -885,6 +891,12 @@ table.payments td.label {
 	<tr>
 		<td data-automation="lineItemDescription" class="description">
 			{{ _self.lineDescription(Line,options) }}
+			{% if options.show_custom_sku and Line.Item.customSku|strlen > 0 %}
+				<div class="line_extra">Custom SKU: {{ Line.Item.customSku }}</div>
+			{% endif %}
+			{% if options.show_manufacturer_sku and Line.Item.manufacturerSku|strlen > 0 %}
+				<div class="line_extra">Man. SKU: {{ Line.Item.manufacturerSku }}</div>
+			{% endif %}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
 					<small>Discount: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
@@ -893,13 +905,6 @@ table.payments td.label {
 				{% endif %}
 			{% endif %}
 		</td>
-
-		{% if options.show_custom_sku %}
-			<td class="custom_field">{{ Line.Item.customSku }}</td>
-		{% endif %}
-		{% if options.show_manufacturer_sku %}
-			<td class="custom_field">{{ Line.Item.manufacturerSku }}</td>
-		{% endif %}
 
 		{% if options.show_msrp == true and not parameters.gift_receipt %}
 			{% set msrp_printed = false %}
@@ -948,13 +953,6 @@ table.payments td.label {
 		<table class="sale lines">
 			<tr>
 				<th class="description">Items</th>
-
-				{% if options.show_custom_sku and options.show_manufacturer_sku %}
-					<th class="custom_field">Custom SKU</th>
-					<th class="custom_field">Man. SKU </th>
-				{% elseif options.show_custom_sku or options.show_manufacturer_sku %}
-					<th class="custom_field">SKU</th>
-				{% endif %}
 
 				{% if options.show_msrp and not parameters.gift_receipt %}
 					<th class="custom_field">MSRP</th>
