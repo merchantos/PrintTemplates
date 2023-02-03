@@ -516,7 +516,7 @@ img.barcode {
 			{% if Line.warranty == 'false' %}
 			    {{Line.SaleLine.displayableSubtotal|money}}
 			{% elseif Line.warranty == 'true' %}
-			    $0.00
+			    €0.00
 			{% endif %}
 		</td>
 	</tr>
