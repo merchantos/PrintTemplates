@@ -3,32 +3,32 @@
 Set any of the options in this section from 'false' to 'true' in order to enable them in the template
 #}
 
-{% set chrome_right_margin_fix = false %}			{# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
-{% set firefox_margin_fix = false %}				{# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
+{% set chrome_right_margin_fix = false %}					{# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
+{% set firefox_margin_fix = false %}							{# Fixes issue with margins cutting off when printing on a letter printer on a Mac #}
 
-{% set itemized_hours_labor = false %}				{# Shows time spent on Labor item if time spent is present in the charge #}
-{% set per_line_subtotal = false %}					{# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
+{% set itemized_hours_labor = false %}						{# Shows time spent on Labor item if time spent is present in the charge #}
+{% set per_line_subtotal = false %}								{# Displays Subtotals for each Sale Line (ex. 1 x $5.00) #}
 {% set employee_name_on_labor_charges = false %}	{# Display Employee name on Labor Charges #}
 {% set make_work_order_number_small = false %}		{# Makes work order number inline with the header #}
-{% set remove_logo = false %}						{# Removes logo from receipt #}
+{% set remove_logo = false %}											{# Removes logo from receipt #}
 
-{% set tag_header_information = false %}			{# Shows shop header information on Tags #}
-{% set notes_on_tag_only = false %}					{# Displays notes on tags only (these will still show up in the Sales screen when ringing out the Work Order) #}
+{% set tag_header_information = false %}					{# Shows shop header information on Tags #}
+{% set notes_on_tag_only = false %}								{# Displays notes on tags only (these will still show up in the Sales screen when ringing out the Work Order) #}
 
-{% set hide_work_order_item = false %}				{# Removes the Start and end date from receipts #}
-{% set hide_status = false %}						{# Removes the Status receipts #}
-{% set hide_warranty = false %}						{# Removes warranty line from receipts #}
-{% set hide_start_and_date = false %}				{# Removes the Start and end date from receipts #}
+{% set hide_work_order_item = false %}						{# Removes the Start and end date from receipts #}
+{% set hide_status = false %}											{# Removes the Status receipts #}
+{% set hide_warranty = false %}										{# Removes warranty line from receipts #}
+{% set hide_start_and_date = false %}							{# Removes the Start and end date from receipts #}
 
-{% set hide_employee = false %}						{# Removes the the employee from the Work order header #}
-{% set hide_Work_Order_Agreement = false %}			{# Removes the the employee from the Work order header #}
+{% set hide_employee = false %}										{# Removes the the employee from the Work order header #}
+{% set hide_Work_Order_Agreement = false %}				{# Removes the the employee from the Work order header #}
 
 
-{% set hide_barcode = false %}						{# Removes barcode from bottom of receipts #}
-{% set hide_barcode_sku = false %}					{# Remove the System ID from displaying at the bottom of barcdoes #}
+{% set hide_barcode = false %}										{# Removes barcode from bottom of receipts #}
+{% set hide_barcode_sku = false %}								{# Remove the System ID from displaying at the bottom of barcdoes #}
 
-{% set logo_width = '225px' %}						{# Default width is 225px. A smaller number will scale logo down #}
-{% set multi_shop_logos = false %}					{# Allows multiple logos to be added for separate locations when used with options below #}
+{% set logo_width = '225px' %}										{# Default width is 225px. A smaller number will scale logo down #}
+{% set multi_shop_logos = false %}								{# Allows multiple logos to be added for separate locations when used with options below #}
 
 {% set minimal_mode = false %}
 
