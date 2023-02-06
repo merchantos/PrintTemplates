@@ -1431,9 +1431,6 @@ table.payments td.label {
 						<img src="{{ shop.logo_url }}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
 						{% set logo_printed = true %}
 					{% endif %}
-					{% if options.show_shop_name_with_logo and shop.name|strlen > 0 %}
-						<h3 class="receiptShopName">{{ shop.name }}</h3>
-					{% endif %}
 				{% endif %}
 			{% endfor %}
 		{% endif %}
@@ -1441,12 +1438,16 @@ table.payments td.label {
 		{% if not logo_printed %}
 			{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 %}
 				<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
-				{% if options.show_shop_name_with_logo == true %}
-					<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
-				{% endif %}
+				{% set logo_printed = true %}
 			{% endif %}
-			<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 		{% endif %}
+
+		{% if Sale.Shop.name|strlen > 0 %}
+			{% if not logo_printed or options.show_shop_name_with_logo == true %}
+				<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
+			{% endif %}
+		{% endif %}
+
 		<p class="receiptShopContact">
 			{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
 				<p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
