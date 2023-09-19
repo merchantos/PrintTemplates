@@ -988,17 +988,17 @@ table.payments td.label {
 						</td>
 						<td id="receiptSaleTotalsSubtotal" class="amount">
 							{% if options.discounted_line_items %}
-                                {% if options.Sale.isTaxInclusive == 'true'%}
-                                    {{ subtract(Sale.calcSubtotal, Sale.calcDiscount)|money }}
-                                {% else %}
-                                    {{ subtract(Sale.displayableSubtotal, Sale.calcDiscount)|money }}
-                                {% endif %}
-                            {% else %}
-                                {% if options.Sale.isTaxInclusive == 'true'%}
-                                    {{ Sale.calcSubtotal|money }}
-                                {% else %}
-                                    {{ Sale.displayableSubtotal|money }}
-                                {% endif %}
+								{% if options.Sale.isTaxInclusive == 'true'%}
+									{{ subtract(Sale.calcSubtotal, Sale.calcDiscount)|money }}
+								{% else %}
+									{{ subtract(Sale.displayableSubtotal, Sale.calcDiscount)|money }}
+								{% endif %}
+							{% else %}
+								{% if options.Sale.isTaxInclusive == 'true'%}
+									{{ Sale.calcSubtotal|money }}
+								{% else %}
+									{{ Sale.displayableSubtotal|money }}
+								{% endif %}
 							{% endif %}
 						</td>
 					</tr>
@@ -1037,7 +1037,7 @@ table.payments td.label {
 								<!-- Gift Card -->
 								{% if Payment.amount > 0 %}
 									<tr>
-										<td class="label">Prélèvement sur carte cadeau {{Payment.CreditAccount.code}}</td>
+										<td class="label">Prélèvement sur carte cadeau</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|money}}</td>
 									</tr>
 									<tr>
