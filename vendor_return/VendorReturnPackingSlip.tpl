@@ -257,7 +257,7 @@ html { height: 100% }
 
 {% if VendorReturn.Note.note|strlen > 0 %}
 <h3>Notes</h3>
-<p class="s">{{ VendorReturn.Note.note|nl2br|raw }}</p>
+<p class="s">{{ VendorReturn.Note.note|noteformat|raw }}</p>
 {% endif %}
 
 {% endfor %}
