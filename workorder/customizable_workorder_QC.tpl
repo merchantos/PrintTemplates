@@ -155,6 +155,11 @@ table td.description {
     width: 100%;
 }
 
+table td.item_fee_line_name {
+	text-align: left;
+	padding-left: 10px;
+}
+
 table .description small {
     font-weight: normal;
 }
@@ -398,6 +403,15 @@ img.barcode {
                             <td>R&eacute;ductions</td>
                             <td id="totalsDiscountsValue" class="amount">
                                 {{Workorder.MetaData.discount|getinverse|money}}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if Workorder.MetaData.itemFeesSubtotal %}
+                        <tr>
+                            <td>Total des frais</td>
+                            <td id="totalsFeesValue" class="amount">
+                                {{Workorder.MetaData.itemFeesSubtotal|money}}
                             </td>
                         </tr>
                     {% endif %}
