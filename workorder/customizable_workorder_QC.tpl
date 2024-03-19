@@ -526,13 +526,13 @@ img.barcode {
 	{% for WorkorderSaleLine in Line.SaleLine %}
 		{% if WorkorderSaleLine.itemFeeID != 0 and (WorkorderSaleLine.lineType == 'item_fee' or WorkorderSaleLine.lineType == 'item_fee_refund') %}
 			<tr data-automation="lineItemRow">
-				<td data-automation="lineItemRowItemLabor" class="item_fee_line_name">
+				<td data-automation="lineItemRowItemFee" class="item_fee_line_name">
 					<div>
 					{% autoescape true %}{{ WorkorderSaleLine.ItemFee.name|nl2br }}{% endautoescape %}
 					</div>
 				</td>
-				<td data-automation="lineItemQuantity" class="quantity">{{ WorkorderSaleLine.unitQuantity }}</td>
-				<td data-automation="lineItemRowCharge" class="amount">{{ WorkorderSaleLine.ItemFee.feeValue|money }}</td>
+				<td data-automation="lineItemFeeQuantity" class="quantity">{{ WorkorderSaleLine.unitQuantity }}</td>
+				<td data-automation="lineItemFeeRowCharge" class="amount">{{ WorkorderSaleLine.ItemFee.feeValue|money }}</td>
 			</tr>
 		{% endif %}
 	{% endfor %}
