@@ -361,10 +361,12 @@ img.barcode {
 					<th class="amount">Prijs</th>
 				</tr>
 				{% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
-					{% if WorkorderItem.isSpecialOrder == 'false' %}
-						{{ _self.line(WorkorderItem, parameters, _context) }}
-					{% else %}
-						{% set specialorder = true %}
+					{% if WorkorderItem.itemFeeID == 0 %}
+						{% if WorkorderItem.isSpecialOrder == 'false' %}
+							{{ _self.line(WorkorderItem, parameters, _context) }}
+						{% else %}
+							{% set specialorder = true %}
+						{% endif %}
 					{% endif %}
 				{% endfor %}
 
@@ -544,7 +546,7 @@ img.barcode {
 				</td>
 				<td data-automation="lineItemQuantity" class="quantity">{{ WorkorderSaleLine.unitQuantity }}</td>
 				<td data-automation="lineItemRowCharge" class="amount">{{ WorkorderSaleLine.ItemFee.feeValue|money }}</td>
-			</td>
+			</tr>
 		{% endif %}
 	{% endfor %}
 {% endmacro %}
