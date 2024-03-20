@@ -219,6 +219,14 @@ table div.line_serial {
 	padding-left: 10px;
 }
 
+table div.line_description_item_fee {
+	padding-left: 10px;
+}
+
+.footerSectionTitle + table div.line_description_item_fee {
+	padding-left: 25px;
+}
+
 table.workorders div.line_description {
 	font-weight: normal;
 	padding-left: 10px;
@@ -681,6 +689,10 @@ table.payments td.label {
 		<div class='line_description'>
 			{% autoescape true %}{{ Line.Item.description|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}{% endautoescape %}
 		</div>
+		{% elseif Line.ItemFee and Line.itemFeeID and (Line.lineType == 'item_fee' or Line.lineType == 'item_fee_refund') %}
+			<div class="line_description_item_fee">
+			{{ Line.ItemFee.name|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}
+		</div>
 	{% endif %}
 	{% if Line.Note %}
 		<div class='line_note'>
@@ -974,6 +986,9 @@ table.payments td.label {
 		{% if not parameters.gift_receipt %}
 			<table class="saletotals totals">
 				<tbody id="receiptSaleTotals">
+					{% if Sale.MetaData.itemFeesSubtotal %}
+						<tr><td width="100%">Totaal kosten</td><td id="receiptSaleItemFeesTotal" class="amount">{{Sale.MetaData.itemFeesSubtotal|money}}</td></tr>
+					{% endif %}
 					<tr>
 						<td width="100%">
 							{% if options.discounted_line_items and Sale.calcDiscount != 0 %}
