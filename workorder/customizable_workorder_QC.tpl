@@ -367,7 +367,9 @@ img.barcode {
                 {% endfor %}
 
                 {% for WorkorderLine in Workorder.WorkorderLines.WorkorderLine %} <!--this loop is necessary for showing labor charges -->
-                    {{ _self.line(WorkorderLine, parameters, _context) }}
+                    {% if WorkorderLine.itemFeeID == 0 %}
+                        {{ _self.line(WorkorderLine, parameters, _context) }}
+                    {% endif %}
                 {% endfor %}
 
                 {% if specialorder == true %}
