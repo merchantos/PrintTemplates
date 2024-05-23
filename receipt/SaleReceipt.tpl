@@ -118,6 +118,10 @@ h1 {
 	text-align: center;
 }
 
+h1.spacer {
+	margin-top: 2em;
+}
+
 p.date, p.copy {
 	font-size: 9pt;
 	margin: 0;
@@ -254,10 +258,52 @@ p.thankyou {
 
 .note { text-align: center; }
 
-
 .barcodeContainer {
 	margin-top: 15px;
 	text-align: center;
+}
+
+.remotePaymentLinkContainer {
+	text-align: center;
+	margin: 1.5em 0;
+}
+
+span.payOnlineTitle {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: bold;
+	margin: 2rem 0 0.25rem;
+	text-transform: uppercase;
+}
+
+svg.payOnlineIcon {
+	height: 1rem;
+	margin-right: 0.25rem;
+	vertical-align: -0.2rem;
+	width: 1rem;
+}
+
+.payButton {
+	background-color: #1844cc;
+	background-image: linear-gradient(#537dec, #2e61de);
+	border: 1px solid #1844cc;
+	border-radius: 0.1875rem;
+	box-shadow: rgba(255, 255, 255, 0.15) 0px 1px 0px 0px inset;
+	color: #fff;
+	display: inline-block;
+	font-size: 1rem;
+	font-weight: 500;
+	line-height: 2rem;
+	margin: 1.5em 0 0;
+	padding: 0.375rem 1.5rem;
+	text-align: center;
+	text-decoration: none;
+	width: 90%;
+}
+
+.payButton:hover {
+	background-color: #2e61de;
+	background-image: linear-gradient(#2e61de, #2e61de);
 }
 
 .workorders .barcodeContainer {
@@ -607,6 +653,10 @@ table.payments td.label {
 
 				{{ _self.client_workorder_agreement(Sale,_context) }}
 
+				{% if parameters.email %}
+					{{ _self.remoteDepositLink(Sale,parameters) }}
+				{% endif %}
+
 				{% if not parameters.gift_receipt %}
 					{{ _self.no_tax_applied_text(Sale) }}
 					<p id="receiptThankYouNote" class="thankyou">
@@ -628,6 +678,10 @@ table.payments td.label {
 						Twig doesnt play nice with these functions.
 					#}
 					{{ _self.transaction_details(Sale) }}
+				{% endif %}
+
+				{% if not parameters.email %}
+					{{ _self.remoteDepositLink(Sale,parameters) }}
 				{% endif %}
 			</div>
 
@@ -690,7 +744,7 @@ table.payments td.label {
 			{% autoescape true %}{{ Line.Item.description|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}{% endautoescape %}
 		</div>
 		{% elseif Line.ItemFee and Line.itemFeeID and (Line.lineType == 'item_fee' or Line.lineType == 'item_fee_refund') %}
-			<div class="line_description_item_fee">
+		<div class="line_description_item_fee">
 			{{ Line.ItemFee.name|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}
 		</div>
 	{% endif %}
@@ -729,6 +783,8 @@ table.payments td.label {
 				{% endif %}
 				{% if options.workorders_as_title and Sale.SaleLines is empty and Sale.Customer.Workorders is defined %}
 					 Work Orders
+				{% elseif Sale.SaleLines is empty and Sale.Customer.CreditAccount.MetaData.remoteDepositAmount %}
+					Remote deposit request
 				{% else %}
 					{% if parameters.gift_receipt %}Gift Receipt{% else %}Sales Receipt{% endif %}
 				{% endif %}
@@ -845,7 +901,7 @@ table.payments td.label {
 		{% endif %}
 
 		{% if Sale.Customer %}
-			{% if Sale.Customer.company|strlen > 0 %}
+			{% if Sale.Customer.company|strlen > 0 and not options.show_customer_name_only %}
 				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Company: </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
 			{% endif %}
 
@@ -931,19 +987,19 @@ table.payments td.label {
 			{% endif %}
 		{% endif %}
 
-		<td data-automation="lineItemQuantity" class="quantity">
-			{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
-				<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
-			{% endif %}
-			{{Line.unitQuantity}}
-			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
-				{% if options.discounted_line_items %}
-					{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
-				{% else %}
-					{{Line.displayableUnitPrice|money}}
+			<td data-automation="lineItemQuantity" class="quantity">
+				{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
+					<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
 				{% endif %}
-			{% endif %}
-		</td>
+				{{Line.unitQuantity}}
+				{% if options.per_line_subtotal and not parameters.gift_receipt %} x
+					{% if options.discounted_line_items %}
+						{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+					{% else %}
+						{{Line.displayableUnitPrice|money}}
+					{% endif %}
+				{% endif %}
+			</td>
 
 		<td data-automation="lineItemPrice" class="amount">
 			{% if not parameters.gift_receipt %}
@@ -999,16 +1055,16 @@ table.payments td.label {
 						</td>
 						<td id="receiptSaleTotalsSubtotal" class="amount">
 							{% if options.discounted_line_items %}
-				                        	{% if options.Sale.isTaxInclusive == 'true' %}
-				                                    {{ subtract(Sale.calcSubtotal, Sale.calcDiscount)|money }}
-				                                {% else %}
-								    {{ subtract(Sale.displayableSubtotal, Sale.calcDiscount)|money }}
+								{% if options.Sale.isTaxInclusive == 'true' %}
+									{{ subtract(Sale.calcSubtotal, Sale.calcDiscount)|money }}
+								{% else %}
+									{{ subtract(Sale.displayableSubtotal, Sale.calcDiscount)|money }}
 								{% endif %}
 							{% else %}
-				                                {% if options.Sale.isTaxInclusive == 'true' %}
-				                                    {{ Sale.calcSubtotal|money }}
-				                                {% else %}
-				                                    {{ Sale.displayableSubtotal|money }}
+								{% if options.Sale.isTaxInclusive == 'true' %}
+									{{ Sale.calcSubtotal|money }}
+								{% else %}
+									{{ Sale.displayableSubtotal|money }}
 								{% endif %}
 							{% endif %}
 						</td>
@@ -1048,7 +1104,7 @@ table.payments td.label {
 								<!-- Gift Card -->
 								{% if Payment.amount > 0 %}
 									<tr>
-										<td class="label">Gift Card Charge</td>
+										<td class="label">Gift Card Charge {{Payment.CreditAccount.code}}</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|money}}</td>
 									</tr>
 									<tr>
@@ -1110,18 +1166,18 @@ table.payments td.label {
 		{% endif %}
 
 		{% if options.show_customer_credit_account and Sale.Customer and not parameters.gift_receipt and not store_copy %}
-			{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
+			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 				<h2 class="footerSectionTitle">Store Account</h2>
 				<table class="totals">
 					{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
 						<tr>
 							<td width="100%">Balance Owed: </td>
-							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
+							<td class="amount" data-test="creditBalanceOwed">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
 						</tr>
 					{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 						<tr>
 							<td width="100%">On Deposit: </td>
-							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
+							<td class="amount" data-test="extraDeposit">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
 						</tr>
 					{% endif %}
 				</table>
@@ -1130,7 +1186,7 @@ table.payments td.label {
 				<table class="totals">
 					<tr class="total">
 						<td width="100%">Remaining Balance: </td>
-						<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
+						<td class="amount" data-test="getAmountToCompleteAll">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 					</tr>
 				</table>
 			{% endif %}
@@ -1147,9 +1203,82 @@ table.payments td.label {
 				{% endif %}
 			{% endfor %}
 		{% endif %}
+
+		{{ _self.remoteDepositSummary(Sale,parameters) }}
 	{% endif %}
 	{% if (not parameters.gift_receipt and not options.hide_notes_in_sale_receipt) or (parameters.gift_receipt and not options.hide_notes_in_gift_receipt) %}
 		{{ _self.show_note(Sale.SaleNotes) }}
+	{% endif %}
+{% endmacro %}
+
+{% macro remoteDepositLink(Sale,parameters) %}
+	{% if Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl %}
+		{% if parameters.email %}
+			<p class="remotePaymentLinkContainer">
+				<a href="{{ Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl }}" class="payButton" target="_blank" data-test="remotePaymentLinkUrl">
+					Pay deposit
+				</a>
+			</p>
+		{% else %}
+			<p class="remotePaymentLinkContainer">
+				<span class="payOnlineTitle">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="payOnlineIcon">
+						<path d="M14 11h1.001a.998.998 0 0 0 .999-.998V2.998A.998.998 0 0 0 15.001 2H4a.998.998 0 0 0-1 .998V4h10.001c.552 0 .999.446.999.998V11z" opacity=".7"></path>
+						<path d="M13 7H0V5.998C0 5.447.447 5 .999 5H12c.552 0 .999.446.999.998V7zm0 2v4.002a.998.998 0 0 1-.999.998H1a.998.998 0 0 1-1-.998V9h13z"></path>
+					</svg>
+					Pay online
+				</span>
+				<a href="{{ Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl }}" target="_blank" data-test="remotePaymentLinkUrl">
+					{{ Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl }}
+				</a>
+			</p>
+		{% endif %}
+	{% endif %}
+{% endmacro %}
+
+{% macro remoteDepositSummary(Sale,parameters) %}
+	{% if Sale.Customer.CreditAccount.MetaData.remoteDepositAmount %}
+		{% if Sale.SaleLines is not empty %}
+			<h1 class="spacer">
+				Remote deposit request
+			</h1>
+			{{ _self.date(Sale) }}
+		{% endif %}
+		<h2 class="footerSectionTitle">Requested Payment</h2>
+		<table class="totals">
+			<tbody>
+				<tr>
+					<td width="100%">Account Deposit: </td>
+					<td class="amount" data-test="remoteDepositAmount">{{ Sale.Customer.CreditAccount.MetaData.remoteDepositAmount|money }}</td>
+				</tr>
+			</tbody>
+		</table>
+	{% endif %}
+	{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwedAfterPayment > 0 or Sale.Customer.CreditAccount.MetaData.extraDepositAfterPayment > 0 %}
+		<h2 class="footerSectionTitle">Store Account (After Payment)</h2>
+		<table class="totals">
+			<tbody>
+			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwedAfterPayment > 0 %}
+				<tr>
+					<td width="100%">Balance Owed (after payment): </td>
+					<td class="amount" data-test="creditBalanceOwedAfterPayment">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwedAfterPayment|money }}</td>
+				</tr>
+			{% elseif Sale.Customer.CreditAccount.MetaData.extraDepositAfterPayment > 0 %}
+				<tr>
+					<td width="100%">On Deposit (after payment): </td>
+					<td class="amount" data-test="extraDepositAfterPayment">{{ Sale.Customer.CreditAccount.MetaData.extraDepositAfterPayment|money }}</td>
+				</tr>
+			{% endif %}
+			</tbody>
+		</table>
+	{% endif %}
+	{% if Sale.Customer.MetaData.getAmountToCompleteAllAfterPayment > 0 %}
+		<table class="totals">
+			<tr class="total">
+				<td width="100%">Remaining Balance (after payment): </td>
+				<td class="amount" data-test="getAmountToCompleteAllAfterPayment">{{ Sale.Customer.MetaData.getAmountToCompleteAllAfterPayment|money }}</td>
+			</tr>
+		</table>
 	{% endif %}
 {% endmacro %}
 
@@ -1414,7 +1543,7 @@ table.payments td.label {
 			{% endfor %}
 		{% endif %}
 
-		{% if not logo_printed %} 
+		{% if not logo_printed %}
 			{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 %}
 				<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
 				{% set logo_printed = true %}
