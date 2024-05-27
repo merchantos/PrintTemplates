@@ -231,6 +231,10 @@ table div.line_description_item_fee {
 	padding-left: 10px;
 }
 
+.footerSectionTitle + table div.line_description_item_fee {
+	padding-left: 25px;
+}
+
 table.workorders div.line_description {
 	font-weight: normal;
 	padding-left: 10px;

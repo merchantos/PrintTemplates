@@ -987,19 +987,19 @@ table.payments td.label {
 			{% endif %}
 		{% endif %}
 
-			<td data-automation="lineItemQuantity" class="quantity">
-				{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
-					<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
+		<td data-automation="lineItemQuantity" class="quantity">
+			{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
+				<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
+			{% endif %}
+			{{Line.unitQuantity}}
+			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
+				{% if options.discounted_line_items %}
+					{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+				{% else %}
+					{{Line.displayableUnitPrice|money}}
 				{% endif %}
-				{{Line.unitQuantity}}
-				{% if options.per_line_subtotal and not parameters.gift_receipt %} x
-					{% if options.discounted_line_items %}
-						{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
-					{% else %}
-						{{Line.displayableUnitPrice|money}}
-					{% endif %}
-				{% endif %}
-			</td>
+			{% endif %}
+		</td>
 
 		<td data-automation="lineItemPrice" class="amount">
 			{% if not parameters.gift_receipt %}
