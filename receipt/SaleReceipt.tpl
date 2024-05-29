@@ -845,7 +845,7 @@ table.payments td.label {
 		{% endif %}
 
 		{% if Sale.Customer %}
-			{% if Sale.Customer.company|strlen > 0 %}
+			{% if Sale.Customer.company|strlen > 0 and not options.show_customer_name_only %}
 				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Company: </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
 			{% endif %}
 
