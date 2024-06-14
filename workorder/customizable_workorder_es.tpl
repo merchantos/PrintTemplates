@@ -160,7 +160,6 @@ table td.description {
 	width: 100%;
 }
 
-
 table td.item_fee_line_name {
 	text-align: left;
 	padding-left: 10px;
@@ -269,14 +268,14 @@ img.barcode {
 					{% endif %}
 				{% endif %}
 				{% if minimal_mode == true %}
-					<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
+					<h1 id="receiptTypeTitle">Núm. de orden de trabajo{{ Workorder.workorderID }}</h1>
 					{{ _self.date(Workorder) }}
 				{% else %}
 						{% if make_work_order_number_small == true %} 
-							<h1 id="receiptTypeTitle">Work Order #{{ Workorder.workorderID }}</h1>
+							<h1 id="receiptTypeTitle">Núm. de orden de trabajo{{ Workorder.workorderID }}</h1>
 							{{ _self.date(Workorder) }}
 						{% elseif make_work_order_number_small == false %}	
-							<h1 id="receiptTypeTitle">Work Order</h1>
+							<h1 id="receiptTypeTitle">Orden de trabajo</h1>
 							{{ _self.date(Workorder) }}
 							<br />
 							<h1 id="receiptTypeId"><strong>#{{ Workorder.workorderID }}</strong></h1>
@@ -285,14 +284,14 @@ img.barcode {
 				{% endif %}
 				{% if parameters.type == 'shop-tag' %}
 					{% if Workorder.hookIn|strlen > 0 or Workorder.hookOut|strlen > 0 %}
-						<h1 style="margin-top:20px;">Hook In: {{Workorder.hookIn}} <br />
-						Hook Out: {{Workorder.hookOut}}</h1>
+						<h1 style="margin-top:20px;">Enganche: {{Workorder.hookIn}} <br />
+						Sacado: {{Workorder.hookOut}}</h1>
 					{% endif %}
 				{% endif %}
 			</div>
 
 			<div class="detail">
-				<h3>Customer:</h3>
+				<h3>Cliente:</h3>
 				<p id="customerName">{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}</p>
 				<p id="customerAddress1">{{ Workorder.Customer.Contact.Addresses.ContactAddress.address1 }}</p>
 				<p id="customerAddress2">{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
@@ -310,7 +309,7 @@ img.barcode {
 				{% endfor %}
 				{% for serializedID in Workorder.Serialized %}
 					{% if hide_work_order_item == false %}
-						<div class="workOrderItem" >Work Order Item:</div>
+						<div class="workOrderItem" >Artículo de orden de trabajo:</div>
 							{% if Workorder.Serialized.description|strlen > 0 %}
 								{{ Workorder.Serialized.description }}
 							{% elseif Workorder.Serialized.Item.description|strlen > 0 %}
@@ -330,24 +329,24 @@ img.barcode {
 				{% endfor %}
 				<h2 id="woQuoteInfo">
 				{% if hide_status == false %}
-					Status: {{ Workorder.WorkorderStatus.name }}
+					Estado: {{ Workorder.WorkorderStatus.name }}
 				{% endif %}
 				{% if hide_warranty == false %}
 					{% if Workorder.warranty == 'true' %}
-							<br />Warranty: Yes
+							<br />Garantía: Sí
 						{% else %}
-							<br />Warranty: No
+							<br />Garantía: No
 						{% endif %}
 						<br />
 					{% else %}
 					{% endif %}
 				{% if hide_start_and_date == false %}
-					Started: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
-					Due on: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}<br />
+					Fecha de inicio: {{Workorder.timeIn|correcttimezone|date ("m/d/y h:i a")}}<br />
+					Vencimiento: {{Workorder.etaOut|correcttimezone|date ("m/d/y h:i a")}}<br />
 					{% else %}
 				{% endif %}
 				{% if hide_employee == false %}
-					Employee: {{ Workorder.Employee.firstName }} {{ Workorder.Employee.lastName }}
+					Empleado: {{ Workorder.Employee.firstName }} {{ Workorder.Employee.lastName }}
 				{% else %}
 				{% endif %}
 				</h2>
@@ -357,18 +356,18 @@ img.barcode {
 				{% set servicerate = Workorder.Shop.serviceRate %}
 				{% set specialorder = false %} <!-- Needed to trigger special order table if special order item is found -->
 				<tr>
-					<th class="description">Item/Labor</th>
+					<th class="description">Artículo/Trabajo</th>
 					<th class="quantity">#</th>
-					<th class="amount">Price</th>
+					<th class="amount">Precio</th>
 				</tr>
 				{% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
-				{% if WorkorderItem.itemFeeID == 0 %}
-					{% if WorkorderItem.isSpecialOrder == 'false' %}
-						{{ _self.line(WorkorderItem, parameters, _context) }}
-					{% else %}
-						{% set specialorder = true %}
+					{% if WorkorderItem.itemFeeID == 0 %}
+						{% if WorkorderItem.isSpecialOrder == 'false' %}
+							{{ _self.line(WorkorderItem, parameters, _context) }}
+						{% else %}
+							{% set specialorder = true %}
+						{% endif %}
 					{% endif %}
-				{% endif %}
 				{% endfor %}
 
 				{% for WorkorderLine in Workorder.WorkorderLines.WorkorderLine %} <!--this loop is necessary for showing labor charges -->
@@ -379,7 +378,7 @@ img.barcode {
 
 				{% if specialorder == true %}
 					<tr>
-						<th class="specialorder">Special Orders</th>
+						<th class="specialorder">Pedidos especiales</th>
 						<th></th>
 						<th></th>
 					</tr>
@@ -394,14 +393,14 @@ img.barcode {
 			<table class="totals">
 				<tbody>
 					<tr>
-						<td>Labor</td>
+						<td>Mano de obra</td>
 						<td id="totalsLaborValue" class="amount">
 							{{Workorder.MetaData.labor|money}}
 						</td>
 					</tr>
 
 					<tr>
-						<td>Parts</td>
+						<td>Piezas</td>
 						<td id="totalsPartsValue" class="amount">
 							{{Workorder.MetaData.parts|money}}
 						</td>
@@ -409,7 +408,7 @@ img.barcode {
 
 					{% if Workorder.MetaData.discount > 0 %}
 						<tr>
-							<td>Discounts</td>
+							<td>Descuentos</td>
 							<td id="totalsDiscountsValue" class="amount">
 								{{Workorder.MetaData.discount|getinverse|money}}
 							</td>
@@ -418,7 +417,7 @@ img.barcode {
 
 					{% if Workorder.MetaData.itemFeesSubtotal %}
 						<tr>
-							<td>Fee total</td>
+							<td>Total de tarifas</td>
 							<td id="totalsFeesValue" class="amount">
 								{{Workorder.MetaData.itemFeesSubtotal|money}}
 							</td>
@@ -426,7 +425,7 @@ img.barcode {
 					{% endif %}
 
 					<tr>
-						<td>Tax</td>
+						<td>Impuestos</td>
 						<td id="totalsTaxValue" class="amount">
 							{{Workorder.MetaData.tax|money}}
 						</td>
@@ -444,14 +443,14 @@ img.barcode {
 			{% if notes_on_tag_only == false %}
 				{% if Workorder.note|strlen > 0 %}
 					<div class="notes">
-						<h3>Notes:</h3>
+						<h3>Notas:</h3>
 						{{ Workorder.note|noteformat|raw }}
 					</div>
 				{% endif %}
 			{% else %}
 				{% if Workorder.note|strlen > 0 and parameters.type == 'shop-tag' %}
 					<div class="notes">
-						<h3>Notes:</h3>
+						<h3>Notas:</h3>
 						{{ Workorder.note|noteformat|raw }}
 					</div>
 				{% endif %}
@@ -460,7 +459,7 @@ img.barcode {
 			{% if parameters.type == 'shop-tag' %}
 				{% if Workorder.internalNote|strlen > 0 %}
 					<div class="notes">
-						<h3>Internal Notes:</h3>
+						<h3>Notas internas:</h3>
 						{{ Workorder.internalNote|noteformat|raw }}
 					</div>
 				{% endif %}
@@ -503,7 +502,7 @@ img.barcode {
 		<td data-automation="lineItemRowItemLabor" class="description">
 			{{ _self.lineDescription(Line,options) }}
 			{% if Line.Discount %}
-				<small>Discount: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
+				<small>Descuento: '{{ Line.Discount.name }}' (-{{ Line.SaleLine.calcLineDiscount|money }})</small>
 			{% endif %}
 		</td>
 		{% if options.per_line_subtotal == true %}
@@ -511,7 +510,7 @@ img.barcode {
 				{% if Line.unitPriceOverride > 0 %}
 					<td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{ Line.unitPriceOverride|money }}</td>
 				{% elseif Line.hours > 0 or Line.minutes > 0 %}
-					<td data-automation="lineItemQuantity" class="quantity">{{ Line.hours }} hrs {{ Line.minutes }} mins x {{ options.servicerate|money }}/hr.</td>
+					<td data-automation="lineItemQuantity" class="quantity">{{ Line.hours }} h {{ Line.minutes }} min x {{ options.servicerate|money }}/h.</td>
 				{% elseif Line.unitPrice > 0 %}
 					<td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}} x {{ Line.unitPrice|money }}</td>
 				{% endif %}
@@ -524,7 +523,7 @@ img.barcode {
 			{% endif %}
 		{% elseif options.itemized_hours_labor == true and Line.unitPriceOverride == '0'%}
 			{% if Line.hours > 0 or Line.minutes > 0 %}
-				<td data-automation="lineItemQuantity" class="quantity">{{ Line.hours }} hrs {{ Line.minutes }} mins</td>
+				<td data-automation="lineItemQuantity" class="quantity">{{ Line.hours }} h {{ Line.minutes }} min</td>
 			{% else %}
 				<td data-automation="lineItemQuantity" class="quantity">{{Line.unitQuantity}}</td>
 			{% endif %}
@@ -566,7 +565,7 @@ img.barcode {
 		{% endif %}
 		{% if Line.isSpecialOrder == 'true' %}
 			<div data-automation="lineItemRowEmployeeName" class='line_note'>
-				Employee: {{ Line.Employee.firstName }} {{ Line.Employee.lastName }}
+				Empleado: {{ Line.Employee.firstName }} {{ Line.Employee.lastName }}
 			</div>
 		{% endif %}
 	{% else %}
@@ -574,7 +573,7 @@ img.barcode {
 			{% autoescape true %}{{ Line.note|noteformat|raw }}{% endautoescape %}
 			{% if options.employee_name_on_labor_charges == true %}
 				<div data-automation="lineItemRowEmployeeName" class='line_note'>
-					Employee: {{ Line.Employee.firstName }} {{ Line.Employee.lastName }}
+					Empleado: {{ Line.Employee.firstName }} {{ Line.Employee.lastName }}
 				</div>
 			{% endif %}
 		</div>

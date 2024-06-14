@@ -16,7 +16,7 @@
 {% set hide_customer_vat_number = false %}          {# Hide the Customer VAT Number on Sales #}
 {% set hide_customer_registration_number = false %} {# Hide the Customer Registration Number on Sales #}
 {% set sale_id_instead_of_ticket_number = true %}   {# Displays the Sale ID instead of the Ticket Number #}
-{% set invoice_as_title = false %}                  {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
+{% set invoice_as_title = parameters.invoice_as_title == "true" ? true : false %} {# If print_layout is true, "Invoice" will be displayed instead of "Sales Receipt" on A4/Letter/Email formats #}
 {% set workorders_as_title = false %}               {# Changes the receipt title to "Work Orders" if there is no Salesline items and 1 or more workorders #}
 {% set quote_id_prefix = "" %}                      {# Adds a string of text as a prefix for the Quote ID. Ex: "Q-". To be used when "sale_id_instead_of_ticket_number" is true #}
 {% set sale_id_prefix = "" %}                       {# Adds a string of text as a prefix for the Sales ID. Ex: "S-". To be used when "sale_id_instead_of_ticket_number" is true #}
@@ -118,6 +118,10 @@ h1 {
 	text-align: center;
 }
 
+h1.spacer {
+	margin-top: 2em;
+}
+
 p.date, p.copy {
 	font-size: 9pt;
 	margin: 0;
@@ -207,10 +211,24 @@ table div.line_note {
 	padding-left: 10px;
 }
 
+table div.line_extra {
+	text-align: left;
+	padding-left: 10px;
+	font-size: .8em;
+}
+
 table div.line_serial {
 	text-align: left;
 	font-weight: normal;
 	padding-left: 10px;
+}
+
+table div.line_description_item_fee {
+	padding-left: 10px;
+}
+
+.footerSectionTitle + table div.line_description_item_fee {
+	padding-left: 25px;
 }
 
 table.workorders div.line_description {
@@ -240,10 +258,52 @@ p.thankyou {
 
 .note { text-align: center; }
 
-
 .barcodeContainer {
 	margin-top: 15px;
 	text-align: center;
+}
+
+.remotePaymentLinkContainer {
+	text-align: center;
+	margin: 1.5em 0;
+}
+
+span.payOnlineTitle {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: bold;
+	margin: 2rem 0 0.25rem;
+	text-transform: uppercase;
+}
+
+svg.payOnlineIcon {
+	height: 1rem;
+	margin-right: 0.25rem;
+	vertical-align: -0.2rem;
+	width: 1rem;
+}
+
+.payButton {
+	background-color: #1844cc;
+	background-image: linear-gradient(#537dec, #2e61de);
+	border: 1px solid #1844cc;
+	border-radius: 0.1875rem;
+	box-shadow: rgba(255, 255, 255, 0.15) 0px 1px 0px 0px inset;
+	color: #fff;
+	display: inline-block;
+	font-size: 1rem;
+	font-weight: 500;
+	line-height: 2rem;
+	margin: 1.5em 0 0;
+	padding: 0.375rem 1.5rem;
+	text-align: center;
+	text-decoration: none;
+	width: 90%;
+}
+
+.payButton:hover {
+	background-color: #2e61de;
+	background-image: linear-gradient(#2e61de, #2e61de);
 }
 
 .workorders .barcodeContainer {
@@ -287,6 +347,24 @@ table.payments td.label {
 	font-weight: normal;
 	text-align: right;
 	width: 100%;
+}
+
+#receiptTransactionDetails table {
+	max-width: 245px;
+	margin: 0 auto;
+}
+
+#receiptTransactionDetails table td {
+	text-align: right;
+}
+
+#receiptTransactionDetails table td.top {
+	font-weight: bold;
+}
+
+#receiptTransactionDetails table td.label {
+	padding-right: 20px;
+	text-align: left;
 }
 
 {% if print_layout %}
@@ -575,6 +653,10 @@ table.payments td.label {
 
 				{{ _self.client_workorder_agreement(Sale,_context) }}
 
+				{% if parameters.email %}
+					{{ _self.remoteDepositLink(Sale,parameters) }}
+				{% endif %}
+
 				{% if not parameters.gift_receipt %}
 					{{ _self.no_tax_applied_text(Sale) }}
 					<p id="receiptThankYouNote" class="thankyou">
@@ -585,9 +667,21 @@ table.payments td.label {
 				{% endif %}
 
 				{% if show_barcode %}
-				<p class="barcodeContainer">
-					<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}&hide_text={{ not show_barcode_sku }}">
-				</p>
+					<p class="barcodeContainer">
+						<img id="barcodeImage" height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}&hide_text={{ not show_barcode_sku }}">
+					</p>
+				{% endif %}
+
+				{% if Sale.completed == 'true' and Sale.SalePayments and not parameters.gift_receipt %}
+					{#
+						DO NOT CONSOLIDATE THESE IF STATEMENTS.
+						Twig doesnt play nice with these functions.
+					#}
+					{{ _self.transaction_details(Sale) }}
+				{% endif %}
+
+				{% if not parameters.email %}
+					{{ _self.remoteDepositLink(Sale,parameters) }}
 				{% endif %}
 			</div>
 
@@ -612,7 +706,7 @@ table.payments td.label {
 
 {% macro store_receipt(Sale,parameters,options,Payment) %}
 	<div class="store">
-        {{ _self.header(Sale,options) }}
+		{{ _self.header(Sale,options) }}
 		{{ _self.title(Sale,parameters,options) }}
 			<p class="copy">Winkelbon</p>
 		{{ _self.date(Sale) }}
@@ -621,10 +715,14 @@ table.payments td.label {
 		{% if options.show_sale_lines_on_store_copy %}
 			{{ _self.receipt(Sale,parameters,true,options) }}
 		{% else %}
-			<h2 class="paymentTitle">Betalingen</h2>
-			<table class="payments">
-				{{ _self.cc_payment_info(Sale,Payment) }}
-			</table>
+			{% if isUnifiedReceipt(Sale.SalePayments) %}
+				{{ _self.single_transaction_details(Sale, Payment) }}
+			{% else %}
+				<h2 class="paymentTitle">Betalingen</h2>
+				<table class="payments">
+					{{ _self.cc_payment_info(Sale,Payment) }}
+				</table>
+			{% endif %}
 		{% endif %}
 
 		{% if Sale.quoteID and Sale.Quote.notes|strlen > 0 %}<p class="note quote">{{Sale.Quote.notes|noteformat|raw}}</p>{% endif %}
@@ -644,6 +742,10 @@ table.payments td.label {
 	{% if Line.Item %}
 		<div class='line_description'>
 			{% autoescape true %}{{ Line.Item.description|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}{% endautoescape %}
+		</div>
+		{% elseif Line.ItemFee and Line.itemFeeID and (Line.lineType == 'item_fee' or Line.lineType == 'item_fee_refund') %}
+		<div class="line_description_item_fee">
+			{{ Line.ItemFee.name|nl2br }}{% if Line.tax == 'false' or (Line.calcTax1 == 0 and Line.calcTax2 == 0) %}*{% endif %}
 		</div>
 	{% endif %}
 	{% if Line.Note %}
@@ -665,7 +767,7 @@ table.payments td.label {
 			</div>
 		{% endfor %}
 	{% endif %}
-	{% if options.per_line_employee %}
+	{% if options.per_line_employee and not options.hide_employee_name %}
 		<div class='line_note'>
 			Medewerker: {{ Line.Employee.firstName }}
 		</div>
@@ -681,6 +783,8 @@ table.payments td.label {
 				{% endif %}
 				{% if options.workorders_as_title and Sale.SaleLines is empty and Sale.Customer.Workorders is defined %}
 					Werkbonnen
+				{% elseif Sale.SaleLines is empty and Sale.Customer.CreditAccount.MetaData.remoteDepositAmount %}
+					Aanbetalingsverzoek op afstand
 				{% else %}
 					{% if parameters.gift_receipt %}Geschenkbewijs{% else %}Ontvangstbewijs{% endif %}
 				{% endif %}
@@ -717,7 +821,7 @@ table.payments td.label {
 			{% if options.invoice_as_title and options.print_layout %}
 				<span class="hide-on-print">
 			{% endif %}
-					Retour ontvangstbewijs
+			Retour ontvangstbewijs
 			{% if options.invoice_as_title and options.print_layout %}
 				</span>
 				<span class="show-on-print">Retour factuur</span>
@@ -744,9 +848,9 @@ table.payments td.label {
 				<span class="receiptQuoteIdField">
 					<span class="receiptQuoteIdLabel">
 						{% if options.quote_to_invoice %}
-						Factuurnr #:
+							Factuurnr #:
 						{% else %}
-						Offertenr.:
+							Offertenr.:
 						{% endif %}
 					</span>
 					<span id="receiptQuoteId">{{options.quote_id_prefix}}{{Sale.quoteID}}</span>
@@ -797,7 +901,7 @@ table.payments td.label {
 		{% endif %}
 
 		{% if Sale.Customer %}
-			{% if Sale.Customer.company|strlen > 0 %}
+			{% if Sale.Customer.company|strlen > 0 and not options.show_customer_name_only %}
 				<span class="receiptCompanyNameField"><span class="receiptCompanyNameLabel">Bedrijf: </span><span id="receiptCompanyName">{{Sale.Customer.company}}</span><br /></span>
 			{% endif %}
 
@@ -855,6 +959,12 @@ table.payments td.label {
 	<tr>
 		<td data-automation="lineItemDescription" class="description">
 			{{ _self.lineDescription(Line,options) }}
+			{% if options.show_custom_sku and Line.Item.customSku|strlen > 0 %}
+				<div class="line_extra">Aangepaste artikelnummer: {{ Line.Item.customSku }}</div>
+			{% endif %}
+			{% if options.show_manufacturer_sku and Line.Item.manufacturerSku|strlen > 0 %}
+				<div class="line_extra">Artikelnummer fabr.: {{ Line.Item.manufacturerSku }}</div>
+			{% endif %}
 			{% if options.per_line_discount == true and not parameters.gift_receipt %}
 				{% if Line.calcLineDiscount > 0 %}
 					<small>Korting: '{{ Line.Discount.name }}' -{{Line.calcLineDiscount|money}}</small>
@@ -863,13 +973,6 @@ table.payments td.label {
 				{% endif %}
 			{% endif %}
 		</td>
-
-		{% if options.show_custom_sku and Line.Item.customSku %}
-			<td class="custom_field">{{ Line.Item.customSku }}</td>
-		{% endif %}
-		{% if options.show_manufacturer_sku and Line.Item.manufacturerSku %}
-			<td class="custom_field">{{ Line.Item.manufacturerSku }}</td>
-		{% endif %}
 
 		{% if options.show_msrp == true and not parameters.gift_receipt %}
 			{% set msrp_printed = false %}
@@ -886,7 +989,7 @@ table.payments td.label {
 
 		<td data-automation="lineItemQuantity" class="quantity">
 			{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
-				<span class="strike">{{Line.unitQuantity}} x {{Line.displayableUnitPrice|money}}</span>
+				<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
 			{% endif %}
 			{{Line.unitQuantity}}
 			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
@@ -904,7 +1007,7 @@ table.payments td.label {
 					{% if not isTaxInclusive or isTaxInclusive == 'false' %}
 						<span class="strike">{{ Line.calcSubtotal|money }}</span><br />
 					{% else %}
-						<span class="strike">{{ multiply(Line.displayableUnitPrice, Line.unitQuantity)|money }}</span><br />
+						<span class="strike">{{ multiply(Line.unitPrice, Line.unitQuantity)|money }}</span><br />
 					{% endif %}
 				{% endif %}
 				{{ Line.displayableSubtotal|money }}
@@ -918,13 +1021,6 @@ table.payments td.label {
 		<table class="sale lines">
 			<tr>
 				<th class="description">Product</th>
-
-				{% if options.show_custom_sku and options.show_manufacturer_sku %}
-					<th class="custom_field">Aangepaste artikelnummer</th>
-					<th class="custom_field">Artikelnummer fabr.</th>
-				{% elseif options.show_custom_sku or options.show_manufacturer_sku %}
-					<th class="custom_field">Artikelnummer</th>
-				{% endif %}
 
 				{% if options.show_msrp and not parameters.gift_receipt %}
 					<th class="custom_field">Adviesprijs</th>
@@ -946,19 +1042,30 @@ table.payments td.label {
 		{% if not parameters.gift_receipt %}
 			<table class="saletotals totals">
 				<tbody id="receiptSaleTotals">
+					{% if Sale.MetaData.itemFeesSubtotal %}
+						<tr><td width="100%">Totaal kosten</td><td id="receiptSaleItemFeesTotal" class="amount">{{Sale.MetaData.itemFeesSubtotal|money}}</td></tr>
+					{% endif %}
 					<tr>
 						<td width="100%">
 							{% if options.discounted_line_items and Sale.calcDiscount != 0 %}
-							Subtotaal + kortingen
+								Subtotaal + kortingen
 							{% else %}
-							Subtotaal
+								Subtotaal
 							{% endif %}
 						</td>
 						<td id="receiptSaleTotalsSubtotal" class="amount">
 							{% if options.discounted_line_items %}
-								{{ subtract(Sale.displayableSubtotal, Sale.calcDiscount)|money}}
+								{% if options.Sale.isTaxInclusive == 'true'%}
+									{{ subtract(Sale.calcSubtotal, Sale.calcDiscount)|money }}
+								{% else %}
+									{{ subtract(Sale.displayableSubtotal, Sale.calcDiscount)|money }}
+								{% endif %}
 							{% else %}
-								{{Sale.displayableSubtotal|money}}
+								{% if options.Sale.isTaxInclusive == 'true'%}
+									{{ Sale.calcSubtotal|money }}
+								{% else %}
+									{{ Sale.displayableSubtotal|money }}
+								{% endif %}
 							{% endif %}
 						</td>
 					</tr>
@@ -976,30 +1083,30 @@ table.payments td.label {
 						{% endif %}
 					{% endfor %}
 					<tr><td width="100%">Totaal belasting</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
-                    {% set cash_total = 0 %}
-                    {% set non_cash_total = 0 %}
-                    {% for Payment in Sale.SalePayments.SalePayment %}
-                        {% if Payment.PaymentType.code == "Cash" %}
-                            {% set cash_total = cash_total + Payment.amount|floatval %}
-                        {% else %}
-                            {% set non_cash_total = non_cash_total + Payment.amount|floatval %}
-                        {% endif %}
-                    {% endfor %}
-                        {% set roundedCashTotal = ((cash_total * 20) | round) / 20 %}
-                        {% set roundedTotal = roundedCashTotal + non_cash_total %}
-                    {% if roundedTotal != Sale.calcTotal %}
-                        {% if Sale.completed == "false" and Sale.quoteID > 0 %}
-                            <tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
-                        {% else %}
-                            <tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
-                            <tr class="total"><td>Afgerond totaal</td><td id="receiptSaleTotalsRoundedTotal" class="amount">{{roundedTotal|money}}</td></tr>
-                        {% endif %}
-                    {% else %}
-                        <tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
-                    {% endif %}
-                    {% if Sale.tipEnabled == 'true' %}
-                        <tr class="tip"><td>Fooi</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
-                    {% endif %}
+					{% set cash_total = 0 %}
+					{% set non_cash_total = 0 %}
+					{% for Payment in Sale.SalePayments.SalePayment %}
+						{% if Payment.PaymentType.code == "Cash" %}
+							{% set cash_total = cash_total + Payment.amount|floatval %}
+						{% else %}
+							{% set non_cash_total = non_cash_total + Payment.amount|floatval %}
+						{% endif %}
+					{% endfor %}
+					{% set roundedCashTotal = ((cash_total * 20) | round) / 20 %}
+					{% set roundedTotal = roundedCashTotal + non_cash_total %}
+					{% if roundedTotal != Sale.calcTotal %}
+						{% if Sale.completed == "false" and Sale.quoteID > 0 %}
+							<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+						{% else %}
+							<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+							<tr class="total"><td>Afgerond totaal</td><td id="receiptSaleTotalsRoundedTotal" class="amount">{{roundedTotal|money}}</td></tr>
+						{% endif %}
+					{% else %}
+						<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+					{% endif %}
+					{% if Sale.tipEnabled == 'true' %}
+						<tr class="tip"><td>Fooi</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
+					{% endif %}
 				</tbody>
 			</table>
 		{% endif %}
@@ -1014,10 +1121,10 @@ table.payments td.label {
 						{% if Payment.PaymentType.name != 'Cash' %}
 							<!-- NOT Cash Payment -->
 							{% if Payment.CreditAccount.giftCard == 'true' %}
-								<!--  Gift Card -->
+								<!-- Gift Card -->
 								{% if Payment.amount > 0 %}
 									<tr>
-										<td class="label">Afgeschreven van cadeaubon</td>
+										<td class="label">Afgeschreven van cadeaubon {{Payment.CreditAccount.code}}</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|money}}</td>
 									</tr>
 									<tr>
@@ -1033,7 +1140,7 @@ table.payments td.label {
 										<td class="label">Saldo</td>
 										<td id="receiptPaymentsGiftCardBalance" class="amount">{{Payment.CreditAccount.balance|getinverse|money}}
 									</tr>
-								{% elseif Payment.amount < 0 and Sale.calcTotal >= 0 %}
+								{% elseif Payment.amount < 0 and Payment.archived != 'true' and Sale.calcTotal >= 0 %}
 									<tr>
 										<td class="label">Aankoop cadeaubon</td>
 										<td id="receiptPaymentsGiftCardValue" class="amount">{{Payment.amount|getinverse|money}}</td>
@@ -1044,17 +1151,17 @@ table.payments td.label {
 									</tr>
 								{% endif %}
 							{% elseif Payment.creditAccountID == 0 %}
-								<!--  NOT Customer Account -->
+								<!-- NOT Customer Account -->
 								{{ _self.cc_payment_info(Sale,Payment) }}
-							{% elseif Payment.CreditAccount %}
+							{% elseif Payment.CreditAccount and Payment.archived == 'false' %}
 								<!-- Customer Account -->
 								<tr>
 									{% if Payment.amount < 0 %}
-									<td class="label">Aanbetaling op rekening</td>
-									<td id="receiptPaymentsCreditAccountDepositValue" class="amount">{{Payment.amount|getinverse|money}}</td>
+										<td class="label">Aanbetaling op rekening</td>
+										<td id="receiptPaymentsCreditAccountDepositValue" class="amount">{{Payment.amount|getinverse|money}}</td>
 									{% else %}
-									<td class="label">Betalen op rekening</td>
-									<td id="receiptPaymentsCreditAccountChargeValue" class="amount">{{Payment.amount|money}}</td>
+										<td class="label">Betalen op rekening</td>
+										<td id="receiptPaymentsCreditAccountChargeValue" class="amount">{{Payment.amount|money}}</td>
 									{% endif %}
 								</tr>
 							{% endif %}
@@ -1079,18 +1186,18 @@ table.payments td.label {
 		{% endif %}
 
 		{% if options.show_customer_credit_account and Sale.Customer and not parameters.gift_receipt and not store_copy %}
-			{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
+			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 				<h2 class="footerSectionTitle">Op rekening</h2>
 				<table class="totals">
 					{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 %}
 						<tr>
 							<td width="100%">Verschuldigd saldo: </td>
-							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
+							<td class="amount" data-test="creditBalanceOwed">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwed|money }}</td>
 						</tr>
 					{% elseif Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 						<tr>
 							<td width="100%">Aanbetaling op rekening: </td>
-							<td class="amount">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
+							<td class="amount" data-test="extraDeposit">{{ Sale.Customer.CreditAccount.MetaData.extraDeposit|money }}</td>
 						</tr>
 					{% endif %}
 				</table>
@@ -1099,14 +1206,99 @@ table.payments td.label {
 				<table class="totals">
 					<tr class="total">
 						<td width="100%">Resterend bedrag: </td>
-						<td class="amount">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
+						<td class="amount" data-test="getAmountToCompleteAll">{{ Sale.Customer.MetaData.getAmountToCompleteAll|money }}</td>
 					</tr>
 				</table>
 			{% endif %}
 		{% endif %}
+		{% if Sale.Customer.CreditAccount %}
+			{% for Payment in Sale.SalePayments.SalePayment %}
+				{% if Payment.PaymentType.name == 'Credit Account' and options.show_credit_account_signature %}
+					<dl id="signatureSection" class="signature">
+						<dt>Signature:</dt>
+						<dd>
+							{{Sale.Customer.title}} {{Sale.Customer.firstName}} {{Sale.Customer.lastName}}<br />
+						</dd>
+					</dl>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+
+		{{ _self.remoteDepositSummary(Sale,parameters) }}
 	{% endif %}
 	{% if (not parameters.gift_receipt and not options.hide_notes_in_sale_receipt) or (parameters.gift_receipt and not options.hide_notes_in_gift_receipt) %}
 		{{ _self.show_note(Sale.SaleNotes) }}
+	{% endif %}
+{% endmacro %}
+
+{% macro remoteDepositLink(Sale,parameters) %}
+	{% if Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl %}
+		{% if parameters.email %}
+			<p class="remotePaymentLinkContainer">
+				<a href="{{ Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl }}" class="payButton" target="_blank" data-test="remotePaymentLinkUrl">
+					Aanbetaling betalen
+				</a>
+			</p>
+		{% else %}
+			<p class="remotePaymentLinkContainer">
+				<span class="payOnlineTitle">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="payOnlineIcon">
+						<path d="M14 11h1.001a.998.998 0 0 0 .999-.998V2.998A.998.998 0 0 0 15.001 2H4a.998.998 0 0 0-1 .998V4h10.001c.552 0 .999.446.999.998V11z" opacity=".7"></path>
+						<path d="M13 7H0V5.998C0 5.447.447 5 .999 5H12c.552 0 .999.446.999.998V7zm0 2v4.002a.998.998 0 0 1-.999.998H1a.998.998 0 0 1-1-.998V9h13z"></path>
+					</svg>
+					Online betalen
+				</span>
+				<a href="{{ Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl }}" target="_blank" data-test="remotePaymentLinkUrl">
+					{{ Sale.Customer.CreditAccount.MetaData.remotePaymentLinkUrl }}
+				</a>
+			</p>
+		{% endif %}
+	{% endif %}
+{% endmacro %}
+
+{% macro remoteDepositSummary(Sale,parameters) %}
+	{% if Sale.Customer.CreditAccount.MetaData.remoteDepositAmount %}
+		{% if Sale.SaleLines is not empty %}
+			<h1 class="spacer">
+				Aanbetalingsverzoek op afstand
+			</h1>
+			{{ _self.date(Sale) }}
+		{% endif %}
+		<h2 class="footerSectionTitle">Verzochte betaling</h2>
+		<table class="totals">
+			<tbody>
+				<tr>
+					<td width="100%">Aanbetaling rekening: </td>
+					<td class="amount" data-test="remoteDepositAmount">{{ Sale.Customer.CreditAccount.MetaData.remoteDepositAmount|money }}</td>
+				</tr>
+			</tbody>
+		</table>
+	{% endif %}
+	{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwedAfterPayment > 0 or Sale.Customer.CreditAccount.MetaData.extraDepositAfterPayment > 0 %}
+		<h2 class="footerSectionTitle">Rekening winkel (na betaling)</h2>
+		<table class="totals">
+			<tbody>
+			{% if Sale.Customer.CreditAccount.MetaData.creditBalanceOwedAfterPayment > 0 %}
+				<tr>
+					<td width="100%">Openstaand bedrag (na betaling): </td>
+					<td class="amount" data-test="creditBalanceOwedAfterPayment">{{ Sale.Customer.CreditAccount.MetaData.creditBalanceOwedAfterPayment|money }}</td>
+				</tr>
+			{% elseif Sale.Customer.CreditAccount.MetaData.extraDepositAfterPayment > 0 %}
+				<tr>
+					<td width="100%">In aanbetaling (na betaling): </td>
+					<td class="amount" data-test="extraDepositAfterPayment">{{ Sale.Customer.CreditAccount.MetaData.extraDepositAfterPayment|money }}</td>
+				</tr>
+			{% endif %}
+			</tbody>
+		</table>
+	{% endif %}
+	{% if Sale.Customer.MetaData.getAmountToCompleteAllAfterPayment > 0 %}
+		<table class="totals">
+			<tr class="total">
+				<td width="100%">Resterend openstaand bedrag (na betaling): </td>
+				<td class="amount" data-test="getAmountToCompleteAllAfterPayment">{{ Sale.Customer.MetaData.getAmountToCompleteAllAfterPayment|money }}</td>
+			</tr>
+		</table>
 	{% endif %}
 {% endmacro %}
 
@@ -1147,12 +1339,166 @@ table.payments td.label {
 				<td class="amount">{{Payment.amount|money}}</td>
 			{% elseif Payment.ccChargeID == 0 %}
 				<td class="label" width="100%">
-					{{ Payment.PaymentType.name }}
+					{% if Payment.PaymentType.name == 'Credit Card' %}
+						Creditcard
+					{% elseif Payment.PaymentType.name == 'Debit Card' %}
+						Betaalkaart
+					{% elseif Payment.PaymentType.name == 'Check' %}
+						Cheque
+					{% else %}
+						{{Payment.PaymentType.name}}
+					{% endif %}
 				</td>
 				<td class="amount">{{Payment.amount|money}}</td>
 			{% endif %}
 		{% endif %}
 	</tr>
+{% endmacro %}
+
+{% macro transaction(Payment) %}
+	{% if Payment.PaymentType.type == 'credit card' and Payment.MetaData.ReceiptData.status != 'error' and Payment.archived == 'false' %}
+		{% if Payment.MetaData.ReceiptData.type|strlen and Payment.MetaData.ReceiptData.authorized_amount|strlen %}
+			<tr>
+				{% if Payment.MetaData.ReceiptData.type == 'sale' %}
+					<td class="label top">Verkoop</td>
+				{% else %}
+					<td class="label top">{{ mostranslate(Payment.MetaData.ReceiptData.type, 'capitalize', true) }}</td>
+				{%endif%}
+				<td class="top">{{ Payment.MetaData.ReceiptData.authorized_amount|money }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.extra_parameters.statusCode|strlen %}
+			<tr>
+				<td class="label">Status:</td>
+				<td>
+					{% if Payment.MetaData.ReceiptData.extra_parameters.statusCode == 'Approved' %}
+						Goedgekeurd
+					{% elseif Payment.MetaData.ReceiptData.extra_parameters.statusCode == 'Declined' %}
+						Geweigerd
+					{% else %}
+						{{ Payment.MetaData.ReceiptData.extra_parameters.statusCode }}
+					{%endif%}
+				</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.card_brand|strlen and Payment.MetaData.ReceiptData.card_number|strlen %}
+			<tr>
+				<td class="label">{{ Payment.MetaData.ReceiptData.card_brand }}</td>
+				<td>{{ getDisplayableCardNumber(Payment.MetaData.ReceiptData.card_number) }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.processed_date|strlen %}
+			<tr>
+				<td class="label">Datum:</td>
+				<td>
+					{{ Payment.MetaData.ReceiptData.processed_date|correcttimezone|date(getDateTimeFormat()) }}
+				</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.entry_method|strlen %}
+			<tr>
+				<td class="label">Methode:</td>
+				<td>{{ Payment.MetaData.ReceiptData.entry_method }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.extra_parameters.acceptorId|strlen %}
+			<tr>
+				<td class="label">MLC:</td>
+				<td>{{ Payment.MetaData.ReceiptData.extra_parameters.acceptorId }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.authorization_number|strlen %}
+			<tr>
+				<td class="label">Auth-code:</td>
+				<td>{{ Payment.MetaData.ReceiptData.authorization_number }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode|strlen or Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage|strlen %}
+			<tr>
+				<td class="label">Antwoord:</td>
+				<td>
+					{{ Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkCode }}/{{ Payment.MetaData.ReceiptData.extra_parameters.authorizationNetworkMessage }}
+				</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.emv_application_id|strlen %}
+			<tr>
+				<td class="label">Applicatie-ID:</td>
+				<td>{{ Payment.MetaData.ReceiptData.emv_application_id }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.emv_application_preferred_name|strlen %}
+			<tr>
+				<td class="label">Voorkeursnaam applicatie:</td>
+				<td>{{ Payment.MetaData.ReceiptData.emv_application_preferred_name }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.extra_parameters.accountType|strlen %}
+			<tr>
+				<td class="label">Accounttype:</td>
+				<td>{{ Payment.MetaData.ReceiptData.extra_parameters.accountType }}</td>
+			</tr>
+		{% endif %}
+
+		{% if Payment.MetaData.ReceiptData.emv_cryptogram_type|strlen or Payment.MetaData.ReceiptData.emv_cryptogram|strlen %}
+			<tr>
+				<td class="label">Cryptogram:</td>
+				<td>{{ Payment.MetaData.ReceiptData.emv_cryptogram_type }} {{ Payment.MetaData.ReceiptData.emv_cryptogram }}</td>
+			</tr>
+		{% endif %}
+
+		{% for emvTag in Payment.MetaData.ReceiptData.extra_parameters.emv_tags.children() %}
+			<tr>
+				<td class="label">{{ emvTag.getName() }}</td>
+				<td>{{ emvTag }}</td>
+			</tr>
+		{% endfor %}
+
+		{# Creates a Line Break for the next Payment #}
+		<tr><td colspan="2"><br /></td></tr>
+	{% endif %}
+{% endmacro %}
+
+{% macro single_transaction_details(Sale, Payment) %}
+	{% if hasCCPayment(Sale.SalePayments) %}
+		{% if isUnifiedReceipt(Sale.SalePayments) %}
+			<h2 class="paymentTitle">Transactiedetails</h2><br />
+			<div id="receiptTransactionDetails">
+				<table>
+					<tbody>
+						{{ _self.transaction(Payment) }}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+	{% endif %}
+{% endmacro %}
+
+{% macro transaction_details(Sale) %}
+	{% if hasCCPayment(Sale.SalePayments) %}
+		{% if isUnifiedReceipt(Sale.SalePayments) %}
+			<h2 class="paymentTitle">Transactiedetails</h2><br />
+			<div id="receiptTransactionDetails">
+				<table>
+					<tbody>
+						{% for Payment in Sale.SalePayments.SalePayment %}
+							{{ _self.transaction(Payment) }}
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+	{% endif %}
 {% endmacro %}
 
 {% macro cc_agreement(Sale,Payment,options) %}
@@ -1171,10 +1517,6 @@ table.payments td.label {
 
 {% macro shop_workorder_agreement(Sale) %}
 	{% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 and Sale.Workorders %}
-	<!--
-		@FIXME
-		Should only print this work_order agreement if it's never been signed before.
-		transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->
 		<div class="signature">
 			<p>{{Sale.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
 			<dl class="signature">
@@ -1245,14 +1587,19 @@ table.payments td.label {
 			{% endfor %}
 		{% endif %}
 
-		{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 and not logo_printed %}
-			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
-			{% if show_shop_name_with_logo %}
+		{% if not logo_printed %}
+			{% if Sale.Shop.ReceiptSetup.logo|strlen > 0 %}
+				<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{ options.logo_width }}" height="{{ options.logo_height }}" class="logo">
+				{% set logo_printed = true %}
+			{% endif %}
+		{% endif %}
+
+		{% if Sale.Shop.name|strlen > 0 %}
+			{% if not logo_printed or options.show_shop_name_with_logo == true %}
 				<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 			{% endif %}
-		{% else %}
-			<h3 class="receiptShopName">{{ Sale.Shop.name }}</h3>
 		{% endif %}
+
 		<p class="receiptShopContact">
 			{% if Sale.Shop.ReceiptSetup.header|strlen > 0 %}
 				<p>{{Sale.Shop.ReceiptSetup.header|nl2br|raw}}</p>
@@ -1386,37 +1733,37 @@ table.payments td.label {
 {% macro sale_cash_payment(Sale) %}
 	{% set cashTotal = 0 %}
 	{% set payCash = 'false' %}
-		{% for Payment in Sale.SalePayments.SalePayment %}
-			{% if Payment.PaymentType.code == 'Cash' %}
-            	{% set cashTotal = cashTotal + Payment.amount|floatval %}
-            	{% set payCash = 'true' %}
-        	{% endif %}
-    	{% endfor %}
+	{% for Payment in Sale.SalePayments.SalePayment %}
+		{% if Payment.PaymentType.code == 'Cash' %}
+			{% set cashTotal = cashTotal + Payment.amount|floatval %}
+			{% set payCash = 'true' %}
+		{% endif %}
+	{% endfor %}
 	{% if payCash == 'true' %}
 		{% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}
 		{% set roundedCashAmount = (((cashTotal * 20)|round) / 20) %}
 		{% set originalCashPayedTotalValue = Sale.change|floatval + cashTotal %}
 		{% set roundedCashPayedTotalValue = roundedCashAmount + Sale.change|floatval %}
-			<tr><td>Contant betaald bedrag</td><td>{{originalCashPayedTotalValue|money}}</td></tr>
+		<tr><td>Contant betaald bedrag</td><td>{{originalCashPayedTotalValue|money}}</td></tr>
 		{% if originalCashPayedTotalValue == roundedCashPayedTotalValue %}
-        	<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-        	{% if (Sale.change|floatval) != roundedCashChange %}
-        	<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-        	<tr><td class="label"> Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
-        	{% else %}
-        	<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-        	{% endif %}
+			<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+			{% if (Sale.change|floatval) != roundedCashChange %}
+				<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+				<tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+			{% else %}
+				<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+			{% endif %}
 		{% else %}
-        	<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-        	<tr><td class="label">Totaal contant afgerond </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
-        	{% if (Sale.change|floatval) != roundedCashChange %}
-        	<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-        	<tr><td class="label"> Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
-        	{% else %}
-        	<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-        	{% endif %}
+			<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+			<tr><td class="label">Totaal contant afgerond </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
+			{% if (Sale.change|floatval) != roundedCashChange %}
+				<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+				<tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+			{% else %}
+				<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+			{% endif %}
 		{% endif %}
-   	{% endif %}
+	{% endif %}
 {% endmacro %}
 
 {% macro show_note(SaleNotes) %}
@@ -1426,7 +1773,7 @@ table.payments td.label {
 			<table>
 				<tr>
 					<td>
-			            {{SaleNote.PrintedNote.note}}
+						{{SaleNote.PrintedNote.note}}
 					</td>
 				</tr>
 			</table>
