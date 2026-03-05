@@ -3,6 +3,10 @@
 	Toggle any of the options in this section between 'false' and 'true' in order to enable/disable them in the template
 #}
 
+{# Pre-authorization State - from Sale.MetaData.preauthState or parameters.preauth_state #}
+{# Valid values: 'preauthorized', 'cancelled', 'captured', 'expired' #}
+{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+
 {# Layout Adjustments #}
 {% set print_layout = parameters.print_layout == "true" ? true : false %} {# Improves receipt layout for large display/paper size (A4/Letter/Email) #}
 {% set chrome_right_margin_fix = false %}           {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
@@ -776,7 +780,11 @@ table.payments td.label {
 
 {% macro title(Sale,parameters,options) %}
 	<h1 class="receiptTypeTitle">
-		{% if Sale.calcTotal >= 0 %}
+		{# Check for preauth state first - preauth receipts show "Reçu de vente" regardless of Sale.completed #}
+		{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+		{% if preauth_state %}
+			Reçu de vente
+		{% elseif Sale.calcTotal >= 0 %}
 			{% if Sale.completed == 'true' %}
 				{% if options.invoice_as_title and options.print_layout %}
 					<span class="hide-on-print">
@@ -994,7 +1002,12 @@ table.payments td.label {
 			{{Line.unitQuantity}}
 			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
 				{% if options.discounted_line_items %}
-					{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+					{# Use captured amount for captured preauths #}
+					{% if Line.MetaData.capturedSubtotal is defined %}
+						{{ divide(Line.MetaData.capturedSubtotal, Line.unitQuantity)|money }}
+					{% else %}
+						{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+					{% endif %}
 				{% else %}
 					{{Line.displayableUnitPrice|money}}
 				{% endif %}
@@ -1010,7 +1023,12 @@ table.payments td.label {
 						<span class="strike">{{ multiply(Line.unitPrice, Line.unitQuantity)|money }}</span><br />
 					{% endif %}
 				{% endif %}
-				{{ Line.displayableSubtotal|money }}
+				{# Use captured amount for captured preauths, otherwise use displayableSubtotal #}
+				{% if Line.MetaData.capturedSubtotal is defined %}
+					{{ Line.MetaData.capturedSubtotal|money }}
+				{% else %}
+					{{ Line.displayableSubtotal|money }}
+				{% endif %}
 			{% endif %}
 		</td>
 	</tr>
@@ -1020,7 +1038,18 @@ table.payments td.label {
 	{% if Sale.SaleLines %}
 		<table class="sale lines">
 			<tr>
-				<th class="description">Article</th>
+				{# Column header based on preauth state #}
+				{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+				{% if preauth_state == 'preauthorized' %}
+					<th class="description">Préautorisation</th>
+				{% elseif preauth_state == 'cancelled' %}
+					<th class="description">Préautorisation - ANNULÉE</th>
+				{% elseif preauth_state == 'expired' %}
+					<th class="description">Préautorisation - EXPIRÉE</th>
+				{% else %}
+					{# captured or no preauth state - show default Article #}
+					<th class="description">Article</th>
+				{% endif %}
 
 				{% if options.show_msrp and not parameters.gift_receipt %}
 					<th class="custom_field">PDSF</th>
@@ -1104,6 +1133,14 @@ table.payments td.label {
 					{% else %}
 						<tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
 					{% endif %}
+                    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(null) %}
+                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true and cash_rounding_delta is not null %}
+                    {% set rounded_total = Sale.calcTotal|floatval - cash_rounding_delta|floatval %}
+                    <tr>
+                        <td class="label" width="100%">Total arrondi</td>
+                        <td class="amount">{{rounded_total|money}}</td>
+                    </tr>
+                    {% endif %}
 					{% if Sale.tipEnabled == 'true' %}
 						<tr class="tip"><td>Pourboire</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
 					{% endif %}
@@ -1728,6 +1765,7 @@ table.payments td.label {
 
 {% macro sale_cash_payment(Sale) %}
 	{% set cashTotal = 0 %}
+    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(null) %}
 	{% set payCash = 'false' %}
 		{% for Payment in Sale.SalePayments.SalePayment %}
 			{% if Payment.PaymentType.code == 'Cash' %}
@@ -1736,29 +1774,37 @@ table.payments td.label {
 			{% endif %}
 		{% endfor %}
 	{% if payCash == 'true' %}
-		{% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}
-		{% set roundedCashAmount = (((cashTotal * 20)|round) / 20) %}
-		{% set originalCashPayedTotalValue = Sale.change|floatval + cashTotal %}
-		{% set roundedCashPayedTotalValue = roundedCashAmount + Sale.change|floatval %}
-		<tr><td>Montant payé en espèces</td><td>{{originalCashPayedTotalValue|money}}</td></tr>
-		{% if originalCashPayedTotalValue == roundedCashPayedTotalValue %}
-			<tr><td class="label">Espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-			{% if (Sale.change|floatval) != roundedCashChange %}
-				<tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-				<tr><td class="label">Arrondi de la monnaie rendue</td><td id="receiptPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
-			{% else %}
-				<tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-			{% endif %}
-		{% else %}
-			<tr><td class="label">Espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-			<tr><td class="label">Total arrondi en espèces </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
-			{% if (Sale.change|floatval) != roundedCashChange %}
-				<tr><td class="label">Monnaie </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-				<tr><td class="label">Arrondi de la monnaie rendue </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
-			{% else %}
-				<tr><td class="label">Monnaie </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-			{% endif %}
-		{% endif %}
+        {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+            <tr><td class="label">Montant payé en espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+            {% if cash_rounding_delta is not null and cash_rounding_delta|floatval != 0  %}
+                <tr><td class="label">Arrondi</td><td id="receiptRoundedPaymentsChange" class="amount">{{cash_rounding_delta|money}}</td></tr>
+            {% endif %}
+            <tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+        {% else %}
+            {% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}
+            {% set roundedCashAmount = (((cashTotal * 20)|round) / 20) %}
+            {% set originalCashPayedTotalValue = Sale.change|floatval + cashTotal %}
+            {% set roundedCashPayedTotalValue = roundedCashAmount + Sale.change|floatval %}
+            <tr><td>Montant payé en espèces</td><td>{{originalCashPayedTotalValue|money}}</td></tr>
+            {% if originalCashPayedTotalValue == roundedCashPayedTotalValue %}
+                <tr><td class="label">Montant payé en espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+                {% if (Sale.change|floatval) != roundedCashChange %}
+                    <tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+                    <tr><td class="label">Arrondi de la monnaie rendue</td><td id="receiptPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+                {% else %}
+                    <tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+                {% endif %}
+            {% else %}
+                <tr><td class="label">Montant payé en espèces</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+                <tr><td class="label">Total arrondi en espèces </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
+                {% if (Sale.change|floatval) != roundedCashChange %}
+                    <tr><td class="label">Monnaie </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+                    <tr><td class="label">Arrondi de la monnaie rendue </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+                {% else %}
+                    <tr><td class="label">Monnaie</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+                {% endif %}
+            {% endif %}
+        {% endif %}
 	{% endif %}
 {% endmacro %}
 
