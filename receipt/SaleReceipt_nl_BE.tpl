@@ -1132,8 +1132,8 @@ table.payments td.label {
 					{% else %}
 						<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
 					{% endif %}
-                    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(null) %}
-                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true and cash_rounding_delta is not null %}
+                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+                    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
                     {% set rounded_total = Sale.calcTotal|floatval - cash_rounding_delta|floatval %}
                     <tr>
                         <td class="label" width="100%">Afgerond totaal</td>
@@ -1768,7 +1768,6 @@ table.payments td.label {
 
 {% macro sale_cash_payment(Sale) %}
 	{% set cashTotal = 0 %}
-    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(null) %}
 	{% set payCash = 'false' %}
 	{% for Payment in Sale.SalePayments.SalePayment %}
 		{% if Payment.PaymentType.code == 'Cash' %}
@@ -1778,10 +1777,9 @@ table.payments td.label {
 	{% endfor %}
 	{% if payCash == 'true' %}
         {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+            {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
             <tr><td class="label">Contant betaald bedrag</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-            {% if cash_rounding_delta is not null and cash_rounding_delta|floatval != 0  %}
-                <tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{cash_rounding_delta|money}}</td></tr>
-            {% endif %}
+            <tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{cash_rounding_delta|money}}</td></tr>
             <tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
         {% else %}
             {% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}

@@ -1113,8 +1113,8 @@ table.payments td.label {
 					{% endfor %}
 					<tr><td width="100%">Totaal belasting</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
 					<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
-                    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(null) %}
-                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true and cash_rounding_delta is not null %}
+                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+                    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
                     {% set rounded_total = Sale.calcTotal|floatval - cash_rounding_delta|floatval %}
                     <tr>
                         <td class="label" width="100%">Afgerond totaal</td>
@@ -1745,7 +1745,6 @@ table.payments td.label {
 
 {% macro sale_cash_payment(Sale) %}
 	{% set total = Sale.change|floatval %}
-    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(null) %}
 	{% set pay_cash = 'false' %}
 	{% for Payment in Sale.SalePayments.SalePayment %}
 		{% if Payment.PaymentType.name == 'Cash' and Payment.archived == 'false' %}
@@ -1755,7 +1754,8 @@ table.payments td.label {
 	{% endfor %}
 	{% if pay_cash == 'true' %}
 		<tr><td class="label">Contant betaald bedrag</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
-        {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true and cash_rounding_delta is not null and cash_rounding_delta|floatval != 0 %}
+        {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+        {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
         <tr><td class="label">Afronding</td><td id="receiptPaymentsCashRounding" class="amount">{{cash_rounding_delta|money}}</td></tr>
         {% endif %}
 		<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
