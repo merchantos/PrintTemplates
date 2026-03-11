@@ -3,6 +3,10 @@
 	Toggle any of the options in this section between 'false' and 'true' in order to enable/disable them in the template
 #}
 
+{# Pre-authorization State - from Sale.MetaData.preauthState or parameters.preauth_state #}
+{# Valid values: 'preauthorized', 'cancelled', 'captured', 'expired' #}
+{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+
 {# Layout Adjustments #}
 {% set print_layout = parameters.print_layout == "true" ? true : false %} {# Improves receipt layout for large display/paper size (A4/Letter/Email) #}
 {% set chrome_right_margin_fix = false %}           {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
@@ -776,7 +780,11 @@ table.payments td.label {
 
 {% macro title(Sale,parameters,options) %}
 	<h1 class="receiptTypeTitle">
-		{% if Sale.calcTotal >= 0 %}
+		{# Check for preauth state first - preauth receipts show "Sales Receipt" regardless of Sale.completed #}
+		{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+		{% if preauth_state %}
+			Sales Receipt
+		{% elseif Sale.calcTotal >= 0 %}
 			{% if Sale.completed == 'true' %}
 				{% if options.invoice_as_title and options.print_layout %}
 					<span class="hide-on-print">
@@ -987,19 +995,24 @@ table.payments td.label {
 			{% endif %}
 		{% endif %}
 
-		<td data-automation="lineItemQuantity" class="quantity">
-			{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
-				<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
-			{% endif %}
-			{{Line.unitQuantity}}
-			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
-				{% if options.discounted_line_items %}
-					{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
-				{% else %}
-					{{Line.displayableUnitPrice|money}}
+			<td data-automation="lineItemQuantity" class="quantity">
+				{% if options.per_line_subtotal and options.discounted_line_items and Line.calcLineDiscount != 0 and not parameters.gift_receipt %}
+					<span class="strike">{{Line.unitQuantity}} x {{Line.unitPrice|money}}</span>
 				{% endif %}
-			{% endif %}
-		</td>
+				{{Line.unitQuantity}}
+				{% if options.per_line_subtotal and not parameters.gift_receipt %} x
+					{% if options.discounted_line_items %}
+						{# Use captured amount for captured preauths #}
+						{% if Line.MetaData.capturedSubtotal is defined %}
+							{{ divide(Line.MetaData.capturedSubtotal, Line.unitQuantity)|money }}
+						{% else %}
+							{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+						{% endif %}
+					{% else %}
+						{{Line.displayableUnitPrice|money}}
+					{% endif %}
+				{% endif %}
+			</td>
 
 		<td data-automation="lineItemPrice" class="amount">
 			{% if not parameters.gift_receipt %}
@@ -1010,7 +1023,12 @@ table.payments td.label {
 						<span class="strike">{{ multiply(Line.unitPrice, Line.unitQuantity)|money }}</span><br />
 					{% endif %}
 				{% endif %}
-				{{ Line.displayableSubtotal|money }}
+				{# Use captured amount for captured preauths, otherwise use displayableSubtotal #}
+				{% if Line.MetaData.capturedSubtotal is defined %}
+					{{ Line.MetaData.capturedSubtotal|money }}
+				{% else %}
+					{{ Line.displayableSubtotal|money }}
+				{% endif %}
 			{% endif %}
 		</td>
 	</tr>
@@ -1020,7 +1038,18 @@ table.payments td.label {
 	{% if Sale.SaleLines %}
 		<table class="sale lines">
 			<tr>
-				<th class="description">Items</th>
+				{# Column header based on preauth state #}
+				{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+				{% if preauth_state == 'preauthorized' %}
+					<th class="description">Preauthorization</th>
+				{% elseif preauth_state == 'cancelled' %}
+					<th class="description">Preauthorization - CANCELLED</th>
+				{% elseif preauth_state == 'expired' %}
+					<th class="description">Preauthorization - EXPIRED</th>
+				{% else %}
+					{# captured or no preauth state - show default Items #}
+					<th class="description">Items</th>
+				{% endif %}
 
 				{% if options.show_msrp and not parameters.gift_receipt %}
 					<th class="custom_field">MSRP</th>
@@ -1084,9 +1113,20 @@ table.payments td.label {
 					{% endfor %}
 					<tr><td width="100%">Total Tax</td><td id="receiptSaleTotalsTax" class="amount">{{Sale.taxTotal|money}}</td></tr>
 					<tr class="total"><td>Total</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
+                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+                        {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
+                        {% set rounded_total = Sale.calcTotal|floatval - cash_rounding_delta|floatval %}
+                    <tr>
+                        <td class="label" width="100%">Rounded Total</td>
+                        <td class="amount">{{rounded_total|money}}</td>
+                    </tr>
+                    {% endif %}
 					{% if Sale.tipEnabled == 'true' %}
 						<tr class="tip"><td>Tip</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
 					{% endif %}
+                    {% if Sale.calcSurcharges != 0 %}
+                        <tr class="surcharge"><td>Surcharge</td><td id="receiptSaleTotalsSurcharge" class="amount">{{Sale.calcSurcharges|money}}</td></tr>
+                    {% endif %}
 				</tbody>
 			</table>
 		{% endif %}
@@ -1436,6 +1476,16 @@ table.payments td.label {
 					</tbody>
 				</table>
 			</div>
+		{% else %}
+			<!-- Show transaction details for card-on-file payments even when not unified -->
+			<h2 class="paymentTitle">Transaction Details</h2><br />
+			<div id="receiptTransactionDetails">
+				<table>
+					<tbody>
+						{{ _self.transaction(Payment) }}
+					</tbody>
+				</table>
+			</div>
 		{% endif %}
 	{% endif %}
 {% endmacro %}
@@ -1443,6 +1493,18 @@ table.payments td.label {
 {% macro transaction_details(Sale) %}
 	{% if hasCCPayment(Sale.SalePayments) %}
 		{% if isUnifiedReceipt(Sale.SalePayments) %}
+			<h2 class="paymentTitle">Transaction Details</h2><br />
+			<div id="receiptTransactionDetails">
+				<table>
+					<tbody>
+						{% for Payment in Sale.SalePayments.SalePayment %}
+							{{ _self.transaction(Payment) }}
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% else %}
+			<!-- Show transaction details for card-on-file payments even when not unified -->
 			<h2 class="paymentTitle">Transaction Details</h2><br />
 			<div id="receiptTransactionDetails">
 				<table>
@@ -1696,7 +1758,11 @@ table.payments td.label {
 		{% endif %}
 	{% endfor %}
 	{% if pay_cash == 'true' %}
-		<tr><td class="label">Cash</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
+		<tr><td class="label">Amount paid in cash</td><td id="receiptPaymentsCash" class="amount">{{total|money}}</td></tr>
+        {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+            {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
+            <tr><td class="label">Rounding</td><td id="receiptPaymentsCashRounding" class="amount">{{cash_rounding_delta|money}}</td></tr>
+        {% endif %}
 		<tr><td class="label">Change</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
 	{% endif %}
 {% endmacro %}

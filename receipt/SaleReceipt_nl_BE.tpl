@@ -3,6 +3,10 @@
 	Toggle any of the options in this section between 'false' and 'true' in order to enable/disable them in the template
 #}
 
+{# Pre-authorization State - from Sale.MetaData.preauthState or parameters.preauth_state #}
+{# Valid values: 'preauthorized', 'cancelled', 'captured', 'expired' #}
+{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+
 {# Layout Adjustments #}
 {% set print_layout = parameters.print_layout == "true" ? true : false %} {# Improves receipt layout for large display/paper size (A4/Letter/Email) #}
 {% set chrome_right_margin_fix = false %}           {# Fixes a potential issue where the right side of receipts are cut off in Chrome #}
@@ -776,7 +780,11 @@ table.payments td.label {
 
 {% macro title(Sale,parameters,options) %}
 	<h1 class="receiptTypeTitle">
-		{% if Sale.calcTotal >= 0 %}
+		{# Check for preauth state first - preauth receipts show "Kassabon" regardless of Sale.completed #}
+		{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+		{% if preauth_state %}
+			Kassabon
+		{% elseif Sale.calcTotal >= 0 %}
 			{% if Sale.completed == 'true' %}
 				{% if options.invoice_as_title and options.print_layout %}
 					<span class="hide-on-print">
@@ -994,7 +1002,12 @@ table.payments td.label {
 			{{Line.unitQuantity}}
 			{% if options.per_line_subtotal and not parameters.gift_receipt %} x
 				{% if options.discounted_line_items %}
-					{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+					{# Use captured amount for captured preauths #}
+					{% if Line.MetaData.capturedSubtotal is defined %}
+						{{ divide(Line.MetaData.capturedSubtotal, Line.unitQuantity)|money }}
+					{% else %}
+						{{ divide(Line.displayableSubtotal, Line.unitQuantity)|money }}
+					{% endif %}
 				{% else %}
 					{{Line.displayableUnitPrice|money}}
 				{% endif %}
@@ -1010,7 +1023,12 @@ table.payments td.label {
 						<span class="strike">{{ multiply(Line.unitPrice, Line.unitQuantity)|money }}</span><br />
 					{% endif %}
 				{% endif %}
-				{{ Line.displayableSubtotal|money }}
+				{# Use captured amount for captured preauths, otherwise use displayableSubtotal #}
+				{% if Line.MetaData.capturedSubtotal is defined %}
+					{{ Line.MetaData.capturedSubtotal|money }}
+				{% else %}
+					{{ Line.displayableSubtotal|money }}
+				{% endif %}
 			{% endif %}
 		</td>
 	</tr>
@@ -1020,7 +1038,18 @@ table.payments td.label {
 	{% if Sale.SaleLines %}
 		<table class="sale lines">
 			<tr>
-				<th class="description">Product</th>
+				{# Column header based on preauth state #}
+				{% set preauth_state = Sale.MetaData.preauthState|default(parameters.preauth_state|default(null)) %}
+				{% if preauth_state == 'preauthorized' %}
+					<th class="description">Pre-autorisatie</th>
+				{% elseif preauth_state == 'cancelled' %}
+					<th class="description">Pre-autorisatie - GEANNULEERD</th>
+				{% elseif preauth_state == 'expired' %}
+					<th class="description">Pre-autorisatie - VERLOPEN</th>
+				{% else %}
+					{# captured or no preauth state - show default Product #}
+					<th class="description">Product</th>
+				{% endif %}
 
 				{% if options.show_msrp and not parameters.gift_receipt %}
 					<th class="custom_field">Adviesprijs</th>
@@ -1099,11 +1128,18 @@ table.payments td.label {
 							<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
 						{% else %}
 							<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
-							<tr class="total"><td>Afgerond totaal</td><td id="receiptSaleTotalsRoundedTotal" class="amount">{{roundedTotal|money}}</td></tr>
 						{% endif %}
 					{% else %}
 						<tr class="total"><td>Totaal</td><td id="receiptSaleTotalsTotal" class="amount">{{Sale.calcTotal|money}}</td></tr>
 					{% endif %}
+                    {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+                    {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
+                    {% set rounded_total = Sale.calcTotal|floatval - cash_rounding_delta|floatval %}
+                    <tr>
+                        <td class="label" width="100%">Afgerond totaal</td>
+                        <td class="amount">{{rounded_total|money}}</td>
+                    </tr>
+                    {% endif %}
 					{% if Sale.tipEnabled == 'true' %}
 						<tr class="tip"><td>Fooi</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
 					{% endif %}
@@ -1740,29 +1776,36 @@ table.payments td.label {
 		{% endif %}
 	{% endfor %}
 	{% if payCash == 'true' %}
-		{% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}
-		{% set roundedCashAmount = (((cashTotal * 20)|round) / 20) %}
-		{% set originalCashPayedTotalValue = Sale.change|floatval + cashTotal %}
-		{% set roundedCashPayedTotalValue = roundedCashAmount + Sale.change|floatval %}
-		<tr><td>Contant betaald bedrag</td><td>{{originalCashPayedTotalValue|money}}</td></tr>
-		{% if originalCashPayedTotalValue == roundedCashPayedTotalValue %}
-			<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-			{% if (Sale.change|floatval) != roundedCashChange %}
-				<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-				<tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+        {% if Sale.MetaData.isCashRoundingEnabled|CompBool == true %}
+            {% set cash_rounding_delta = Sale.MetaData.cash_rounding_delta|default(0) %}
+            <tr><td class="label">Contant betaald bedrag</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+            <tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{cash_rounding_delta|money}}</td></tr>
+            <tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+        {% else %}
+            {% set roundedCashChange = (((Sale.change|floatval) * 20) | round) / 20 %}
+            {% set roundedCashAmount = (((cashTotal * 20)|round) / 20) %}
+            {% set originalCashPayedTotalValue = Sale.change|floatval + cashTotal %}
+            {% set roundedCashPayedTotalValue = roundedCashAmount + Sale.change|floatval %}
+            <tr><td>Contant betaald bedrag</td><td>{{originalCashPayedTotalValue|money}}</td></tr>
+			{% if originalCashPayedTotalValue == roundedCashPayedTotalValue %}
+				<tr><td class="label">Contant betaald bedrag</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+				{% if (Sale.change|floatval) != roundedCashChange %}
+					<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+					<tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+				{% else %}
+					<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+				{% endif %}
 			{% else %}
-				<tr><td class="label">Wisselgeld</td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+				<tr><td class="label">Contant betaald bedrag</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
+				<tr><td class="label">Totaal contant afgerond </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
+				{% if (Sale.change|floatval) != roundedCashChange %}
+					<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+					<tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
+				{% else %}
+					<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
+				{% endif %}
 			{% endif %}
-		{% else %}
-			<tr><td class="label">Contant</td><td id="receiptPaymentsCash" class="amount">{{cashTotal|money}}</td></tr>
-			<tr><td class="label">Totaal contant afgerond </td><td id="receiptRoundedPaymentsCash" class="amount">{{roundedCashAmount|money}}</td></tr>
-			{% if (Sale.change|floatval) != roundedCashChange %}
-				<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-				<tr><td class="label">Wisselgeld afgerond </td><td id="receiptRoundedPaymentsChange" class="amount">{{roundedCashChange|money}}</td></tr>
-			{% else %}
-				<tr><td class="label">Wisselgeld </td><td id="receiptPaymentsChange" class="amount">{{Sale.change|money}}</td></tr>
-			{% endif %}
-		{% endif %}
+        {% endif %}
 	{% endif %}
 {% endmacro %}
 
