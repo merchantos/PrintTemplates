@@ -155,6 +155,11 @@ table td.description {
     width: 100%;
 }
 
+table td.item_fee_line_name {
+	text-align: left;
+	padding-left: 10px;
+}
+
 table .description small {
     font-weight: normal;
 }
@@ -352,15 +357,19 @@ img.barcode {
                     <th class="amount">Prix</th>
                 </tr>
                 {% for WorkorderItem in Workorder.WorkorderItems.WorkorderItem %}
-                    {% if WorkorderItem.isSpecialOrder == 'false' %}
-                        {{ _self.line(WorkorderItem, parameters, _context) }}
-                    {% else %}
-                        {% set specialorder = true %}
+                    {% if WorkorderItem.itemFeeID == 0 %}
+                        {% if WorkorderItem.isSpecialOrder == 'false' %}
+                            {{ _self.line(WorkorderItem, parameters, _context) }}
+                        {% else %}
+                            {% set specialorder = true %}
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
 
                 {% for WorkorderLine in Workorder.WorkorderLines.WorkorderLine %} <!--this loop is necessary for showing labor charges -->
-                    {{ _self.line(WorkorderLine, parameters, _context) }}
+                    {% if WorkorderLine.itemFeeID == 0 %}
+                        {{ _self.line(WorkorderLine, parameters, _context) }}
+                    {% endif %}
                 {% endfor %}
 
                 {% if specialorder == true %}
@@ -398,6 +407,15 @@ img.barcode {
                             <td>R&eacute;ductions</td>
                             <td id="totalsDiscountsValue" class="amount">
                                 {{Workorder.MetaData.discount|getinverse|money}}
+                            </td>
+                        </tr>
+                    {% endif %}
+
+                    {% if Workorder.MetaData.itemFeesSubtotal %}
+                        <tr>
+                            <td>Total des frais</td>
+                            <td id="totalsFeesValue" class="amount">
+                                {{Workorder.MetaData.itemFeesSubtotal|money}}
                             </td>
                         </tr>
                     {% endif %}
@@ -501,12 +519,25 @@ img.barcode {
         {% endif %}
         <td data-automation="lineItemRowCharge" class="amount">
             {% if Line.warranty == 'false' %}
-                {{Line.SaleLine.calcSubtotal|money}}
+                {{Line.SaleLine.displayableSubtotal|money}}
             {% elseif Line.warranty == 'true' %}
                 $0.00
             {% endif %}
         </td>
     </tr>
+	{% for WorkorderSaleLine in Line.SaleLine %}
+		{% if WorkorderSaleLine.itemFeeID != 0 and (WorkorderSaleLine.lineType == 'item_fee' or WorkorderSaleLine.lineType == 'item_fee_refund') %}
+			<tr data-automation="lineItemRow">
+				<td data-automation="lineItemRowItemFee" class="item_fee_line_name">
+					<div>
+					{% autoescape true %}{{ WorkorderSaleLine.ItemFee.name|nl2br }}{% endautoescape %}
+					</div>
+				</td>
+				<td data-automation="lineItemFeeQuantity" class="quantity">{{ WorkorderSaleLine.unitQuantity }}</td>
+				<td data-automation="lineItemFeeRowCharge" class="amount">{{ WorkorderSaleLine.ItemFee.feeValue|money }}</td>
+			</tr>
+		{% endif %}
+	{% endfor %}
 {% endmacro %}
 
 {% macro lineDescription(Line,options) %}
