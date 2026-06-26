@@ -1,0 +1,43 @@
+---
+repos:
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+        types: [yaml]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.14.0
+    hooks:
+      - id: hadolint-docker
+        types: [dockerfile]
+        args: [--ignore, DL3007, --ignore, DL3025, --ignore, DL3062]
+
+  - repo: local
+    hooks:
+      - id: circleci-validate
+        name: CircleCI pipeline validation
+        language: system
+        entry: bash -c 'for file in "$@"; do circleci config validate --org-slug github/lightspeedretail "$file"; done' --
+        pass_filenames: true
+        files: ^.circleci/.*\.yml$
+
+      - id: helm-lint
+        name: Helm lint (api-server chart)
+        language: system
+        files: ^api-server/charts/.*\.ya?ml$
+        pass_filenames: false
+        entry: helm lint api-server/charts
+
+      - id: helm-template
+        name: Helm template (api-server chart, all envs)
+        language: script
+        files: ^api-server/charts/.*\.ya?ml$
+        pass_filenames: false
+        entry: api-server/scripts/check-helm-charts.sh

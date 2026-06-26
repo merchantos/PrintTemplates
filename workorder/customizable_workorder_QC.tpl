@@ -266,10 +266,10 @@ img.barcode {
                     <h1 id="receiptTypeTitle">Ordre de travail #{{ Workorder.workorderID }}</h1>
                     {{ _self.date(Workorder) }}
                 {% else %}
-                    {% if make_work_order_number_small == true %} 
+                    {% if make_work_order_number_small == true %}
                             <h1 id="receiptTypeTitle">Ordre de travail #{{ Workorder.workorderID }}</h1>
                             {{ _self.date(Workorder) }}
-                        {% elseif make_work_order_number_small == false %}  
+                        {% elseif make_work_order_number_small == false %}
                             <h1 id="receiptTypeTitle">Ordre de travail </h1>
                             {{ _self.date(Workorder) }}
                             <br />

@@ -69,7 +69,7 @@ body {
     {% if firefox_margin_fix == true %}
         margin: 25px;
     {% endif %}
-    padding: 1px; 
+    padding: 1px;
 }
 
 .workorder {
@@ -271,10 +271,10 @@ img.barcode {
 					<h1 id="receiptTypeTitle">Nummer des Arbeitsauftrags{{ Workorder.workorderID }}</h1>
 					{{ _self.date(Workorder) }}
 				{% else %}
-						{% if make_work_order_number_small == true %} 
+						{% if make_work_order_number_small == true %}
 							<h1 id="receiptTypeTitle">Nummer des Arbeitsauftrags{{ Workorder.workorderID }}</h1>
 							{{ _self.date(Workorder) }}
-						{% elseif make_work_order_number_small == false %}	
+						{% elseif make_work_order_number_small == false %}
 							<h1 id="receiptTypeTitle">Arbeitsauftrag</h1>
 							{{ _self.date(Workorder) }}
 							<br />
@@ -297,7 +297,7 @@ img.barcode {
 				<p id="customerAddress2">{{ Workorder.Customer.Contact.Addresses.ContactAddress.address2 }}</p>
 				<p id="customerAddressCity">
 				  {{ Workorder.Customer.Contact.Addresses.ContactAddress.city }}{% if Workorder.Customer.Contact.Addresses.ContactAddress.city and (Workorder.Customer.Contact.Addresses.ContactAddress.state or Workorder.Customer.Contact.Addresses.ContactAddress.zip) %},{% endif %}
-				  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }} 
+				  {{ Workorder.Customer.Contact.Addresses.ContactAddress.state }}
 				  {{ Workorder.Customer.Contact.Addresses.ContactAddress.zip }}
 				</p>
 				<p id="customerCompany">{{ Workorder.Customer.company }}
