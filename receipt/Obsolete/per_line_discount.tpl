@@ -53,9 +53,9 @@ h2 {
 	margin: 0;
 }
 
-.header img { 
+.header img {
 	display: block;
-	margin: 8px auto 4px; 
+	margin: 8px auto 4px;
 	text-align: center;
 }
 
@@ -67,9 +67,9 @@ table {
 
 table thead th { text-align: left; }
 
-table tbody th { 
-	font-weight: normal; 
-	text-align: left; 
+table tbody th {
+	font-weight: normal;
+	text-align: left;
 }
 
 table td.amount, table td.quantity, table th.amount, table th.quantity {
@@ -128,8 +128,8 @@ table.workorders td.workorder div.line_note {
 	padding-left: 0px;
 }
 
-p.thankyou { 
-	margin: 0; 
+p.thankyou {
+	margin: 0;
 	text-align: center;
 }
 
@@ -137,14 +137,14 @@ p.thankyou {
 
 img.barcode {
 	display: block;
-	margin: 0 auto; 
+	margin: 0 auto;
 }
 
 dl {
 	overflow: hidden
 }
 
-dl dt { 
+dl dt {
 	font-weight: bold;
 	width: 80px;
 	float: left
@@ -188,7 +188,7 @@ dl dd p { margin: 0; }
 <div>
 	{{ _self.ship_to(Sale) }}
 
-	<div class="header">		
+	<div class="header">
 		{% if Sale.Shop.ReceiptSetup.hasLogo == 'true' %}
 			<img src="{{Sale.Shop.ReceiptSetup.logo}}" width="{{Sale.Shop.ReceiptSetup.logoWidth}}" height="{{Sale.Shop.ReceiptSetup.logoHeight}}" class="logo">
 		{% else %}
@@ -232,7 +232,7 @@ dl dd p { margin: 0; }
 		<p class="copy">Store Copy</p>
 		{{ _self.date(Sale) }}
 	</div>
-	
+
 	{{ _self.sale_details(Sale) }}
 
 	<h2>Payments</h2>
@@ -245,7 +245,7 @@ dl dd p { margin: 0; }
 	{{ _self.cc_agreement(Sale,Payment) }}
 	{{ _self.workorder_agreement(Sale) }}
 
-	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">	
+	<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Sale.ticketNumber}}">
 
 	{{ _self.ship_to(Sale) }}
 </div>
@@ -278,7 +278,7 @@ dl dd p { margin: 0; }
 		{% if Sale.completed == 'true' %}
 			{% if parameters.gift_receipt %}Gift{%else%}Sales{%endif%} Receipt
 		{% elseif Sale.voided == 'true' %}
-			Receipt 
+			Receipt
 			<large>VOIDED</large>
 		{% else %}
 			Quote
@@ -441,13 +441,13 @@ dl dd p { margin: 0; }
 			</tbody>
 		</table>
 	{% endif %}
-	
+
 	{% if Sale.Customer and store_copy == false %}
 		{{ _self.layaways(Sale.Customer,parameters.gift_receipt)}}
 		{{ _self.specialorders(Sale.Customer,parameters.gift_receipt)}}
 		{{ _self.workorders(Sale.Customer,parameters.gift_receipt)}}
 	{% endif %}
-	
+
 	{% if Sale.Customer and not parameters.gift_receipt and store_copy == false %}
 		{% if Sale.Customer.CreditAccount and Sale.Customer.CreditAccount.MetaData.creditBalanceOwed > 0 or Sale.Customer.CreditAccount.MetaData.extraDeposit > 0 %}
 			<h2>Store Account</h2>
@@ -522,10 +522,10 @@ dl dd p { margin: 0; }
 
 {% macro workorder_agreement(Sale) %}
 	{% if Sale.Shop.ReceiptSetup.workorderAgree|strlen > 0 and Sale.Workorders %}
-	<!-- 
+	<!--
 		@FIXME
 		Should only print this work_order agreement if it's never been signed before.
-		transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->	
+		transaction->customer_id->printWorkorderAgreement($transaction->transaction_id)  -->
         <div class="signature">
         	<p>{{Sale.Shop.ReceiptSetup.workorderAgree|noteformat|raw}}</p>
         	<dl class="signature">
@@ -541,11 +541,11 @@ dl dd p { margin: 0; }
 	<div class="shipping">
 		<h4>Ship To</h4>
 		{{ _self.shipping_address(Sale.ShipTo,Sale.ShipTo.Contact) }}
-		
+
 		{% for Phone in Sale.ShipTo.Contact.Phones.ContactPhone %}{% if loop.first %}
 		<p>Phone: {{Phone.number}} ({{Phone.useType}})</p>
 		{% endif %}{% endfor %}
-		
+
 		{% if Sale.ShipTo.shipNote|strlen > 0 %}
 		<h5>Instructions</h5>
 		<p>{{Sale.ShipTo.shipNote}}</p>
