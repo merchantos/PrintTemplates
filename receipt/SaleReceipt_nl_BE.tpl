@@ -1143,6 +1143,9 @@ table.payments td.label {
 					{% if Sale.tipEnabled == 'true' %}
 						<tr class="tip"><td>Fooi</td><td id="receiptSaleTotalsTip" class="amount">{{Sale.calcTips|money}}</td></tr>
 					{% endif %}
+					{% if Sale.calcSurcharges != 0 %}
+						<tr class="surcharge"><td>Toeslag</td><td id="receiptSaleTotalsSurcharge" class="amount">{{Sale.calcSurcharges|money}}</td></tr>
+					{% endif %}
 				</tbody>
 			</table>
 		{% endif %}
@@ -1191,6 +1194,9 @@ table.payments td.label {
 								{{ _self.cc_payment_info(Sale,Payment) }}
 							{% elseif Payment.CreditAccount and Payment.archived == 'false' %}
 								<!-- Customer Account -->
+								{% if Payment.amount < 0 and not Sale.SaleLines and Sale.calcSurcharges != 0 %}
+									<tr class="surcharge"><td class="label" width="100%">Toeslag</td><td id="receiptSaleTotalsSurcharge" class="amount">{{Sale.calcSurcharges|money}}</td></tr>
+								{% endif %}
 								<tr>
 									{% if Payment.amount < 0 %}
 										<td class="label">Aanbetaling op rekening</td>

@@ -1175,6 +1175,9 @@ table.payments td.label {
 								{{ _self.cc_payment_info(Sale,Payment) }}
 							{% elseif Payment.CreditAccount and Payment.archived == 'false' %}
 								<!-- Customer Account -->
+								{% if Payment.amount < 0 and not Sale.SaleLines and Sale.calcSurcharges != 0 %}
+									<tr class="surcharge"><td class="label" width="100%">Surcharge</td><td id="receiptSaleTotalsSurcharge" class="amount">{{Sale.calcSurcharges|money}}</td></tr>
+								{% endif %}
 								<tr>
 									{% if Payment.amount < 0 %}
 										<td class="label">Account Deposit</td>
