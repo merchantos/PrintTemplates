@@ -1137,6 +1137,7 @@ table.payments td.label {
 			<h2 class="paymentTitle">Paiements</h2>
 			<table id="receiptPayments" class="payments">
 				<tbody>
+					{% set surcharge_rendered = false %}
 					{% for Payment in Sale.SalePayments.SalePayment %}
 						{% if Payment.PaymentType.name != 'Cash' %}
 							<!-- NOT Cash Payment -->
@@ -1175,8 +1176,9 @@ table.payments td.label {
 								{{ _self.cc_payment_info(Sale,Payment) }}
 							{% elseif Payment.CreditAccount and Payment.archived == 'false' %}
 								<!-- Customer Account -->
-								{% if Payment.amount < 0 and not Sale.SaleLines and Sale.calcSurcharges != 0 %}
+								{% if not surcharge_rendered and Payment.amount < 0 and not Sale.SaleLines and Sale.calcSurcharges != 0 %}
 									<tr class="surcharge"><td class="label" width="100%">Supplément</td><td id="receiptSaleTotalsSurcharge" class="amount">{{Sale.calcSurcharges|money}}</td></tr>
+									{% set surcharge_rendered = true %}
 								{% endif %}
 								<tr>
 									{% if Payment.amount < 0 %}
