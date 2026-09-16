@@ -275,25 +275,25 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% for Order in Orders %}
 <header class="col-spacerL-md6 col-md6 u-margin-Bxl">
   <h2 class="u-margin-Vn">
-    Purchase Order<small> #{{ Order.orderID }}</small>
+    Bestellung<small> #{{ Order.orderID }}</small>
   </h2>
   <div class="startStop">
-    Ordered: {{Order.orderedDate|correcttimezone|date ("m/d/y")}}<br />
-    Expected: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
+    Bestellt am: {{Order.orderedDate|correcttimezone|date ("m/d/y")}}<br />
+    Erwartet am: {{Order.arrivalDate|correcttimezone|date ("m/d/y")}}<br />
   </div>
 </header>
 <div class="row">
   <div class="col-md-6">
-    <h6 class="u-margin-Vn">Vendor</h6>
+    <h6 class="u-margin-Vn">Lieferant</h6>
     <h4 class="u-margin-Vxxs">{{ Order.Vendor.name}}</h4>
     {% if hide_rep_info == false %}
     {% if Order.Vendor.Reps.VendorRep.firstName|strlen > 0 %}
-    <h6>ATTN: {{Order.Vendor.Reps.VendorRep.firstName}} {{Order.Vendor.Reps.VendorRep.lastName}}</h6>
+    <h6>z. H. {{Order.Vendor.Reps.VendorRep.firstName}} {{Order.Vendor.Reps.VendorRep.lastName}}</h6>
     {% endif %}
     {% endif %}
     {% if hide_account_number == false %}
     {% if Order.Vendor.accountNumber > 0 %}
-    <h6>Account #{{Order.Vendor.accountNumber}}</h6>
+    <h6>Konto-Nr.{{Order.Vendor.accountNumber}}</h6>
     {% endif %}
     {% endif %}
     <p class="u-margin-Tn s">
@@ -314,7 +314,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
     </p>
   </div>
   <div class="row">
-    <h6 class="u-margin-Vn">Ship to</h6>
+    <h6 class="u-margin-Vn">Lieferadresse</h6>
     <h4 class="u-margin-Vxxs">{{ Order.Shop.name }}</h4>
     <p class="u-margin-Tn s">
       {{ Order.Shop.Contact.Addresses.ContactAddress.address1 }}
@@ -325,16 +325,16 @@ Set any of the options in this section from 'false' to 'true' in order to enable
   </div>
 </div>
 {% if hide_shipping_table == false %}
-<h3>Shipping Info</h3>
+<h3>Lieferinformationen</h3>
 <table class="document">
   <thead>
     <tr>
-      <th>Shipping</th>
-      <th>Total Quantity</th>
+      <th>Versand</th>
+      <th>Gesamtmenge</th>
       {% if Order.MetaData.totalDiscount > 0 %}
-      <th>Discount</th>
+      <th>Rabatt</th>
       {% endif %}
-      <th>Other</th>
+      <th>Sonstige(s)</th>
     </tr>
   </thead>
   <tr>
@@ -342,14 +342,14 @@ Set any of the options in this section from 'false' to 'true' in order to enable
       {% if Order.MetaData.shipping|strlen > 0 %}
       {{Order.MetaData.shipping|format_currency}}
       {% else %}
-      <i>None</i>
+      <i>Nicht vorhanden</i>
       {% endif %}
     </td>
     <td>
       {% if Order.totalQuantity|strlen > 0 %}
       {{Order.totalQuantity}}
       {% else %}
-      <i>None</i>
+      <i>Nicht vorhanden</i>
       {% endif %}
     </td>
     {% if Order.MetaData.totalDiscount > 0 %}
@@ -359,7 +359,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
       {% if Order.MetaData.other|strlen > 0 %}
       {{Order.MetaData.other|format_currency}}
       {% else %}
-      <i>None</i>
+      <i>Nicht vorhanden</i>
       {% endif %}
     </td>
   </tr>
@@ -369,7 +369,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
   {% if hide_shipping_notes == false %}
   {% if Order.shipInstructions|strlen > 0 %}
   <tr class="minor leading-row-gap">
-    <th>Shipping notes:</th>
+    <th>Notizen zur Lieferung</th>
     <td>{{Order.shipInstructions}}</td>
     <td></td>
   </tr>
@@ -381,15 +381,15 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 <table class="document">
   <thead>
     <tr>
-      <th>Vendor ID</th>
-      <th>UPC Code</th>
-      <th>Description</th>
-      <th>Qty</th>
-      <th>Unit Cost</th>
+      <th>Lieferanten-ID</th>
+      <th>UPC-Code</th>
+      <th>Beschreibung</th>
+      <th>Anzahl</th>
+      <th>Stückkosten</th>
       {% if Order.discount > 0 %}
-      <th>Amount w/Discount</th>
+      <th>Betrag mit Rabatt</th>
       {% else %}
-      <th>Amount</th>
+      <th>Betrag</th>
       {% endif %}
     </tr>
   </thead>
@@ -411,7 +411,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
   {% endfor %}
   <tfoot>
     <tr class="minor">
-      <th>Subtotal</th>
+      <th>Zwischensumme</th>
       {% if Order.MetaData.subtotal > 0 %}
       <th></th>
       {% endif %}
@@ -421,7 +421,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
     </tr>
     {% if Order.MetaData.totalDiscount > 0 %}
     <tr class="minor">
-      <th>Discount</th>
+      <th>Rabatt</th>
       <th></th>
       <td></td>
       <td></td>
@@ -429,7 +429,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
     </tr>
     {% endif %}
     <tr class="total">
-      <th>Total</th>
+      <th>Gesamtsumme</th>
       {% if Order.MetaData.total > 0 %}
       <th></th>
       {% endif %}
@@ -442,7 +442,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 <br>
 {% if hide_general_notes == false %}
 {% if Order.Note.note|strlen > 0 %}
-<h3>Notes:</h3>
+<h3>Notizen:</h3>
 <br>{{Order.Note.note|nl2br|raw}}
 {% endif %}
 {% endif %}
