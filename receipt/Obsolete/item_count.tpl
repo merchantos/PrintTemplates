@@ -643,7 +643,7 @@ dl dd p { margin: 0; }
 
 {% macro workorders(Customer,parameters) %}
 	{% if Customer.Workorders|length > 0 %}
-		<h2>Open Workorders</h2>
+		<h2>Open Work Orders</h2>
 		<table class="lines workorders">
 			{% for Line in Customer.Workorders.SaleLine %}
 				<tr>
