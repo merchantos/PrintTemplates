@@ -1704,7 +1704,7 @@ table.payments td.label {
 
 {% macro workorders(Customer,parameters,options) %}
 	{% if Customer.Workorders|length > 0 %}
-		<h2 class="footerSectionTitle">Open Workorders</h2>
+		<h2 class="footerSectionTitle">Open Work Orders</h2>
 		<table class="lines workorders">
 			{% for Line in Customer.Workorders.SaleLine %}
 				<tr>
