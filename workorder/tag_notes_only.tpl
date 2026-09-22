@@ -62,7 +62,7 @@ body{
 	text-decoration: underline;
 }
 
-.detail { 
+.detail {
 	margin-bottom: 1em;
 }
 
@@ -83,7 +83,7 @@ table.lines td {
 table.totals td {
 	margin: 0px;
 }
-        
+
 table.lines th {
 	font-size: 10pt;
 	border-bottom: 1px solid #000;
@@ -99,7 +99,7 @@ table td.amount {
 	width: 10%;
 	text-align: left;
 }
-        
+
 table.totals {
 	text-align: right;
 	border-top: 1px solid #000;
@@ -142,7 +142,7 @@ img.barcode {
 {% block content %}
 	{% for Workorder in Workorders %}
 		<div class="workorder {% if not loop.last %} pagebreak{% endif %}">
-			
+
 			<div class="header">
 				{% if parameters.type == 'invoice' %}
 					{% if Workorder.Shop.ReceiptSetup.hasLogo == "true" %}
@@ -167,7 +167,7 @@ img.barcode {
 					{% endif %}
 				{% endif %}
 			</div>
-			
+
 			<div class="detail">
 				<h3>Customer:</h3>
 				<p>{{ Workorder.Customer.firstName}} {{ Workorder.Customer.lastName}}</p>
@@ -225,7 +225,7 @@ img.barcode {
 							{% endif %}
 						 </td>
 					{% endif %}
-				
+
 						<td class="notes">
 							{{ WorkorderItem.note }}
 						</td>
@@ -233,15 +233,15 @@ img.barcode {
 						{% if WorkorderItem.warranty == 'true' %}
 							<td class="amount"> $0.00
 						{% endif %}
-					
+
 						{% if WorkorderItem.warranty == 'false' %}
-							<td class="amount">        
+							<td class="amount">
 								{{ WorkorderItem.SaleLine.calcSubtotal|money }}
 							</td>
 						{% endif %}
 					</tr>
 				{% endfor %}
-				
+
 				{% for WorkorderLine in Workorder.WorkorderLines.WorkorderLine %} <!--this loop is necessary for showing labor charges -->
 					<tr>
 						{% if WorkorderLine.itemID != 0 %}
@@ -264,14 +264,14 @@ img.barcode {
 								{% endif %}
 							</td>
 						{% endif %}
-						
+
 						<td class="amount">
 							{{ WorkorderLine.SaleLine.calcSubtotal|money }}
 						</td>
 					</tr>
 				{% endfor %}
 			</table>
-			
+
 			<table class="totals">
 				<tbody>
 					<tr>
@@ -280,14 +280,14 @@ img.barcode {
 							{{Workorder.MetaData.labor|money}}
 						</td>
 					</tr>
-					
+
 					<tr>
 						<td>Parts</td>
 						<td class="amount">
 							{{Workorder.MetaData.parts|money}}
 						</td>
 					</tr>
-				
+
 					{% if Workorder.MetaData.discount > 0 %}
 						<tr>
 							<td>Discounts</td>
@@ -296,14 +296,14 @@ img.barcode {
 							</td>
 						</tr>
 					{% endif %}
-				
+
 					<tr>
 						<td>Tax</td>
 						<td class="amount">
 							{{Workorder.MetaData.tax|money}}
 						</td>
 					</tr>
-				
+
 					<tr class="total">
 						<td>Total</td>
 						<td class="amount">
@@ -323,7 +323,7 @@ img.barcode {
 			{% endif %}
 
 			<img height="50" width="250" class="barcode" src="/barcode.php?type=receipt&number={{Workorder.systemSku}}">
-			
+
 			{% if parameters.type == 'invoice' %}
 				{% if Workorder.Shop.ReceiptSetup.workorderAgree|strlen > 0 %}
 					<div style="padding: 10px 0px">
@@ -337,7 +337,7 @@ img.barcode {
 
 			{% endif %}
 		{% endif %}
-	
+
 	{% endfor %}
 
 {% endblock content %}

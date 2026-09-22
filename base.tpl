@@ -10,7 +10,7 @@
 		<title>{% block title %}{{ parameters.template }}{% endblock %}</title>
 		<link rel="shortcut icon" href="/graphics/favicon.ico" type="image/vnd.microsoft.icon" />
 		{% block style %}
-			<style>	
+			<style>
 			{% block extrastyles %}
 			{% endblock %}
 			</style>

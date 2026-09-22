@@ -10,7 +10,7 @@
 			{% else %}
 				var printer_name = "report";
 			{% endif %}
-			
+
 			try {
 				merchantos.print.print(printer_name);
 				window.focus();

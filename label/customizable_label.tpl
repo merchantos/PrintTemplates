@@ -7,7 +7,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 {% set show_custom_sku = false %}                   {# Display Custom SKU (if available) above Description #}
 {% set show_manufacturer_sku = false %}             {# Display Manufacturer SKU (if available) above Description #}
 {% set show_upc_code = false %}                     {# Display the UPC code at the top of the receipt (using UPC codes in barcode does not work) #}
-{% set show_date = false %}                         {# Display today's date above description (ddmmyy formatting) #}
+{% set show_date = false %}                         {# Display todays date above description (ddmmyy formatting) #}
 {% set price_with_no_cents = false %}               {# Remove cents from being displayed in price #}
 {% set date_format = 'mdy' %}                       {# Format the date is shown in if show_date is enabled.
                                                         m = 2 digit month, d = 2 digit day, y = 2 digit year, Y = 4 digit year #}
@@ -122,7 +122,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
     {# Normal Label (2.25x1.25) CSS settings #}
 
-    .label.size225x125 .custom_margin {
+    .label.size225x125 {
         margin: {{normal_top_margin}} {{normal_right_margin}} {{normal_bottom_margin}} {{normal_left_margin}};
     }
 
@@ -142,7 +142,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
     {# Alt. Label (2.00x1.00) CSS settings #}
 
-    .label.size200x100 .custom_margin {
+    .label.size200x100 {
         margin: {{alt_top_margin}} {{alt_right_margin}} {{alt_bottom_margin}} {{alt_left_margin}};
     }
 
@@ -161,7 +161,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
     }
     {# Small Label (1.25x1.00) CSS settings #}
 
-    .label.size125x100 .custom_margin {
+    .label.size125x100 {
         margin: {{small_top_margin}} {{small_right_margin}} {{small_bottom_margin}} {{small_left_margin}};
     }
 
@@ -181,7 +181,7 @@ Set any of the options in this section from 'false' to 'true' in order to enable
 
     {# Jewelry Label (2.20x.50) CSS settings #}
 
-    .label.size220x50 .custom_margin {
+    .label.size220x50 {
         margin: {{jewelry_top_margin}} {{jewelry_right_margin}} {{jewelry_bottom_margin}} {{jewelry_left_margin}};
     }
 
@@ -218,34 +218,29 @@ Set any of the options in this section from 'false' to 'true' in order to enable
             {% for category in normal_label_categories %}
                 {% if category == Label.Item.categoryID %}
                     <div class="label size225x125{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                        <div class="label size225x125 custom_margin">
                         {% set size_specified = true %}
                 {% endif %}
             {% endfor %}
             {% for category in alt_label_categories %}
                 {% if category == Label.Item.categoryID %}
                     <div class="label size200x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                        <div class="label size200x100 custom_margin">
                         {% set size_specified = true %}
                 {% endif %}
             {% endfor %}
             {% for category in small_label_categories %}
                 {% if category == Label.Item.categoryID %}
                     <div class="label size125x100{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                        <div class="label size125x100 custom_margin">
                         {% set size_specified = true %}
                 {% endif %}
             {% endfor %}
             {% for category in jewelry_label_categories %}
                 {% if category == Label.Item.categoryID %}
                     <div class="label size220x50{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                        <div class="label size220x50 custom_margin">
                         {% set size_specified = true %}
                 {% endif %}
             {% endfor %}
             {% if size_specified == false %}
                 <div class="label size{{Label.MetaData.size}}{%if Label.MetaData.title == 'none'%} notitle{%endif%}">
-                    <div class="label size{{Label.MetaData.size}} custom_margin">
             {% endif %}
             <article>
                 <h1>{{ Label.MetaData.title }}</h1>
@@ -309,7 +304,6 @@ Set any of the options in this section from 'false' to 'true' in order to enable
                     <img class="ean" src="/barcode.php?type=label&amp;number={{ Label.Item.systemSku }}&amp;noframe=1&amp;hide_text={{ hide_text }}">
                 </footer>
             {% endif %}
-                    </div>
                 </div>
         {% endfor %}
     {% endfor %}
